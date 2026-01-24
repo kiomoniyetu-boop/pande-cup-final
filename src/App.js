@@ -18,14 +18,14 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- STATIC TEXT (KILLER WORDS) ---
+// --- STATIC TEXT ---
 const ABOUT_TEXT = {
   title: "Kuhusu Pande Cup",
   description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
-// --- FALLBACK EMPTY DATA (Just structure, no content) ---
+// --- DATA TUPU (KAMA CONTENTFUL IKIGOMA KABISA) ---
 const EMPTY_DATA = {
   hero: [], matches: [], news: [], videos: [], standings: [],
   sponsors: [
@@ -60,7 +60,6 @@ const App = () => {
   const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
   
-  // HAPA: Tunatumia Data tupu kuanzia, zikija zinajaa.
   const [cmsData, setCmsData] = useState(EMPTY_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -70,19 +69,9 @@ const App = () => {
     setModalStep(3); 
   };
 
-  const openModal = () => {
-    setIsModalOpen(true);
-    setModalStep(1);
-    setIsMobileMenuOpen(false);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const closeNews = () => {
-    setSelectedNews(null);
-  };
+  const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); };
+  const closeModal = () => { setIsModalOpen(false); };
+  const closeNews = () => { setSelectedNews(null); };
 
   // --- FONT LOADING ---
   useEffect(() => {
@@ -92,10 +81,19 @@ const App = () => {
     document.head.appendChild(link);
   }, []);
 
-  // --- CONTENTFUL FETCHING LOGIC (RESTORED) ---
+  // --- CONTENTFUL FETCHING (WITH TIMEOUT SAFETY) ---
   useEffect(() => {
+    let isMounted = true;
+
+    // 1. SAFETY TIMER: Force loading to stop after 4 seconds if Contentful is slow
+    const timer = setTimeout(() => {
+      if (isMounted) {
+        console.log("Contentful timed out - Force opening");
+        setIsLoading(false);
+      }
+    }, 4000);
+
     const fetchContentfulData = async () => {
-      setIsLoading(true);
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
       
       const fetchSafe = async (type) => {
@@ -109,12 +107,13 @@ const App = () => {
         }
       };
 
-      // Vuta data
       const heroData = await fetchSafe('heroSection');
       const matchesData = await fetchSafe('match');
       const newsData = await fetchSafe('news');
       const standingsData = await fetchSafe('standing');
       const videosData = await fetchSafe('video');
+
+      if (!isMounted) return;
 
       const getAssetUrl = (id, assets) => { if (!assets) return null; const asset = assets.find(a => a.sys.id === id); return asset?.fields?.file ? `https:${asset.fields.file.url}` : null; };
 
@@ -171,10 +170,13 @@ const App = () => {
           videos: fetchedVideos,
           sponsors: EMPTY_DATA.sponsors 
       });
+      
+      clearTimeout(timer); // Clear the safety timer since we got data
       setIsLoading(false);
     };
 
     fetchContentfulData();
+    return () => { isMounted = false; clearTimeout(timer); };
   }, []);
 
   const getFilteredData = (dataArray) => {
@@ -187,7 +189,7 @@ const App = () => {
     });
   };
 
-  const currentHero = (cmsData.hero.find(h => h.location.includes(activeLocation))) || cmsData.hero[0] || {title: "PANDE CUP", subtitle: "Loading...", bgImage: null};
+  const currentHero = (cmsData.hero.find(h => h.location.includes(activeLocation))) || cmsData.hero[0] || {title: "PANDE CUP", subtitle: "Msimu Mpya", bgImage: null};
   const filteredMatches = getFilteredData(cmsData.matches);
   const upcomingMatches = filteredMatches.filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'));
   const pastMatches = filteredMatches.filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'));
@@ -210,7 +212,6 @@ const App = () => {
     buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: '14px 28px', borderRadius: '8px', fontWeight: '800', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px' }
   };
 
-  // LOADING SCREEN
   if (isLoading) {
     return (
       <div style={{height: '100vh', width: '100%', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
