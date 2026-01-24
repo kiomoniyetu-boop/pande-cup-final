@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, 
-  ListOrdered, Video, Play, Calendar, Newspaper, History, Quote, Trophy, Image as ImageIcon, ChevronRight, Phone, Loader, AlertCircle, Info
+  ListOrdered, Video, Play, Calendar, Newspaper, History, Trophy, Image as ImageIcon, ChevronRight, Phone, Info
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -117,9 +117,8 @@ const renderWithLinks = (text) => {
 };
 
 const App = () => {
-  // STATE MUHIMU
   const [activeLocation, setActiveLocation] = useState('kiomoni');
-  const [activeSeason, setActiveSeason] = useState('June 2026'); // Hii ndio inatumika kufilter
+  const [activeSeason, setActiveSeason] = useState('June 2026'); 
   
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -139,20 +138,14 @@ const App = () => {
   const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
   const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
 
-  // --- FILTER LOGIC (HII NDIYO MPYA NA BORA ZAIDI) ---
+  // --- FILTER LOGIC ---
   const getFilteredData = (dataArray) => {
     if (!dataArray) return [];
-    
     return dataArray.filter(item => {
-        // 1. Check Location (Kiomoni au Goba)
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
         const isLocationMatch = itemLoc.includes(activeLocation);
-
-        // 2. Check Season (Mwaka)
-        // Kama item haina season, tunachukulia ni ya msimu wa sasa ("June 2026") ili isipotee
         const itemSeason = item.season ? String(item.season).trim() : 'June 2026';
         const isSeasonMatch = itemSeason.toLowerCase() === activeSeason.toLowerCase();
-
         return isLocationMatch && isSeasonMatch;
     });
   };
@@ -172,7 +165,7 @@ const App = () => {
       try {
         const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
 
-        // 1. HERO SECTION
+        // 1. HERO
         const heroRes = await fetch(`${baseUrl}&content_type=heroSection&include=1`);
         let fetchedHero = FALLBACK_DATA.hero;
         if (heroRes.ok) {
@@ -192,7 +185,7 @@ const App = () => {
             }
         }
 
-        // 2. MATCHES (Added Season)
+        // 2. MATCHES
         const matchesRes = await fetch(`${baseUrl}&content_type=match`);
         let fetchedMatches = FALLBACK_DATA.matches;
         if (matchesRes.ok) {
@@ -204,12 +197,12 @@ const App = () => {
                     score: String(item.fields.score || "VS"),
                     status: String(item.fields.status || "Ratiba"),
                     location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-                    season: item.fields.season || "June 2026" // Vuta Season
+                    season: item.fields.season || "June 2026"
                 }));
             }
         }
 
-        // 3. NEWS (Added Season)
+        // 3. NEWS
         const newsRes = await fetch(`${baseUrl}&content_type=news&include=1`);
         let fetchedNews = FALLBACK_DATA.news;
         if (newsRes.ok) {
@@ -227,12 +220,12 @@ const App = () => {
                     body: item.fields.body || "",
                     image: getNewsImage(item.fields.image?.sys?.id, newsJson.includes) || "/images/IMG_5866.jpeg",
                     location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-                    season: item.fields.season || "June 2026" // Vuta Season
+                    season: item.fields.season || "June 2026"
                 }));
             }
         }
 
-        // 4. STANDINGS (Added Season)
+        // 4. STANDINGS
         const standingsRes = await fetch(`${baseUrl}&content_type=standing&order=fields.position`);
         let fetchedStandings = FALLBACK_DATA.standings;
         if (standingsRes.ok) {
@@ -245,13 +238,13 @@ const App = () => {
                     gd: String(item.fields.goalDifference || "0"),
                     pts: item.fields.points || 0,
                     location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-                    season: item.fields.season || "June 2026" // Vuta Season
+                    season: item.fields.season || "June 2026"
                 }));
                 fetchedStandings.sort((a, b) => a.pos - b.pos);
             }
         }
 
-        // 5. VIDEOS (Added Season)
+        // 5. VIDEOS
         const videosRes = await fetch(`${baseUrl}&content_type=video`);
         let fetchedVideos = FALLBACK_DATA.videos;
         if (videosRes.ok) {
@@ -268,7 +261,7 @@ const App = () => {
                     duration: String(item.fields.duration || ""),
                     thumbnail: getVideoThumbnail(item.fields.thumbnail?.sys?.id, videosJson.includes) || "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=500",
                     location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-                    season: item.fields.season || "June 2026" // Vuta Season
+                    season: item.fields.season || "June 2026"
                 }));
             }
         }
@@ -295,9 +288,7 @@ const App = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- PREPARE DISPLAY DATA ---
   const getCurrentHero = () => {
-    // Hero inategemea location tu kwa sasa, lakini unaweza kuweka season pia ukipenda
     const heroList = cmsData.hero && cmsData.hero.length > 0 ? cmsData.hero : FALLBACK_DATA.hero;
     const heroItem = heroList.find(h => h.location.includes(activeLocation));
     return heroItem || FALLBACK_DATA.hero[0];
@@ -305,7 +296,6 @@ const App = () => {
 
   const currentHero = getCurrentHero();
   
-  // Sasa tunatumia function yetu mpya ya 'getFilteredData' kwa kila kitu
   const filteredMatches = getFilteredData(cmsData.matches);
   const upcomingMatches = filteredMatches.filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'));
   const pastMatches = filteredMatches.filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'));
@@ -313,18 +303,24 @@ const App = () => {
   const filteredStandings = getFilteredData(cmsData.standings);
   const filteredVideos = getFilteredData(cmsData.videos);
 
-  // Fallback Gallery (Hardcoded kwa ajili ya urembo)
   const currentGallery = activeSeason === 'June 2025' 
     ? ["https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=600", "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=600"]
     : ["/images/IMG_5937.jpeg", "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&q=80&w=600"];
 
-  // Logic ya kuonyesha ujumbe kama hakuna data (Mfano Goba 2025)
-  const isDataEmpty = filteredMatches.length === 0 && filteredNews.length === 0 && filteredStandings.length === 0;
   const isGoba2025 = activeLocation === 'goba' && activeSeason === 'June 2025';
 
   const styles = {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif', scrollBehavior: 'smooth', position: 'relative', overflowX: 'hidden' },
-    topBar: { backgroundColor: '#1e293b', padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
+    // MOBILE FIX: Top Bar optimized
+    topBar: { 
+      backgroundColor: '#1e293b', 
+      padding: isMobile ? '8px 12px' : '8px 24px', 
+      display: 'flex', 
+      justifyContent: isMobile ? 'center' : 'space-between', 
+      alignItems: 'center', 
+      fontSize: '11px', 
+      borderBottom: '1px solid rgba(255,255,255,0.05)' 
+    },
     nav: { borderBottom: '1px solid rgba(255,255,255,0.05)', padding: isMobile ? '12px 0' : '16px 0', position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)' },
     navContent: { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' },
     navLink: { color: '#94a3b8', textDecoration: 'none', fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', transition: 'color 0.2s', cursor: 'pointer', padding: '8px' },
@@ -358,16 +354,16 @@ const App = () => {
         `}
       </style>
       <div style={styles.container}>
-      {/* 1. TOP BAR */}
+      {/* 1. TOP BAR (MOBILE FIX APPLIED) */}
       <div style={styles.topBar}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
+        <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
             <History size={14} /><span style={{ fontWeight: 'bold' }}>SEASON:</span>
             {isLoading ? 
                 <span style={{ fontSize: '10px', color: '#94a3b8', marginLeft: 8 }}>Loading...</span> : 
                 <span style={{ fontSize: '10px', color: '#22c55e', marginLeft: 8, fontWeight: 'bold' }}>{activeSeason}</span>
             }
         </div>
-        <div style={{ display: 'flex', gap: '16px' }}>
+        <div style={{ display: 'flex', gap: '16px', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}>
             <button style={{ background: 'none', border: 'none', color: activeSeason === 'June 2025' ? '#a3e635' : '#64748b', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => { setActiveSeason('June 2025'); setActiveLocation('kiomoni'); }}>JUNE 2025 (HISTORIA)</button>
             <button style={{ background: 'none', border: 'none', color: activeSeason === 'June 2026' ? '#a3e635' : '#64748b', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setActiveSeason('June 2026')}>JUNE 2026 (LIVE)</button>
         </div>
