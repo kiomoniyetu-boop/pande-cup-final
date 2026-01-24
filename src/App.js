@@ -10,28 +10,28 @@ const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
 const LOGO_PATH = "/logo.png";
 const USE_IMAGE_LOGO = true;
 
-// --- SOCIAL MEDIA LINKS (BADILISHA HAPA) ---
-// Hapa ndipo utaweka link zako. Zikitokea Contentful tutaziunganisha huko siku nyingine.
+// --- SOCIAL MEDIA LINKS ---
 const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/pande_cup", 
-  facebook: "https://facebook.com/pande_cup",
-  youtube: "https://youtube.com/@pande_cup",
-  tiktok: "https://tiktok.com/@pande_cup"
+  instagram: "https://instagram.com/pande_cup/", 
+  facebook: "https://facebook.com/p/Pande-Cup-61550512517305/",
+  youtube: "https://youtube.com/@PandeCup",
+  tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- DATA ZA KUAZIMIA (FALLBACK) ---
-// Hii itatumika kama Contentful haijaleta data bado
+// --- STATIC TEXT (KILLER WORDS) ---
+// Haya maneno yamewekwa hapa ili yasipotee hata kama Contentful inasumbua
+const ABOUT_TEXT = {
+  title: "Kuhusu Pande Cup",
+  description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
+  slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
+};
+
+// --- FALLBACK DATA ---
 const FALLBACK_DATA = {
   hero: [
-    { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
-    { location: 'goba', title: "HII GAME NI YETU.", subtitle: "Pande Cup Imetua Jijini!", bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" }
+    { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600" },
+    { location: 'goba', title: "HII GAME NI YETU.", subtitle: "Pande Cup Imetua Jijini!", bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" }
   ],
-  // HAPA NIMEWEKA MANENO YAKO MAPYA:
-  about: {
-    title: "Kuhusu Pande Cup",
-    description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
-    slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
-  },
   matches: [], standings: [], news: [], videos: [],
   sponsors: [
     { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB BANK", logo: "/images/crdb.png" },
@@ -79,8 +79,11 @@ const App = () => {
     if (!dataArray) return [];
     return dataArray.filter(item => {
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
-        const itemSeason = item.season ? String(item.season).trim().toLowerCase() : 'june 2026';
-        return itemLoc.includes(activeLocation) && itemSeason === activeSeason.toLowerCase();
+        const isLocationMatch = itemLoc.includes(activeLocation);
+        const itemSeasonRaw = item.season ? String(item.season) : 'June 2026';
+        const itemSeasonClean = itemSeasonRaw.trim().toLowerCase();
+        const activeSeasonClean = activeSeason.trim().toLowerCase();
+        return isLocationMatch && itemSeasonClean === activeSeasonClean;
     });
   };
 
@@ -90,8 +93,9 @@ const App = () => {
         const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
         const fetchData = async (type) => { const res = await fetch(`${baseUrl}&content_type=${type}&include=1`); return res.ok ? await res.json() : { items: [] }; };
         
-        const [heroData, matchesData, newsData, standingsData, videosData, aboutData] = await Promise.all([
-            fetchData('heroSection'), fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video'), fetchData('aboutSection')
+        // NIMEOONDOA 'aboutSection' HAPA ILI KUEPUKA CRASH
+        const [heroData, matchesData, newsData, standingsData, videosData] = await Promise.all([
+            fetchData('heroSection'), fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video')
         ]);
 
         const getAssetUrl = (id, assets) => { if (!assets) return null; const asset = assets.find(a => a.sys.id === id); return asset?.fields?.file ? `https:${asset.fields.file.url}` : null; };
@@ -127,20 +131,10 @@ const App = () => {
             location: item.fields.location, season: item.fields.season
         }));
 
-        // Process About
-        let fetchedAbout = FALLBACK_DATA.about;
-        if (aboutData.items && aboutData.items.length > 0) {
-            fetchedAbout = {
-                title: aboutData.items[0].fields.title,
-                description: aboutData.items[0].fields.description,
-                slogans: aboutData.items[0].fields.slogans
-            };
-        }
-
         setCmsData({ 
             hero: fetchedHero.length > 0 ? fetchedHero : FALLBACK_DATA.hero, 
             matches: fetchedMatches, news: fetchedNews, standings: fetchedStandings, videos: fetchedVideos, 
-            about: fetchedAbout, sponsors: FALLBACK_DATA.sponsors 
+            sponsors: FALLBACK_DATA.sponsors 
         });
 
       } catch (err) { console.error(err); } finally { setIsLoading(false); }
@@ -286,21 +280,16 @@ const App = () => {
              </div>
         </section>
 
-        {/* FOOTER - DYNAMIC ABOUT */}
+        {/* FOOTER */}
         <footer style={{ padding: '80px 24px', background: 'black' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px' }}>
                 <div>
                     <div style={{ marginBottom: '24px' }}><PandeLogo size="large" /></div>
-                    {/* DYNAMIC ABOUT TEXT */}
-                    <h4 style={{color:'#a3e635', marginBottom:'12px', textTransform:'uppercase'}}>{cmsData.about.title}</h4>
-                    <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', whiteSpace: 'pre-wrap' }}>{cmsData.about.description}</p>
-                    
-                    {/* SLOGANS */}
+                    <h4 style={{color:'#a3e635', marginBottom:'12px', textTransform:'uppercase'}}>{ABOUT_TEXT.title}</h4>
+                    <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', whiteSpace: 'pre-wrap' }}>{ABOUT_TEXT.description}</p>
                     <div style={{ marginTop:'20px', borderLeft: '3px solid #a3e635', paddingLeft: '12px', fontStyle: 'italic', color: '#a3e635', fontSize: '13px', lineHeight:'1.8' }}>
-                        {cmsData.about.slogans.split('•').map((s,i) => <div key={i}>{s.trim()}</div>)}
+                        {ABOUT_TEXT.slogans.split('•').map((s,i) => <div key={i}>{s.trim()}</div>)}
                     </div>
-
-                    {/* SOCIAL LINKS */}
                     <div style={{ display: 'flex', gap: '16px', marginTop: '32px' }}>
                         <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Instagram /></a>
                         <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Facebook /></a>
