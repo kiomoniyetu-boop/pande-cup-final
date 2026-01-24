@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, Phone, History, Newspaper, Info, Trophy
+  ListOrdered, Video, Play, Phone, History, Newspaper, Trophy, Info
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -18,34 +18,16 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- STATIC TEXT ---
+// --- STATIC TEXT (KILLER WORDS) ---
 const ABOUT_TEXT = {
   title: "Kuhusu Pande Cup",
   description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
-// --- FALLBACK DATA (HIZI NI ZA 2025) ---
-const FALLBACK_DATA = {
-  hero: [
-    { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
-    { location: 'goba', title: "HII GAME NI YETU.", subtitle: "Pande Cup Imetua Jijini!", bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" }
-  ],
-  matches: [
-    { home: "MTI PESA FC", away: "MABAYANI FC", score: "2-1", status: "FT", location: "kiomoni", season: "June 2025" },
-    { home: "MPIRANI FC", away: "MNYENZANI", score: "5-2", status: "FT", location: "kiomoni", season: "June 2025" }
-  ],
-  news: [
-    { date: "2025-06-29", title: "Shangwe la Ufunguzi: Zaidi ya Soka", excerpt: "Vumbi la Kiomoni lilitimka si kwa soka tu! Kufukuza kuku, kuvuta kamba...", image: "https://images.unsplash.com/photo-1522778119026-d647f0565c6d", location: "kiomoni", season: "June 2025" },
-    { date: "2025-08-30", title: "Historia Imeandikwa: Mpirani Bingwa!", excerpt: "Mpirani (Uruguay) wanyakua taji la kwanza mbele ya umati wa kihistoria.", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018", location: "kiomoni", season: "June 2025" }
-  ],
-  videos: [
-    { title: "Highlights: Fainali 2025", videoUrl: "#", duration: "10:00", thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018", location: "kiomoni", season: "June 2025" }
-  ],
-  standings: [
-    { pos: 1, team: "Mti Pesa FC", p: 3, gd: "+4", pts: 9, location: "kiomoni", season: "June 2025" },
-    { pos: 2, team: "Mpirani FC", p: 3, gd: "+3", pts: 7, location: "kiomoni", season: "June 2025" }
-  ],
+// --- FALLBACK EMPTY DATA (Just structure, no content) ---
+const EMPTY_DATA = {
+  hero: [], matches: [], news: [], videos: [], standings: [],
   sponsors: [
     { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB BANK", logo: "/images/crdb.png" },
     { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI TANZANIA", logo: "/images/polisi.png" },
@@ -62,7 +44,7 @@ const PandeLogo = ({ size = 'normal' }) => {
   if (USE_IMAGE_LOGO && !imgError) {
     return <div style={{ display: 'flex', alignItems: 'center' }}><img src={LOGO_PATH} alt="Pande Cup Logo" style={{ height: height, objectFit: 'contain' }} onError={() => setImgError(true)} /></div>;
   }
-  return <div style={{ fontSize: size === 'large' ? '32px' : '24px', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', color: 'white', fontFamily: 'Oswald, sans-serif' }}>PANDE<span style={{ color: '#a3e635' }}>CUP</span></div>;
+  return <div style={{ fontSize: size === 'large' ? '32px' : '24px', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', color: 'white' }}>PANDE<span style={{ color: '#a3e635' }}>CUP</span></div>;
 };
 
 const TikTokIcon = ({ size = 24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>);
@@ -70,16 +52,16 @@ const formatDate = (d) => { if (!d) return "Tarehe"; const date = new Date(d); r
 const renderWithLinks = (text) => { if (!text) return ""; return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) => part.match(/https?:\/\/[^\s]+/) ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{color: '#a3e635', textDecoration: 'underline'}}>{part}</a> : part); };
 
 const App = () => {
-  // *** BADILIKO MUHIMU: DEFAULT NI 2025 ILI DATA ZIONEKANE ***
   const [activeLocation, setActiveLocation] = useState('kiomoni');
-  const [activeSeason, setActiveSeason] = useState('June 2025'); 
-  
+  const [activeSeason, setActiveSeason] = useState('June 2026'); 
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
-  const [cmsData, setCmsData] = useState(FALLBACK_DATA);
+  
+  // HAPA: Tunatumia Data tupu kuanzia, zikija zinajaa.
+  const [cmsData, setCmsData] = useState(EMPTY_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
   // --- ACTIONS ---
@@ -102,7 +84,7 @@ const App = () => {
     setSelectedNews(null);
   };
 
-  // --- FONT LOADING (FIXED) ---
+  // --- FONT LOADING ---
   useEffect(() => {
     const link = document.createElement("link");
     link.href = "https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap";
@@ -110,9 +92,10 @@ const App = () => {
     document.head.appendChild(link);
   }, []);
 
-  // --- SAFE FETCHING LOGIC ---
+  // --- CONTENTFUL FETCHING LOGIC (RESTORED) ---
   useEffect(() => {
     const fetchContentfulData = async () => {
+      setIsLoading(true);
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
       
       const fetchSafe = async (type) => {
@@ -126,6 +109,7 @@ const App = () => {
         }
       };
 
+      // Vuta data
       const heroData = await fetchSafe('heroSection');
       const matchesData = await fetchSafe('match');
       const newsData = await fetchSafe('news');
@@ -138,7 +122,7 @@ const App = () => {
           title: item.fields.title || "HII GAME NI YETU.",
           subtitle: item.fields.subtitle || "",
           location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
-          bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes) || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66"
+          bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
       }));
 
       const fetchedMatches = matchesData.items.map(item => ({
@@ -155,7 +139,7 @@ const App = () => {
           title: item.fields.title || "Habari", 
           excerpt: item.fields.excerpt || "", 
           body: item.fields.body || "",
-          image: getAssetUrl(item.fields.image?.sys?.id, newsData.includes) || "https://via.placeholder.com/500",
+          image: getAssetUrl(item.fields.image?.sys?.id, newsData.includes),
           location: item.fields.location || "kiomoni", 
           season: item.fields.season || "June 2026"
       }));
@@ -174,18 +158,18 @@ const App = () => {
           title: item.fields.title || "Video", 
           videoUrl: item.fields.videoUrl || "#", 
           duration: item.fields.duration || "0:00",
-          thumbnail: getAssetUrl(item.fields.thumbnail?.sys?.id, videosData.includes) || "https://via.placeholder.com/500",
+          thumbnail: getAssetUrl(item.fields.thumbnail?.sys?.id, videosData.includes),
           location: item.fields.location || "kiomoni", 
           season: item.fields.season || "June 2026"
       }));
 
       setCmsData({ 
-          hero: fetchedHero.length > 0 ? fetchedHero : FALLBACK_DATA.hero, 
-          matches: fetchedMatches.length > 0 ? fetchedMatches : FALLBACK_DATA.matches, 
-          news: fetchedNews.length > 0 ? fetchedNews : FALLBACK_DATA.news, 
-          standings: fetchedStandings.length > 0 ? fetchedStandings : FALLBACK_DATA.standings, 
-          videos: fetchedVideos.length > 0 ? fetchedVideos : FALLBACK_DATA.videos, 
-          sponsors: FALLBACK_DATA.sponsors 
+          hero: fetchedHero,
+          matches: fetchedMatches,
+          news: fetchedNews,
+          standings: fetchedStandings,
+          videos: fetchedVideos,
+          sponsors: EMPTY_DATA.sponsors 
       });
       setIsLoading(false);
     };
@@ -203,7 +187,7 @@ const App = () => {
     });
   };
 
-  const currentHero = (cmsData.hero.find(h => h.location.includes(activeLocation))) || cmsData.hero[0] || FALLBACK_DATA.hero[0];
+  const currentHero = (cmsData.hero.find(h => h.location.includes(activeLocation))) || cmsData.hero[0] || {title: "PANDE CUP", subtitle: "Loading...", bgImage: null};
   const filteredMatches = getFilteredData(cmsData.matches);
   const upcomingMatches = filteredMatches.filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'));
   const pastMatches = filteredMatches.filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'));
@@ -212,7 +196,7 @@ const App = () => {
   const filteredVideos = getFilteredData(cmsData.videos);
   const isGoba2025 = activeLocation === 'goba' && activeSeason === 'June 2025';
 
-  let displayTitle = currentHero.title || "HII GAME NI YETU.";
+  let displayTitle = currentHero.title;
   let displaySubtitle = currentHero.subtitle;
   let displayTag = `${activeSeason} • ${activeLocation.toUpperCase()}`;
   if (activeSeason === 'June 2025' && !isGoba2025) { displayTitle = "HISTORIA: JUNI 2025"; displaySubtitle = "Msimu wa Historia. Bingwa alipatikana kwa jasho na damu."; }
@@ -221,10 +205,21 @@ const App = () => {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif' },
     topBar: { backgroundColor: '#1e293b', padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
     nav: { position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 0' },
-    heroWrapper: { position: 'relative', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    heroWrapper: { position: 'relative', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#020617' },
     mobileMenu: { position: 'fixed', top: 0, right: 0, width: '85%', maxWidth: '320px', height: '100vh', backgroundColor: '#0f172a', zIndex: 60, padding: '32px', transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s ease' },
     buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: '14px 28px', borderRadius: '8px', fontWeight: '800', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px' }
   };
+
+  // LOADING SCREEN
+  if (isLoading) {
+    return (
+      <div style={{height: '100vh', width: '100%', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
+        <PandeLogo size="large" />
+        <p style={{color: '#a3e635', marginTop: '20px', fontWeight: 'bold', animation: 'pulse 1s infinite'}}>INAPAKIA...</p>
+        <style>{`@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -260,11 +255,13 @@ const App = () => {
 
         {/* HERO */}
         <div id="hero" style={styles.heroWrapper} className="hero-mobile">
-            <img 
-              src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" : (currentHero.bgImage || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66")} 
-              style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', filter: isGoba2025 ? 'grayscale(1)' : 'none' }} 
-              alt="Hero Section"
-            />
+            {currentHero.bgImage && (
+              <img 
+                src={currentHero.bgImage} 
+                style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', filter: isGoba2025 ? 'grayscale(1)' : 'none' }} 
+                alt="Hero Section"
+              />
+            )}
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,0.4), rgba(15,23,42,0.9))' }}></div>
             <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 20px', maxWidth: '800px' }}>
                 <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center', gap: '12px' }}>
@@ -293,7 +290,9 @@ const App = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
                     {filteredNews.map((item, i) => (
                         <div key={i} onClick={() => setSelectedNews(item)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden' }}>
-                            <img src={item.image} style={{ width: '100%', height: '200px', objectFit: 'cover' }} alt={item.title} />
+                            <div style={{height: '200px', width: '100%', backgroundColor: '#1e293b'}}>
+                              {item.image && <img src={item.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={item.title} />}
+                            </div>
                             <div style={{ padding: '24px' }}>
                                 <div style={{ color: '#a3e635', fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>{formatDate(item.date)}</div>
                                 <h3 style={{ fontSize: '18px', margin: '0 0 12px' }}>{item.title}</h3>
@@ -325,7 +324,7 @@ const App = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
                     {filteredVideos.map((v, i) => (
                         <a key={i} href={v.videoUrl} target="_blank" rel="noreferrer" style={{position:'relative', borderRadius:'16px', overflow:'hidden', aspectRatio:'16/9', display:'block'}}>
-                            <img src={v.thumbnail} style={{width:'100%', height:'100%', objectFit:'cover'}} alt={v.title} />
+                            {v.thumbnail && <img src={v.thumbnail} style={{width:'100%', height:'100%', objectFit:'cover'}} alt={v.title} />}
                             <div style={{position:'absolute', inset:0, background:'rgba(0,0,0,0.3)', display:'flex', alignItems:'center', justifyContent:'center'}}><div style={{width:'50px', height:'50px', background:'#a3e635', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center'}}><Play size={20} color="black" fill="black" style={{marginLeft:'4px'}} /></div></div>
                             <div style={{position:'absolute', bottom:0, left:0, right:0, padding:'16px', background:'linear-gradient(to top, rgba(0,0,0,0.9), transparent)'}}><p style={{margin:0, fontWeight:'bold', fontSize:'14px'}}>{v.title}</p></div>
                         </a>
@@ -424,7 +423,7 @@ const App = () => {
                 <button onClick={closeNews} style={{position:'fixed', top:'20px', right:'20px', background:'white', border:'none', borderRadius:'50%', width:'40px', height:'40px', zIndex:120}}><X color="black" /></button>
                 <div style={{maxWidth:'600px', margin:'40px auto', color:'white'}}>
                     <h1>{selectedNews.title}</h1>
-                    <img src={selectedNews.image} style={{width:'100%', borderRadius:'16px'}} alt={selectedNews.title} />
+                    {selectedNews.image && <img src={selectedNews.image} style={{width:'100%', borderRadius:'16px'}} alt={selectedNews.title} />}
                     <p style={{lineHeight:1.8, fontSize:'18px', marginTop:'24px', whiteSpace:'pre-wrap'}}>{selectedNews.body || selectedNews.excerpt}</p>
                 </div>
             </div>
