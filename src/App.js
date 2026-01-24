@@ -111,27 +111,16 @@ const App = () => {
   const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
   const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
 
-  // --- FILTER LOGIC (STRICT FIX) ---
+  // --- FILTER LOGIC ---
   const getFilteredData = (dataArray) => {
     if (!dataArray) return [];
-    
     return dataArray.filter(item => {
-        // 1. Location Logic
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
         const isLocationMatch = itemLoc.includes(activeLocation);
-
-        // 2. Season Logic (STRICT)
-        // Tunahakikisha tunalinganisha 'june 2026' na 'june 2026' bila kujali herufi kubwa/ndogo
-        // Kama item haina season, tunaipa default ya 'June 2026'
         const itemSeasonRaw = item.season ? String(item.season) : 'June 2026';
-        
-        // Safisha data: toa spaces, weka herufi ndogo
         const itemSeasonClean = itemSeasonRaw.trim().toLowerCase();
         const activeSeasonClean = activeSeason.trim().toLowerCase();
-
-        const isSeasonMatch = itemSeasonClean === activeSeasonClean;
-
-        return isLocationMatch && isSeasonMatch;
+        return isLocationMatch && itemSeasonClean === activeSeasonClean;
     });
   };
 
@@ -165,8 +154,7 @@ const App = () => {
         const fetchData = async (type) => {
             const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
             if (!res.ok) return [];
-            const json = await res.json();
-            return json;
+            return await res.json();
         };
 
         const [matchesData, newsData, standingsData, videosData] = await Promise.all([
@@ -183,7 +171,7 @@ const App = () => {
             season: item.fields.season || "June 2026"
         })) : [];
 
-        // Process News (With Image)
+        // Process News
         const fetchedNews = newsData.items ? newsData.items.map(item => {
              const getNewsImage = (id) => {
                 if (!id || !newsData.includes || !newsData.includes.Asset) return null;
@@ -248,6 +236,7 @@ const App = () => {
     fetchContentfulData();
   }, []);
 
+  // --- PREPARE DATA FOR RENDER (UNIFIED LOGIC) ---
   const getCurrentHero = () => {
     const heroList = cmsData.hero && cmsData.hero.length > 0 ? cmsData.hero : FALLBACK_DATA.hero;
     const heroItem = heroList.find(h => h.location.includes(activeLocation));
@@ -256,6 +245,7 @@ const App = () => {
 
   const currentHero = getCurrentHero();
   
+  // Filter Data
   const filteredMatches = getFilteredData(cmsData.matches);
   const upcomingMatches = filteredMatches.filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'));
   const pastMatches = filteredMatches.filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'));
@@ -269,6 +259,17 @@ const App = () => {
 
   const isGoba2025 = activeLocation === 'goba' && activeSeason === 'June 2025';
 
+  // UNIFIED HERO TEXT LOGIC (Ili isibadilike kati ya simu na PC)
+  let displayTitle = currentHero.title;
+  let displaySubtitle = currentHero.subtitle;
+  let displayTag = `${activeSeason} • ${activeLocation.toUpperCase()}`;
+
+  if (activeSeason === 'June 2025' && !isGoba2025) {
+     displayTitle = "HISTORIA: JUNI 2025";
+     displaySubtitle = "Msimu wa Historia. Bingwa alipatikana kwa jasho na damu mbele ya maelfu ya wakazi wa Kiomoni.";
+  }
+
+  // Styles
   const styles = {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif', scrollBehavior: 'smooth', position: 'relative', overflowX: 'hidden' },
     topBar: { 
@@ -311,18 +312,17 @@ const App = () => {
           .hover-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(163, 230, 53, 0.2); border-color: rgba(163, 230, 53, 0.3) !important; }
           .nav-glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(15, 23, 42, 0.85) !important; }
           
-          /* MOBILE HIDING MAGIC */
+          /* MOBILE ADJUSTMENTS */
           @media (max-width: 768px) {
             .desktop-only { display: none !important; }
             .mobile-center { justify-content: center !important; width: 100%; }
             .top-bar-mobile { padding: 8px 12px !important; }
-            .nav-mobile { padding: 12px 0 !important; }
-            .hero-mobile { min-height: 70vh !important; }
+            .hero-mobile-height { min-height: 70vh !important; }
           }
         `}
       </style>
       <div style={styles.container}>
-      {/* 1. TOP BAR (FIXED) */}
+      {/* 1. TOP BAR */}
       <div style={styles.topBar} className="top-bar-mobile">
         <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
             <History size={14} /><span style={{ fontWeight: 'bold' }}>SEASON:</span>
@@ -347,7 +347,7 @@ const App = () => {
             <a onClick={() => window.location.href='#tv'} style={styles.navLink}>PC TV</a>
             <button onClick={openModal} style={{ ...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px' }}>SAJILI TIMU</button>
           </div>
-          <div style={{ display: 'block' }} className="mobile-only-trigger">
+          <div style={{ display: 'block' }}>
              <button onClick={toggleMobileMenu} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: window.innerWidth <= 768 ? 'block' : 'none' }}>{isMobileMenuOpen ? <X size={32} /> : <Menu size={32} />}</button>
           </div>
         </div>
@@ -364,10 +364,10 @@ const App = () => {
       </div>
       {isMobileMenuOpen && <div onClick={() => setIsMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 55, backdropFilter: 'blur(4px)' }}></div>}
 
-      {/* 3. HERO & LOCATION */}
-      <div id="hero" style={styles.heroWrapper} className="hero-mobile">
+      {/* 3. HERO SECTION (UNIFIED - ONE CODE FOR MOBILE & PC) */}
+      <div id="hero" style={styles.heroWrapper} className="hero-mobile-height">
         <img 
-            src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : currentHero.bgImage}
+            src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : (currentHero.bgImage || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600")}
             style={{...styles.heroMedia, filter: isGoba2025 ? 'grayscale(100%) brightness(0.4)' : 'none'}}
             alt="Background" 
             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600"; }}
@@ -387,16 +387,17 @@ const App = () => {
               </div>
            ) : (
              <>
-               <h1 style={styles.mainTitle}>{activeSeason === 'June 2026' ? currentHero.title : "HISTORIA: JUNI 2025"}</h1>
+               <h1 style={styles.mainTitle}>{displayTitle}</h1>
                <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: '0 auto 16px', lineHeight: '1.6' }}>
-                  {activeSeason === 'June 2025' ? "Msimu wa Historia. Bingwa alipatikana kwa jasho na damu mbele ya maelfu ya wakazi wa Kiomoni." : currentHero.subtitle}
+                  {displaySubtitle}
                </p>
-               <p style={{ color: '#a3e635', fontSize: '16px', fontWeight: 'bold', fontStyle: 'italic', margin: '0 auto 30px', textTransform: 'uppercase', letterSpacing: '1px' }}>{activeSeason} • {activeLocation.toUpperCase()}</p>
+               <p style={{ color: '#a3e635', fontSize: '16px', fontWeight: 'bold', fontStyle: 'italic', margin: '0 auto 30px', textTransform: 'uppercase', letterSpacing: '1px' }}>{displayTag}</p>
              </>
            )}
         </section>
       </div>
 
+      {/* REST OF THE SECTIONS (MATCHES, NEWS, ETC) */}
       {!isGoba2025 && (
       <>
         {/* 4. NEWS */}
@@ -543,7 +544,7 @@ const App = () => {
         <div style={{ textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px', marginTop: '60px' }}><p style={{ fontSize: '11px', color: '#475569', textTransform: 'uppercase', letterSpacing: '1px' }}>© 2026 Pande Cup Events</p></div>
       </footer>
 
-      {/* MODAL - USAJILI */}
+      {/* MODAL (SAME AS BEFORE) */}
       {isModalOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(5px)' }}>
           <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '450px', borderRadius: '24px', padding: '32px', position: 'relative' }}>
@@ -584,7 +585,6 @@ const App = () => {
         </div>
       )}
 
-      {/* MODAL - NEWS READ MORE */}
       {selectedNews && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 110, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(5px)' }}>
           <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px', borderRadius: '24px', padding: '0', position: 'relative', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
