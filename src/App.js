@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, Phone, History, Newspaper
+  ListOrdered, Video, Play, Phone, History, Newspaper, Info
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -56,7 +56,7 @@ const FALLBACK_DATA = {
 const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
 
 // --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal' }) => { // Removed unused 'useImage' prop
+const PandeLogo = ({ size = 'normal' }) => {
   const height = size === 'large' ? '120px' : '56px';
   const [imgError, setImgError] = useState(false);
   if (USE_IMAGE_LOGO && !imgError) {
@@ -78,7 +78,7 @@ const App = () => {
   const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // eslint-disable-line no-unused-vars
 
   // --- ACTIONS ---
   const handleFinalSubmit = () => { 
@@ -233,7 +233,11 @@ const App = () => {
 
         {/* HERO */}
         <div id="hero" style={styles.heroWrapper} className="hero-mobile">
-            <img src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" : (currentHero.bgImage || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66")} style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', filter: isGoba2025 ? 'grayscale(1)' : 'none' }} alt="Hero" />
+            <img 
+              src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" : (currentHero.bgImage || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66")} 
+              style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', filter: isGoba2025 ? 'grayscale(1)' : 'none' }} 
+              alt="Pande Cup Hero"
+            />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,0.4), rgba(15,23,42,0.9))' }}></div>
             <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 20px', maxWidth: '800px' }}>
                 <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center', gap: '12px' }}>
@@ -262,7 +266,7 @@ const App = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
                     {filteredNews.map((item, i) => (
                         <div key={i} onClick={() => setSelectedNews(item)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden' }}>
-                            <img src={item.image} style={{ width: '100%', height: '200px', objectFit: 'cover' }} alt="News" />
+                            <img src={item.image} style={{ width: '100%', height: '200px', objectFit: 'cover' }} alt={item.title} />
                             <div style={{ padding: '24px' }}>
                                 <div style={{ color: '#a3e635', fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>{formatDate(item.date)}</div>
                                 <h3 style={{ fontSize: '18px', margin: '0 0 12px' }}>{item.title}</h3>
@@ -393,7 +397,7 @@ const App = () => {
                 <button onClick={closeNews} style={{position:'fixed', top:'20px', right:'20px', background:'white', border:'none', borderRadius:'50%', width:'40px', height:'40px', zIndex:120}}><X color="black" /></button>
                 <div style={{maxWidth:'600px', margin:'40px auto', color:'white'}}>
                     <h1>{selectedNews.title}</h1>
-                    <img src={selectedNews.image} style={{width:'100%', borderRadius:'16px'}} alt="news" />
+                    <img src={selectedNews.image} style={{width:'100%', borderRadius:'16px'}} alt={selectedNews.title} />
                     <p style={{lineHeight:1.8, fontSize:'18px', marginTop:'24px', whiteSpace:'pre-wrap'}}>{selectedNews.body || selectedNews.excerpt}</p>
                 </div>
             </div>
