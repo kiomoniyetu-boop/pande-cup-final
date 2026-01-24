@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User
+  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -18,7 +18,7 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- ABOUT TEXT (ILIYOPANGILIWA) ---
+// --- ABOUT TEXT ---
 const ABOUT_TEXT = {
   description: `Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya soka kuunganisha jamii. Ilizaliwa Pande, Tanga na sasa imefika Goba, Dar es Salaam.
 
@@ -67,7 +67,7 @@ const FEES = {
 };
 
 // --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal' }) => {
+const PandeLogo = ({ size = 'normal', useImage = true }) => {
   const height = size === 'large' ? '120px' : '56px';
   const [imgError, setImgError] = useState(false);
 
@@ -544,7 +544,8 @@ const App = () => {
           </div>
           <div>
             <h4 style={{ color: 'white', fontSize: '14px', fontWeight: 'bold', marginBottom: '24px' }}>TUWASILIANE</h4>
-            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={16} /> +255 700 000 000</p>
+            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={16} /> +255 653 292 935</p>
+            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><Mail size={16} /> pandecup2023@gmail.com</p>
             <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={16} /> Goba Center & Kiomoni Tanga</p>
           </div>
         </div>
