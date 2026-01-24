@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText
+  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -10,16 +10,20 @@ const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
 const LOGO_PATH = "/logo.png";
 const USE_IMAGE_LOGO = true;
 
-// --- LINKS ZA SOCIAL MEDIA (BADILISHA HAPA) ---
+// --- LINKS ZA SOCIAL MEDIA HALISI ---
 const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/pande_cup", // Weka link halisi
-  facebook: "https://facebook.com/pande_cup",
-  youtube: "https://youtube.com/@pande_cup",
-  tiktok: "https://tiktok.com/@pande_cup"
+  instagram: "https://www.instagram.com/pande_cup/", 
+  facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
+  youtube: "https://www.youtube.com/@PandeCup",
+  tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- DATA ZA KUAZIMIA (FALLBACK) ---
+// --- DATA ZA KUAZIMIA (FALLBACK & STATIC ABOUT) ---
 const FALLBACK_DATA = {
+  about: {
+    description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Kutoka vumbi la Kiomoni hadi taa za Goba, tunajenga undugu na kukuza vipaji.",
+    slogan: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande"
+  },
   hero: [
     {
       location: 'kiomoni',
@@ -54,7 +58,7 @@ const FEES = {
 };
 
 // --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal', useImage = true }) => {
+const PandeLogo = ({ size = 'normal' }) => {
   const height = size === 'large' ? '120px' : '56px';
   const [imgError, setImgError] = useState(false);
 
@@ -106,7 +110,8 @@ const App = () => {
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', phone: '', termsAccepted: false });
+  // Added nidaNumber to state
+  const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', nidaNumber: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
@@ -158,15 +163,15 @@ const App = () => {
             }
         }
 
-        // 2. DATA ZOTE
+        // 2. DATA ZOTE + ABOUT
         const fetchData = async (type) => {
             const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
             if (!res.ok) return [];
             return await res.json();
         };
 
-        const [matchesData, newsData, standingsData, videosData] = await Promise.all([
-            fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video')
+        const [matchesData, newsData, standingsData, videosData, aboutData] = await Promise.all([
+            fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video'), fetchData('about')
         ]);
 
         // Process Matches
@@ -225,13 +230,23 @@ const App = () => {
              };
         }) : [];
 
+        // Process About (New)
+        let fetchedAbout = FALLBACK_DATA.about;
+        if (aboutData.items && aboutData.items.length > 0) {
+            fetchedAbout = {
+                description: aboutData.items[0].fields.description || FALLBACK_DATA.about.description,
+                slogan: aboutData.items[0].fields.slogan || FALLBACK_DATA.about.slogan
+            };
+        }
+
         setCmsData({
             hero: fetchedHero,
             matches: fetchedMatches,
             news: fetchedNews,
             standings: fetchedStandings, 
             videos: fetchedVideos,
-            sponsors: FALLBACK_DATA.sponsors
+            sponsors: FALLBACK_DATA.sponsors,
+            about: fetchedAbout
         });
 
       } catch (error) {
@@ -506,19 +521,18 @@ const App = () => {
         </div>
       </section>
 
-      {/* 8. FOOTER (UPDATED - KILLER WORDS & YOUTUBE) */}
+      {/* 8. FOOTER (UPDATED - DYNAMIC ABOUT & REAL LINKS) */}
       <footer id="about" style={{ padding: '80px 24px 40px', backgroundColor: '#000' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '60px' }}>
           <div>
             <div style={{ marginBottom: '24px' }}><PandeLogo size="large" /></div>
             <div style={{ marginBottom: '20px' }}>
-                {/* KILLER WORDS */}
                 <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', margin: '0 0 16px' }}>
-                  Kutoka vumbi la Kiomoni hadi taa za Goba. Pande Cup siyo ligi tu—ni kiwanda cha vipaji na jukwaa la kuunganisha jamii. Hapa ndipo ndoto zinapozaliwa.
+                  {cmsData.about ? cmsData.about.description : "Inapakia..."}
                 </p>
-                <div style={{ borderLeft: '3px solid #a3e635', paddingLeft: '12px', fontStyle: 'italic', color: '#a3e635', fontSize: '13px' }}>"Pamoja sisi ni Pande. Hii game ni yetu."</div>
+                <div style={{ borderLeft: '3px solid #a3e635', paddingLeft: '12px', fontStyle: 'italic', color: '#a3e635', fontSize: '13px' }}>"{cmsData.about ? cmsData.about.slogan : "Pamoja Sisi Ni Pande"}"</div>
             </div>
-            {/* SOCIAL LINKS - UPDATED WITH YOUTUBE */}
+            {/* SOCIAL LINKS - UPDATED */}
             <div style={{ display: 'flex', gap: '16px' }}>
               <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" style={{ color: 'white', opacity: 0.7, transition: 'opacity 0.2s' }}><Instagram size={20} /></a>
               <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" style={{ color: 'white', opacity: 0.7, transition: 'opacity 0.2s' }}><Facebook size={20} /></a>
@@ -539,7 +553,7 @@ const App = () => {
         <div style={{ textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px', marginTop: '60px' }}><p style={{ fontSize: '11px', color: '#475569', textTransform: 'uppercase', letterSpacing: '1px' }}>© 2026 Pande Cup Events</p></div>
       </footer>
 
-      {/* MODAL - USAJILI (FORMAL UPDATES) */}
+      {/* MODAL - USAJILI (UPDATED WITH NIDA) */}
       {isModalOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(5px)' }}>
           <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '450px', borderRadius: '24px', padding: '32px', position: 'relative' }}>
@@ -548,9 +562,31 @@ const App = () => {
               <div>
                 <h2 style={{ fontSize: '20px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '8px' }}>Fomu ya <span style={styles.limeText}>Maombi</span></h2>
                 <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>Jaza taarifa sahihi ili kusajili timu yako.</p>
-                <input type="text" placeholder="Jina la Timu" value={teamData.name} onChange={(e) => setTeamData({...teamData, name: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white', marginBottom: '12px' }} />
-                <input type="text" placeholder="Jina la Kocha/Nahodha" value={teamData.coachName} onChange={(e) => setTeamData({...teamData, coachName: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white', marginBottom: '12px' }} />
-                <input type="tel" placeholder="Namba ya Simu" value={teamData.phone} onChange={(e) => setTeamData({...teamData, phone: e.target.value})} style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white', marginBottom: '24px' }} />
+                
+                {/* JINA LA TIMU */}
+                <div style={{ position: 'relative', marginBottom: '12px' }}>
+                    <input type="text" placeholder="Jina la Timu" value={teamData.name} onChange={(e) => setTeamData({...teamData, name: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
+                    <Trophy size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                </div>
+
+                {/* JINA LA KOCHA */}
+                <div style={{ position: 'relative', marginBottom: '12px' }}>
+                    <input type="text" placeholder="Jina la Kocha/Nahodha" value={teamData.coachName} onChange={(e) => setTeamData({...teamData, coachName: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
+                    <User size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                </div>
+
+                {/* NAMBA YA NIDA (NEW) */}
+                <div style={{ position: 'relative', marginBottom: '12px' }}>
+                    <input type="text" placeholder="Namba ya NIDA ya Kocha" value={teamData.nidaNumber} onChange={(e) => setTeamData({...teamData, nidaNumber: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
+                    <FileText size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                </div>
+
+                {/* NAMBA YA SIMU */}
+                <div style={{ position: 'relative', marginBottom: '24px' }}>
+                    <input type="tel" placeholder="Namba ya Simu" value={teamData.phone} onChange={(e) => setTeamData({...teamData, phone: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
+                    <Phone size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }}>
                     <button onClick={() => setTeamData({...teamData, location: 'Kiomoni'})} style={{ padding: '12px', borderRadius: '8px', border: teamData.location === 'Kiomoni' ? '1px solid #a3e635' : '1px solid rgba(255,255,255,0.1)', backgroundColor: teamData.location === 'Kiomoni' ? 'rgba(163,230,53,0.1)' : 'transparent', color: 'white', fontWeight: 'bold' }}>KIOMONI</button>
                     <button onClick={() => setTeamData({...teamData, location: 'Goba'})} style={{ padding: '12px', borderRadius: '8px', border: teamData.location === 'Goba' ? '1px solid #a3e635' : '1px solid rgba(255,255,255,0.1)', backgroundColor: teamData.location === 'Goba' ? 'rgba(163,230,53,0.1)' : 'transparent', color: 'white', fontWeight: 'bold' }}>GOBA</button>
