@@ -56,7 +56,7 @@ const FALLBACK_DATA = {
 const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
 
 // --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal', useImage = true }) => {
+const PandeLogo = ({ size = 'normal' }) => { // Removed unused 'useImage' prop
   const height = size === 'large' ? '120px' : '56px';
   const [imgError, setImgError] = useState(false);
   if (USE_IMAGE_LOGO && !imgError) {
@@ -80,7 +80,7 @@ const App = () => {
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- ACTIONS (ZIMEONGEZWA HAPA KUREKEBISHA ERROR) ---
+  // --- ACTIONS ---
   const handleFinalSubmit = () => { 
     alert(`Asante ${teamData.coachName}! Maombi yamepokelewa. Tutawasiliana nawe.`); 
     setModalStep(3); 
@@ -92,12 +92,10 @@ const App = () => {
     setIsMobileMenuOpen(false);
   };
 
-  // HII HAPA NDIO ILIKUWA INAKOSEKANA:
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  // NA HII PIA:
   const closeNews = () => {
     setSelectedNews(null);
   };
@@ -296,7 +294,7 @@ const App = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
                     {filteredVideos.map((v, i) => (
                         <a key={i} href={v.videoUrl} target="_blank" rel="noreferrer" style={{position:'relative', borderRadius:'16px', overflow:'hidden', aspectRatio:'16/9', display:'block'}}>
-                            <img src={v.thumbnail} style={{width:'100%', height:'100%', objectFit:'cover'}} />
+                            <img src={v.thumbnail} style={{width:'100%', height:'100%', objectFit:'cover'}} alt={v.title} />
                             <div style={{position:'absolute', inset:0, background:'rgba(0,0,0,0.3)', display:'flex', alignItems:'center', justifyContent:'center'}}><div style={{width:'50px', height:'50px', background:'#a3e635', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center'}}><Play size={20} color="black" fill="black" style={{marginLeft:'4px'}} /></div></div>
                             <div style={{position:'absolute', bottom:0, left:0, right:0, padding:'16px', background:'linear-gradient(to top, rgba(0,0,0,0.9), transparent)'}}><p style={{margin:0, fontWeight:'bold', fontSize:'14px'}}>{v.title}</p></div>
                         </a>
