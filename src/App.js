@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, Phone, Info, History, Newspaper
+  ListOrdered, Video, Play, Phone, Info, History, Newspaper, Trophy
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -10,7 +10,7 @@ const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
 const LOGO_PATH = "/logo.png";
 const USE_IMAGE_LOGO = true;
 
-// --- SOCIAL MEDIA LINKS (HIZI HAPA SAHIHI KABISA) ---
+// --- SOCIAL MEDIA LINKS ---
 const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/pande_cup/", 
   facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
@@ -18,20 +18,35 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- MANENO YA KUHUSU SISI (KILLER WORDS) ---
+// --- STATIC TEXT (Haya maneno hayategemei internet) ---
 const ABOUT_TEXT = {
   title: "Kuhusu Pande Cup",
   description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
-// --- DATA ZA KUAZIMIA (FALLBACK) ---
+// --- DATA ZA AKIBA (HIZI HAZIPOTEl KAMWE) ---
+// Hata Contentful ikigoma, hizi zitaonekana.
 const FALLBACK_DATA = {
   hero: [
     { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
     { location: 'goba', title: "HII GAME NI YETU.", subtitle: "Pande Cup Imetua Jijini!", bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" }
   ],
-  matches: [], news: [], videos: [], standings: [],
+  matches: [
+    { home: "MTI PESA FC", away: "MABAYANI FC", score: "2-1", status: "FT", location: "kiomoni", season: "June 2025" },
+    { home: "MPIRANI FC", away: "MNYENZANI", score: "5-2", status: "FT", location: "kiomoni", season: "June 2025" }
+  ],
+  news: [
+    { date: "2025-06-29", title: "Shangwe la Ufunguzi: Zaidi ya Soka", excerpt: "Vumbi la Kiomoni lilitimka si kwa soka tu! Kufukuza kuku, kuvuta kamba...", image: "https://images.unsplash.com/photo-1522778119026-d647f0565c6d", location: "kiomoni", season: "June 2025" },
+    { date: "2025-08-30", title: "Historia Imeandikwa: Mpirani Bingwa!", excerpt: "Mpirani (Uruguay) wanyakua taji la kwanza mbele ya umati wa kihistoria.", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018", location: "kiomoni", season: "June 2025" }
+  ],
+  videos: [
+    { title: "Highlights: Fainali 2025", videoUrl: "#", duration: "10:00", thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018", location: "kiomoni", season: "June 2025" }
+  ],
+  standings: [
+    { pos: 1, team: "Mti Pesa FC", p: 3, gd: "+4", pts: 9, location: "kiomoni", season: "June 2025" },
+    { pos: 2, team: "Mpirani FC", p: 3, gd: "+3", pts: 7, location: "kiomoni", season: "June 2025" }
+  ],
   sponsors: [
     { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB BANK", logo: "/images/crdb.png" },
     { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI TANZANIA", logo: "/images/polisi.png" },
@@ -66,12 +81,19 @@ const App = () => {
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- SAFE FETCHING LOGIC (Hii inazuia site kupotea) ---
+  // --- FONT INJECTION (DAWA YA FONTS) ---
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+  }, []);
+
+  // --- SAFE FETCHING LOGIC ---
   useEffect(() => {
     const fetchContentfulData = async () => {
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
       
-      // Helper function: Inajaribu kuvuta data, ikishindikana inarudisha empty list (haiuwi site)
       const fetchSafe = async (type) => {
         try {
           const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
@@ -83,7 +105,6 @@ const App = () => {
         }
       };
 
-      // Vuta data moja baada ya nyingine kwa usalama
       const heroData = await fetchSafe('heroSection');
       const matchesData = await fetchSafe('match');
       const newsData = await fetchSafe('news');
@@ -92,7 +113,6 @@ const App = () => {
 
       const getAssetUrl = (id, assets) => { if (!assets) return null; const asset = assets.find(a => a.sys.id === id); return asset?.fields?.file ? `https:${asset.fields.file.url}` : null; };
 
-      // Process Data
       const fetchedHero = heroData.items.map(item => ({
           title: item.fields.title, subtitle: item.fields.subtitle, location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
           bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
@@ -119,9 +139,13 @@ const App = () => {
           location: item.fields.location, season: item.fields.season
       }));
 
+      // KAMA CONTENTFUL HAINA KITU, TUMIA FALLBACK
       setCmsData({ 
           hero: fetchedHero.length > 0 ? fetchedHero : FALLBACK_DATA.hero, 
-          matches: fetchedMatches, news: fetchedNews, standings: fetchedStandings, videos: fetchedVideos, 
+          matches: fetchedMatches.length > 0 ? fetchedMatches : FALLBACK_DATA.matches, 
+          news: fetchedNews.length > 0 ? fetchedNews : FALLBACK_DATA.news, 
+          standings: fetchedStandings.length > 0 ? fetchedStandings : FALLBACK_DATA.standings, 
+          videos: fetchedVideos.length > 0 ? fetchedVideos : FALLBACK_DATA.videos, 
           sponsors: FALLBACK_DATA.sponsors 
       });
       setIsLoading(false);
@@ -136,7 +160,9 @@ const App = () => {
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
         const itemSeason = item.season ? String(item.season) : 'June 2026';
         const activeSeasonClean = activeSeason.trim().toLowerCase();
-        return itemLoc.includes(activeLocation) && itemSeason.trim().toLowerCase() === activeSeasonClean;
+        // Fallback items might strictly match 'June 2025' or 'June 2026'
+        const itemSeasonClean = itemSeason.trim().toLowerCase();
+        return itemLoc.includes(activeLocation) && itemSeasonClean === activeSeasonClean;
     });
   };
 
@@ -166,7 +192,6 @@ const App = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap');
         body { margin: 0; font-family: 'Inter', sans-serif; }
         h1, h2, h3 { font-family: 'Oswald', sans-serif; }
         @media (max-width: 768px) { .desktop-only { display: none !important; } .mobile-center { justify-content: center !important; width: 100%; } .hero-mobile { min-height: 70vh !important; } }
