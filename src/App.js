@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Phone, History, Newspaper, Info, Play
+  ListOrdered, Video, Play, Phone, History, Newspaper
 } from 'lucide-react';
 
-// --- USANIDI (CONFIG) ---
+// --- CONFIG ---
 const SPACE_ID = 'ax6wvfd84net'; 
 const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
+
 const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/pande_cup/", 
   facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
   youtube: "https://www.youtube.com/@PandeCup",
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
+
 const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
 
-// --- DATA ZA KUAZIMIA (FALLBACK - VISUALS ONLY) ---
-// Hizi zinahakikisha site haiko tupu wakati inatafuta data
-const FALLBACK_DATA = {
+// --- KILLER CONTENT (MANUAL DATA) ---
+// Hii inahakikisha site haipo tupu hata kama Contentful inazingua
+const MANUAL_DATA = {
   hero: [
     { 
       location: 'kiomoni', 
       title: "HII GAME NI YETU.", 
       subtitle: "Soka la mtaani lenye hadhi ya kitaifa. Kutoka vumbi la Kiomoni hadi taa za Goba.", 
-      bgImage: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&q=80&w=1600" // Football texture
+      bgImage: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&q=80&w=1600"
     },
     { 
       location: 'goba', 
       title: "PANDE CUP JIJI.", 
       subtitle: "Tunawasha taa Goba! Soka safi, burudani na uchumi.", 
-      bgImage: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&q=80&w=1600" // Stadium lights
+      bgImage: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&q=80&w=1600"
     }
   ],
   matches: [
@@ -42,22 +44,28 @@ const FALLBACK_DATA = {
       date: "2025-06-29", 
       title: "Shangwe la Ufunguzi: Zaidi ya Soka", 
       excerpt: "Vumbi la Kiomoni lilitimka si kwa soka tu! Kufukuza kuku, kuvuta kamba na ngoma za asili vilitawala.", 
-      image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=500", // Soccer generic
+      image: "https://images.unsplash.com/photo-1522778119026-d647f0565c6d?auto=format&fit=crop&q=80&w=500", 
       location: "kiomoni", season: "June 2025" 
     },
     { 
       date: "2025-08-30", 
       title: "Historia: Mpirani Bingwa!", 
       excerpt: "Timu ya Mpirani (Uruguay) imenyakua taji la kwanza la Pande Cup mbele ya umati wa kihistoria.", 
-      image: "https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=500", // Trophy generic
+      image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=500", 
       location: "kiomoni", season: "June 2025" 
+    },
+    { 
+      date: "2026-01-20", 
+      title: "Usajili wa Msimu Mpya Waanza", 
+      excerpt: "Fomu za usajili kwa msimu wa 2026 zinapatikana sasa. Wahi mapema nafasi ni chache.", 
+      image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=500", 
+      location: "goba", season: "June 2026" 
     }
   ],
   videos: [
     { 
       title: "Highlights: Fainali 2025", 
       videoUrl: "https://youtube.com", 
-      duration: "10:00", 
       thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=500",
       location: "kiomoni", season: "June 2025" 
     }
@@ -65,7 +73,8 @@ const FALLBACK_DATA = {
   standings: [
     { pos: 1, team: "Mti Pesa FC", p: 3, gd: "+4", pts: 9, location: "kiomoni", season: "June 2025" },
     { pos: 2, team: "Mpirani FC", p: 3, gd: "+3", pts: 7, location: "kiomoni", season: "June 2025" },
-    { pos: 3, team: "Mabayani FC", p: 3, gd: "-1", pts: 4, location: "kiomoni", season: "June 2025" }
+    { pos: 3, team: "Mabayani FC", p: 3, gd: "-1", pts: 4, location: "kiomoni", season: "June 2025" },
+    { pos: 4, team: "Uruguay FC", p: 3, gd: "-2", pts: 3, location: "kiomoni", season: "June 2025" }
   ],
   sponsors: [
     { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB", logo: "/images/crdb.png" },
@@ -74,10 +83,15 @@ const FALLBACK_DATA = {
   ]
 };
 
+const ABOUT_TEXT = {
+  description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya.",
+  slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande"
+};
+
 // --- COMPONENTS ---
 const PandeLogo = ({ size = 'normal' }) => (
   <div style={{ 
-    fontSize: size === 'large' ? '32px' : '24px', 
+    fontSize: size === 'large' ? '36px' : '28px', 
     fontWeight: '900', 
     fontStyle: 'italic', 
     textTransform: 'uppercase', 
@@ -93,8 +107,8 @@ const TikTokIcon = ({ size = 24 }) => (<svg xmlns="http://www.w3.org/2000/svg" w
 
 const SectionHeader = ({ icon: Icon, title, highlight }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' }}>
-    {Icon && <Icon color="#a3e635" size={24} />}
-    <h2 style={{ fontSize: '24px', margin: 0, textTransform: 'uppercase', fontStyle: 'italic', fontFamily: '"Oswald", sans-serif' }}>
+    <Icon color="#a3e635" size={24} />
+    <h2 style={{ fontSize: '24px', margin: 0, textTransform: 'uppercase', fontStyle: 'italic', fontFamily: '"Oswald", sans-serif', color:'white' }}>
       {title} <span style={{ color: '#a3e635' }}>{highlight}</span>
     </h2>
   </div>
@@ -102,22 +116,22 @@ const SectionHeader = ({ icon: Icon, title, highlight }) => (
 
 const App = () => {
   const [activeLocation, setActiveLocation] = useState('kiomoni');
-  const [activeSeason, setActiveSeason] = useState('June 2025'); // Default 2025 ili tuone data
+  const [activeSeason, setActiveSeason] = useState('June 2025'); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStep, setModalStep] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [teamData, setTeamData] = useState({ name: '', coach: '', phone: '', terms: false });
   const [selectedNews, setSelectedNews] = useState(null);
   
-  // Start with Fallback, fill with Contentful later
-  const [cmsData, setCmsData] = useState(FALLBACK_DATA);
+  // INIT WITH MANUAL DATA (No empty screen)
+  const [cmsData, setCmsData] = useState(MANUAL_DATA);
 
-  // --- ACTIONS ---
+  // Handlers
   const handleFinalSubmit = () => { alert("Asante! Tutawasiliana."); setModalStep(3); };
   const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); };
   const closeModal = () => setIsModalOpen(false);
 
-  // --- FONT INJECTION ---
+  // Font Injection
   useEffect(() => {
     const link = document.createElement('link');
     link.href = 'https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap';
@@ -125,7 +139,7 @@ const App = () => {
     document.head.appendChild(link);
   }, []);
 
-  // --- DATA FETCHING (SILENT) ---
+  // Contentful Fetch (Updates data if available)
   useEffect(() => {
     const fetchContentfulData = async () => {
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
@@ -143,7 +157,6 @@ const App = () => {
       const getUrl = (item) => item?.fields?.file?.url ? `https:${item.fields.file.url}` : null;
       const getAsset = (id, assets) => assets?.find(a => a.sys.id === id);
 
-      // Process only if we have data, otherwise keep fallback
       if (matches.items.length > 0 || news.items.length > 0) {
         setCmsData({
           hero: hero.items.map(i => ({
@@ -167,14 +180,14 @@ const App = () => {
             title: i.fields.title, videoUrl: i.fields.videoUrl, thumbnail: getUrl(getAsset(i.fields.thumbnail?.sys?.id, videos.includes)),
             location: i.fields.location || 'kiomoni', season: i.fields.season || 'June 2026'
           })),
-          sponsors: FALLBACK_DATA.sponsors
+          sponsors: MANUAL_DATA.sponsors
         });
       }
     };
     fetchContentfulData();
   }, []);
 
-  // --- FILTERING ---
+  // Filter Logic
   const filterData = (arr) => {
     if (!arr) return [];
     return arr.filter(i => {
@@ -184,7 +197,7 @@ const App = () => {
     });
   };
 
-  const currentHero = cmsData.hero.find(h => h.location.includes(activeLocation)) || cmsData.hero[0] || FALLBACK_DATA.hero[0];
+  const currentHero = (Array.isArray(cmsData.hero) ? cmsData.hero.find(h => h.location.includes(activeLocation)) : cmsData.hero) || MANUAL_DATA.hero[0];
   const filteredMatches = filterData(cmsData.matches);
   const filteredNews = filterData(cmsData.news);
   const filteredStandings = filterData(cmsData.standings);
@@ -193,9 +206,9 @@ const App = () => {
 
   let heroTitle = isGoba2025 ? "HISTORIA: JUNI 2025" : (currentHero.title || "PANDE CUP");
   let heroSub = isGoba2025 ? "Msimu wa Historia." : (currentHero.subtitle || "Karibu.");
-  let heroBg = isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : (currentHero.bgImage || FALLBACK_DATA.hero[0].bgImage);
+  let heroBg = isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : (currentHero.bgImage || MANUAL_DATA.hero[0].bgImage);
 
-  // --- STYLES ---
+  // Styles
   const s = {
     container: { backgroundColor: '#0f172a', color: '#f8fafc', minHeight: '100vh', fontFamily: '"Inter", sans-serif' },
     nav: { position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 20px' },
@@ -266,13 +279,13 @@ const App = () => {
                     {n.image && <img src={n.image} style={{width:'100%', height:'100%', objectFit:'cover'}} alt="news" />}
                   </div>
                   <div style={{padding: 24}}>
-                    <div style={{color:'#a3e635', fontSize:11, fontWeight:'bold', marginBottom:8}}>{formatDate(n.date)}</div>
+                    <div style={{color:'#a3e635', fontSize:11, fontWeight:'bold', marginBottom:8}}>{n.date}</div>
                     <h3 style={{fontSize:18, margin:'0 0 12px'}}>{n.title}</h3>
                     <p style={{color:'#94a3b8', fontSize:14}}>{n.excerpt}</p>
                   </div>
                 </div>
               ))}
-              {filteredNews.length === 0 && <div style={{color:'#64748b', gridColumn:'1/-1', textAlign:'center', padding:40, background:'rgba(255,255,255,0.02)', borderRadius:16}}><Info style={{margin:'0 auto 10px'}}/>Hakuna habari bado.</div>}
+              {filteredNews.length === 0 && <p style={{color:'#64748b'}}>Hakuna habari bado.</p>}
             </div>
           </section>
 
@@ -350,11 +363,12 @@ const App = () => {
         <div style={{maxWidth:1200, margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:60}}>
           <div>
             <div style={{marginBottom:24}}><PandeLogo size="large" /></div>
-            <p style={{color:'#94a3b8', fontSize:14, lineHeight:1.6}}>Pande Cup si ligi tu, ni maisha. Tunajenga umoja na vipaji kupitia soka.</p>
+            <p style={{color:'#94a3b8', fontSize:14, lineHeight:1.6}}>{ABOUT_TEXT.description}</p>
             <div style={{display:'flex', gap:16, marginTop:24}}>
               <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Instagram size={20}/></a>
               <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Facebook size={20}/></a>
               <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Youtube size={20}/></a>
+              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><TikTokIcon size={20}/></a>
             </div>
           </div>
           <div>
@@ -416,19 +430,7 @@ const App = () => {
         </div>
       )}
 
-      {/* MOBILE MENU */}
-      {isMobileMenuOpen && (
-        <div style={{position:'fixed', inset:0, background:'#0f172a', zIndex:60, padding:32}}>
-          <button onClick={()=>setIsMobileMenuOpen(false)} style={{position:'absolute', top:24, right:24, background:'none', border:'none', color:'white'}}><X size={32}/></button>
-          <div style={{marginTop:80, display:'flex', flexDirection:'column', gap:32}}>
-            <a href="#news" onClick={()=>setIsMobileMenuOpen(false)} style={{color:'white', fontSize:24, fontWeight:'bold', textDecoration:'none', fontFamily:'Oswald'}}>HABARI</a>
-            <a href="#ratiba" onClick={()=>setIsMobileMenuOpen(false)} style={{color:'white', fontSize:24, fontWeight:'bold', textDecoration:'none', fontFamily:'Oswald'}}>RATIBA</a>
-            <button onClick={openModal} style={{...s.btn, width:'100%', fontSize:18, padding:16}}>SAJILI TIMU</button>
-          </div>
-        </div>
-      )}
-
-      {/* NEWS FULL */}
+      {/* NEWS POPUP (ADDED THIS FIX) */}
       {selectedNews && (
         <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.95)', zIndex:110, padding:20, overflowY:'auto'}}>
           <button onClick={()=>setSelectedNews(null)} style={{position:'fixed', top:20, right:20, background:'white', border:'none', borderRadius:'50%', width:40, height:40, zIndex:120}}><X color="black"/></button>
