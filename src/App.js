@@ -1,448 +1,408 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, Phone, History, Newspaper
+  ListOrdered, Video, Play, Phone, History, Newspaper, Trophy, Info
 } from 'lucide-react';
-
-// --- CONFIG ---
-const SPACE_ID = 'ax6wvfd84net'; 
+// --- USANIDI WA CMS ---
+const SPACE_ID = 'ax6wvfd84net';
 const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
-
+const LOGO_PATH = "/logo.png";
+const USE_IMAGE_LOGO = true;
+// --- SOCIAL MEDIA LINKS ---
 const SOCIAL_LINKS = {
-  instagram: "https://www.instagram.com/pande_cup/", 
+  instagram: "https://www.instagram.com/pande_cup/",
   facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
   youtube: "https://www.youtube.com/@PandeCup",
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
-
-const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
-
-// --- KILLER CONTENT (MANUAL DATA) ---
-// Hii inahakikisha site haipo tupu hata kama Contentful inazingua
-const MANUAL_DATA = {
-  hero: [
-    { 
-      location: 'kiomoni', 
-      title: "HII GAME NI YETU.", 
-      subtitle: "Soka la mtaani lenye hadhi ya kitaifa. Kutoka vumbi la Kiomoni hadi taa za Goba.", 
-      bgImage: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&q=80&w=1600"
-    },
-    { 
-      location: 'goba', 
-      title: "PANDE CUP JIJI.", 
-      subtitle: "Tunawasha taa Goba! Soka safi, burudani na uchumi.", 
-      bgImage: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&q=80&w=1600"
-    }
-  ],
-  matches: [
-    { home: "MTI PESA", away: "MABAYANI", score: "2-1", status: "FT", location: "kiomoni", season: "June 2025" },
-    { home: "MPIRANI", away: "MNYENZANI", score: "5-2", status: "FT", location: "kiomoni", season: "June 2025" },
-    { home: "URUGUAY", away: "PAMBA", score: "1-0", status: "FT", location: "kiomoni", season: "June 2025" }
-  ],
-  news: [
-    { 
-      date: "2025-06-29", 
-      title: "Shangwe la Ufunguzi: Zaidi ya Soka", 
-      excerpt: "Vumbi la Kiomoni lilitimka si kwa soka tu! Kufukuza kuku, kuvuta kamba na ngoma za asili vilitawala.", 
-      image: "https://images.unsplash.com/photo-1522778119026-d647f0565c6d?auto=format&fit=crop&q=80&w=500", 
-      location: "kiomoni", season: "June 2025" 
-    },
-    { 
-      date: "2025-08-30", 
-      title: "Historia: Mpirani Bingwa!", 
-      excerpt: "Timu ya Mpirani (Uruguay) imenyakua taji la kwanza la Pande Cup mbele ya umati wa kihistoria.", 
-      image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=500", 
-      location: "kiomoni", season: "June 2025" 
-    },
-    { 
-      date: "2026-01-20", 
-      title: "Usajili wa Msimu Mpya Waanza", 
-      excerpt: "Fomu za usajili kwa msimu wa 2026 zinapatikana sasa. Wahi mapema nafasi ni chache.", 
-      image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=500", 
-      location: "goba", season: "June 2026" 
-    }
-  ],
-  videos: [
-    { 
-      title: "Highlights: Fainali 2025", 
-      videoUrl: "https://youtube.com", 
-      thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=500",
-      location: "kiomoni", season: "June 2025" 
-    }
-  ],
-  standings: [
-    { pos: 1, team: "Mti Pesa FC", p: 3, gd: "+4", pts: 9, location: "kiomoni", season: "June 2025" },
-    { pos: 2, team: "Mpirani FC", p: 3, gd: "+3", pts: 7, location: "kiomoni", season: "June 2025" },
-    { pos: 3, team: "Mabayani FC", p: 3, gd: "-1", pts: 4, location: "kiomoni", season: "June 2025" },
-    { pos: 4, team: "Uruguay FC", p: 3, gd: "-2", pts: 3, location: "kiomoni", season: "June 2025" }
-  ],
+// --- STATIC TEXT ---
+const ABOUT_TEXT = {
+  title: "Kuhusu Pande Cup",
+  description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
+  slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
+};
+// --- DATA TUPU (KAMA CONTENTFUL IKIGOMA KABISA) ---
+const EMPTY_DATA = {
+  hero: [], matches: [], news: [], videos: [], standings: [],
   sponsors: [
-    { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB", logo: "/images/crdb.png" },
-    { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI", logo: "/images/polisi.png" },
-    { name: "AZAM", logo: "/images/azam.png" }
+    { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB BANK", logo: "/images/crdb.png" },
+    { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI TANZANIA", logo: "/images/polisi.png" },
+    { name: "AZAM TV", logo: "/images/azam.png" }
   ]
 };
-
-const ABOUT_TEXT = {
-  description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya.",
-  slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande"
-};
-
+const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
 // --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal' }) => (
-  <div style={{ 
-    fontSize: size === 'large' ? '36px' : '28px', 
-    fontWeight: '900', 
-    fontStyle: 'italic', 
-    textTransform: 'uppercase', 
-    color: 'white', 
-    fontFamily: '"Oswald", sans-serif',
-    letterSpacing: '-1px'
-  }}>
-    PANDE<span style={{ color: '#a3e635' }}>CUP</span>
-  </div>
-);
-
+const PandeLogo = ({ size = 'normal' }) => {
+  const height = size === 'large' ? '120px' : '56px';
+  const [imgError, setImgError] = useState(false);
+  if (USE_IMAGE_LOGO && !imgError) {
+    return <div style={{ display: 'flex', alignItems: 'center' }}><img src={LOGO_PATH} alt="Pande Cup Logo" style={{ height: height, objectFit: 'contain' }} onError={() => setImgError(true)} /></div>;
+  }
+  return <div style={{ fontSize: size === 'large' ? '32px' : '24px', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', color: 'white' }}>PANDE<span style={{ color: '#a3e635' }}>CUP</span></div>;
+};
 const TikTokIcon = ({ size = 24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>);
-
-const SectionHeader = ({ icon: Icon, title, highlight }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' }}>
-    <Icon color="#a3e635" size={24} />
-    <h2 style={{ fontSize: '24px', margin: 0, textTransform: 'uppercase', fontStyle: 'italic', fontFamily: '"Oswald", sans-serif', color:'white' }}>
-      {title} <span style={{ color: '#a3e635' }}>{highlight}</span>
-    </h2>
-  </div>
-);
-
+const formatDate = (d) => { if (!d) return "Tarehe"; const date = new Date(d); return isNaN(date.getTime()) ? d : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); };
+const renderWithLinks = (text) => { if (!text) return ""; return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) => part.match(/https?:\/\/[^\s]+/) ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{color: '#a3e635', textDecoration: 'underline'}}>{part}</a> : part); };
 const App = () => {
   const [activeLocation, setActiveLocation] = useState('kiomoni');
-  const [activeSeason, setActiveSeason] = useState('June 2025'); 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeSeason, setActiveSeason] = useState('June 2026');
   const [modalStep, setModalStep] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [teamData, setTeamData] = useState({ name: '', coach: '', phone: '', terms: false });
+  const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
-  
-  // INIT WITH MANUAL DATA (No empty screen)
-  const [cmsData, setCmsData] = useState(MANUAL_DATA);
-
-  // Handlers
-  const handleFinalSubmit = () => { alert("Asante! Tutawasiliana."); setModalStep(3); };
+ 
+  const [cmsData, setCmsData] = useState(EMPTY_DATA);
+  const [isLoading, setIsLoading] = useState(true);
+  // --- ACTIONS ---
+  const handleFinalSubmit = () => {
+    alert(`Asante ${teamData.coachName}! Maombi yamepokelewa. Tutawasiliana nawe.`);
+    setModalStep(3);
+  };
   const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); };
-  const closeModal = () => setIsModalOpen(false);
-
-  // Font Injection
+  const closeModal = () => { setIsModalOpen(false); };
+  const closeNews = () => { setSelectedNews(null); };
+  // --- FONT LOADING ---
   useEffect(() => {
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap';
-    link.rel = 'stylesheet';
+    const link = document.createElement("link");
+    link.href = "https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap";
+    link.rel = "stylesheet";
     document.head.appendChild(link);
   }, []);
-
-  // Contentful Fetch (Updates data if available)
+  // --- CONTENTFUL FETCHING (WITH TIMEOUT SAFETY) ---
   useEffect(() => {
+    let isMounted = true;
+    // 1. SAFETY TIMER: Force loading to stop after 10 seconds if Contentful is slow
+    const timer = setTimeout(() => {
+      if (isMounted) {
+        console.log("Contentful timed out - Force opening");
+        setCmsData(EMPTY_DATA);
+        setIsLoading(false);
+      }
+    }, 10000);
     const fetchContentfulData = async () => {
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
+     
       const fetchSafe = async (type) => {
         try {
           const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
-          return res.ok ? await res.json() : { items: [] };
-        } catch { return { items: [] }; }
+          if (!res.ok) throw new Error(type);
+          return await res.json();
+        } catch (e) {
+          console.warn(`Failed to load ${type}`, e);
+          return { items: [] };
+        }
       };
-
-      const [hero, matches, news, standings, videos] = await Promise.all([
-        fetchSafe('heroSection'), fetchSafe('match'), fetchSafe('news'), fetchSafe('standing'), fetchSafe('video')
-      ]);
-
-      const getUrl = (item) => item?.fields?.file?.url ? `https:${item.fields.file.url}` : null;
-      const getAsset = (id, assets) => assets?.find(a => a.sys.id === id);
-
-      if (matches.items.length > 0 || news.items.length > 0) {
+      const heroData = await fetchSafe('heroSection');
+      const matchesData = await fetchSafe('match');
+      const newsData = await fetchSafe('news');
+      const standingsData = await fetchSafe('standing');
+      const videosData = await fetchSafe('video');
+      if (!isMounted) return;
+      const getAssetUrl = (id, responseIncludes) => {
+        if (!id || !responseIncludes || !responseIncludes.Asset) return null;
+        const asset = responseIncludes.Asset.find(a => a.sys.id === id);
+        return asset?.fields?.file?.url ? `https:${asset.fields.file.url}` : null;
+      };
+      try {
+        const fetchedHero = heroData.items.map(item => ({
+            title: item.fields.title || "HII GAME NI YETU.",
+            subtitle: item.fields.subtitle || "",
+            location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
+            bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
+        }));
+        const fetchedMatches = matchesData.items.map(item => ({
+            home: item.fields.homeTeam || "Team A",
+            away: item.fields.awayTeam || "Team B",
+            score: item.fields.score || "VS",
+            status: item.fields.status || "-",
+            location: item.fields.location || "kiomoni",
+            season: item.fields.season || "June 2026"
+        }));
+        const fetchedNews = newsData.items.map(item => ({
+            date: item.fields.date || new Date().toISOString(),
+            title: item.fields.title || "Habari",
+            excerpt: item.fields.excerpt || "",
+            body: item.fields.body || "",
+            image: getAssetUrl(item.fields.image?.sys?.id, newsData.includes),
+            location: item.fields.location || "kiomoni",
+            season: item.fields.season || "June 2026"
+        }));
+        const fetchedStandings = standingsData.items.map(item => ({
+            pos: item.fields.position || 0,
+            team: item.fields.teamName || "Team",
+            p: item.fields.played || 0,
+            gd: item.fields.goalDifference || "0",
+            pts: item.fields.points || 0,
+            location: item.fields.location || "kiomoni",
+            season: item.fields.season || "June 2026"
+        })).sort((a,b) => a.pos - b.pos);
+        const fetchedVideos = videosData.items.map(item => ({
+            title: item.fields.title || "Video",
+            videoUrl: item.fields.videoUrl || "#",
+            duration: item.fields.duration || "0:00",
+            thumbnail: getAssetUrl(item.fields.thumbnail?.sys?.id, videosData.includes),
+            location: item.fields.location || "kiomoni",
+            season: item.fields.season || "June 2026"
+        }));
         setCmsData({
-          hero: hero.items.map(i => ({
-            title: i.fields.title, subtitle: i.fields.subtitle, location: i.fields.location?.toLowerCase() || 'kiomoni',
-            bgImage: getUrl(getAsset(i.fields.backgroundImage?.sys?.id || i.fields.image?.sys?.id, hero.includes))
-          })),
-          matches: matches.items.map(i => ({
-            home: i.fields.homeTeam, away: i.fields.awayTeam, score: i.fields.score, status: i.fields.status,
-            location: i.fields.location || 'kiomoni', season: i.fields.season || 'June 2026'
-          })),
-          news: news.items.map(i => ({
-            date: i.fields.date, title: i.fields.title, excerpt: i.fields.excerpt, body: i.fields.body,
-            image: getUrl(getAsset(i.fields.image?.sys?.id, news.includes)) || "https://via.placeholder.com/500",
-            location: i.fields.location || 'kiomoni', season: i.fields.season || 'June 2026'
-          })),
-          standings: standings.items.map(i => ({
-            pos: i.fields.position, team: i.fields.teamName, p: i.fields.played, gd: i.fields.goalDifference, pts: i.fields.points,
-            location: i.fields.location || 'kiomoni', season: i.fields.season || 'June 2026'
-          })).sort((a,b)=>a.pos-b.pos),
-          videos: videos.items.map(i => ({
-            title: i.fields.title, videoUrl: i.fields.videoUrl, thumbnail: getUrl(getAsset(i.fields.thumbnail?.sys?.id, videos.includes)),
-            location: i.fields.location || 'kiomoni', season: i.fields.season || 'June 2026'
-          })),
-          sponsors: MANUAL_DATA.sponsors
+            hero: fetchedHero,
+            matches: fetchedMatches,
+            news: fetchedNews,
+            standings: fetchedStandings,
+            videos: fetchedVideos,
+            sponsors: EMPTY_DATA.sponsors
         });
+      } catch (e) {
+        console.warn('Error processing CMS data:', e);
+        setCmsData(EMPTY_DATA);
       }
+     
+      clearTimeout(timer); // Clear the safety timer since we got data
+      setIsLoading(false);
     };
     fetchContentfulData();
+    return () => { isMounted = false; clearTimeout(timer); };
   }, []);
-
-  // Filter Logic
-  const filterData = (arr) => {
-    if (!arr) return [];
-    return arr.filter(i => {
-      const iLoc = (i.location || 'kiomoni').toLowerCase();
-      const iSea = (i.season || 'June 2026').toLowerCase();
-      return iLoc.includes(activeLocation) && iSea === activeSeason.toLowerCase();
+  const getFilteredData = (dataArray) => {
+    if (!dataArray) return [];
+    return dataArray.filter(item => {
+        const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
+        const itemSeason = item.season ? String(item.season).trim().toLowerCase() : 'june 2026';
+        const activeSeasonClean = activeSeason.trim().toLowerCase();
+        return itemLoc.includes(activeLocation) && itemSeason === activeSeasonClean;
     });
   };
-
-  const currentHero = (Array.isArray(cmsData.hero) ? cmsData.hero.find(h => h.location.includes(activeLocation)) : cmsData.hero) || MANUAL_DATA.hero[0];
-  const filteredMatches = filterData(cmsData.matches);
-  const filteredNews = filterData(cmsData.news);
-  const filteredStandings = filterData(cmsData.standings);
-  const filteredVideos = filterData(cmsData.videos);
+  const currentHero = (cmsData.hero.find(h => h.location.includes(activeLocation))) || cmsData.hero[0] || {title: "PANDE CUP", subtitle: "Msimu Mpya", bgImage: null};
+  const filteredMatches = getFilteredData(cmsData.matches);
+  const upcomingMatches = filteredMatches.filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'));
+  const pastMatches = filteredMatches.filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'));
+  const filteredNews = getFilteredData(cmsData.news);
+  const filteredStandings = getFilteredData(cmsData.standings);
+  const filteredVideos = getFilteredData(cmsData.videos);
   const isGoba2025 = activeLocation === 'goba' && activeSeason === 'June 2025';
-
-  let heroTitle = isGoba2025 ? "HISTORIA: JUNI 2025" : (currentHero.title || "PANDE CUP");
-  let heroSub = isGoba2025 ? "Msimu wa Historia." : (currentHero.subtitle || "Karibu.");
-  let heroBg = isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : (currentHero.bgImage || MANUAL_DATA.hero[0].bgImage);
-
-  // Styles
-  const s = {
-    container: { backgroundColor: '#0f172a', color: '#f8fafc', minHeight: '100vh', fontFamily: '"Inter", sans-serif' },
-    nav: { position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 20px' },
-    glassCard: { backgroundColor: 'rgba(30, 41, 59, 0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden' },
-    btn: { background: '#a3e635', color: '#020617', border: 'none', padding: '12px 24px', borderRadius: '8px', fontWeight: '800', fontFamily: '"Oswald", sans-serif', cursor: 'pointer' },
-    section: { maxWidth: '1200px', margin: '0 auto', padding: '80px 24px' },
-    btnSeason: (active) => ({ background: 'none', border: 'none', color: active ? '#a3e635' : '#64748b', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }),
-    btnLoc: (active) => ({ padding: '8px 20px', borderRadius: '50px', border: active ? '1px solid #a3e635' : '1px solid rgba(255,255,255,0.3)', background: active ? '#a3e635' : 'transparent', color: active ? 'black' : 'white', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' })
+  let displayTitle = currentHero.title;
+  let displaySubtitle = currentHero.subtitle;
+  let displayTag = `${activeSeason} • ${activeLocation.toUpperCase()}`;
+  if (activeSeason === 'June 2025' && !isGoba2025) { displayTitle = "HISTORIA: JUNI 2025"; displaySubtitle = "Msimu wa Historia. Bingwa alipatikana kwa jasho na damu."; }
+  const styles = {
+    container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif' },
+    topBar: { backgroundColor: '#1e293b', padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
+    nav: { position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 0' },
+    heroWrapper: { position: 'relative', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#020617' },
+    mobileMenu: { position: 'fixed', top: 0, right: 0, width: '85%', maxWidth: '320px', height: '100vh', backgroundColor: '#0f172a', zIndex: 60, padding: '32px', transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s ease' },
+    buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: '14px 28px', borderRadius: '8px', fontWeight: '800', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px' }
   };
-
+  if (isLoading) {
+    return (
+      <div style={{height: '100vh', width: '100%', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
+        <PandeLogo size="large" />
+        <p style={{color: '#a3e635', marginTop: '20px', fontWeight: 'bold', animation: 'pulse 1s infinite'}}>INAPAKIA...</p>
+        <style>{`@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }`}</style>
+      </div>
+    );
+  }
   return (
-    <div style={s.container}>
+    <>
       <style>{`
-        body { margin: 0; }
+        body { margin: 0; font-family: 'Inter', sans-serif; }
         h1, h2, h3 { font-family: 'Oswald', sans-serif; }
-        .hover-up:hover { transform: translateY(-5px); transition: transform 0.3s; }
-        .grid-responsive { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
-        @media(max-width:768px){ .desktop{display:none} .mobile-hero{min-height:70vh} .hero-text{font-size:3rem!important} }
+        @media (max-width: 768px) { .desktop-only { display: none !important; } .mobile-center { justify-content: center !important; width: 100%; } .hero-mobile { min-height: 70vh !important; } }
       `}</style>
-
-      {/* TOP BAR */}
-      <div style={{ background: '#020617', padding: '8px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #1e293b' }}>
-        <div className="desktop" style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}><History size={12}/> SEASON: <span style={{color:'#22c55e', fontWeight:'bold'}}>{activeSeason}</span></div>
-        <div style={{ display: 'flex', gap: 16 }}>
-           <button onClick={()=>{setActiveSeason('June 2025'); setActiveLocation('kiomoni')}} style={s.btnSeason(activeSeason==='June 2025')}>2025 (HISTORIA)</button>
-           <button onClick={()=>setActiveSeason('June 2026')} style={s.btnSeason(activeSeason==='June 2026')}>2026 (LIVE)</button>
-        </div>
-      </div>
-
-      {/* NAV */}
-      <nav style={s.nav}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <PandeLogo />
-          <div className="desktop" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
-            <a href="#news" style={{color:'#94a3b8', textDecoration:'none', fontWeight:'600', fontSize:13}}>HABARI</a>
-            <a href="#ratiba" style={{color:'#94a3b8', textDecoration:'none', fontWeight:'600', fontSize:13}}>RATIBA</a>
-            <button onClick={openModal} style={s.btn}>SAJILI TIMU</button>
-          </div>
-          <button onClick={()=>setIsMobileMenuOpen(true)} style={{background:'none', border:'none', color:'white'}} className="mobile-only-btn"><Menu/></button>
-        </div>
-      </nav>
-
-      {/* HERO */}
-      <div style={{ position: 'relative', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 20 }} className="mobile-hero">
-        <img src={heroBg} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} alt="hero" />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,0.1), #0f172a)' }}></div>
-        <div style={{ position: 'relative', zIndex: 10, maxWidth: 800 }}>
-          <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', gap: 12 }}>
-            <button onClick={()=>setActiveLocation('kiomoni')} style={s.btnLoc(activeLocation==='kiomoni')}>KIOMONI</button>
-            <button onClick={()=>setActiveLocation('goba')} style={s.btnLoc(activeLocation==='goba')}>GOBA</button>
-          </div>
-          <h1 className="hero-text" style={{ fontSize: '5rem', lineHeight: 0.9, textTransform: 'uppercase', fontStyle: 'italic', marginBottom: 24, textShadow: '0 4px 30px rgba(0,0,0,0.5)' }}>{heroTitle}</h1>
-          <p style={{ fontSize: '1.2rem', color: '#cbd5e1', marginBottom: 32 }}>{heroSub}</p>
-          <div style={{color:'#a3e635', fontWeight:'bold', letterSpacing:2, fontSize:12}}>{activeSeason} • {activeLocation.toUpperCase()}</div>
-        </div>
-      </div>
-
-      {/* CONTENT */}
-      {!isGoba2025 && (
-        <>
-          {/* HABARI */}
-          <section id="news" style={s.section}>
-            <SectionHeader icon={Newspaper} title="HABARI" highlight="ZA MSIMU" />
-            <div className="grid-responsive">
-              {filteredNews.map((n, i) => (
-                <div key={i} onClick={()=>setSelectedNews(n)} className="hover-up" style={{...s.glassCard, cursor:'pointer'}}>
-                  <div style={{height: 200, background: '#1e293b'}}>
-                    {n.image && <img src={n.image} style={{width:'100%', height:'100%', objectFit:'cover'}} alt="news" />}
-                  </div>
-                  <div style={{padding: 24}}>
-                    <div style={{color:'#a3e635', fontSize:11, fontWeight:'bold', marginBottom:8}}>{n.date}</div>
-                    <h3 style={{fontSize:18, margin:'0 0 12px'}}>{n.title}</h3>
-                    <p style={{color:'#94a3b8', fontSize:14}}>{n.excerpt}</p>
-                  </div>
-                </div>
-              ))}
-              {filteredNews.length === 0 && <p style={{color:'#64748b'}}>Hakuna habari bado.</p>}
+      <div style={styles.container}>
+       
+        {/* TOP BAR */}
+        <div style={styles.topBar}>
+            <div className="desktop-only" style={{ display: 'flex', gap: '8px', color: '#64748b' }}><History size={14} /> SEASON: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{activeSeason}</span></div>
+            <div className="mobile-center" style={{ display: 'flex', gap: '16px' }}>
+                <button onClick={() => { setActiveSeason('June 2025'); setActiveLocation('kiomoni'); }} style={{ background: 'none', border: 'none', color: activeSeason === 'June 2025' ? '#a3e635' : '#64748b', fontWeight: 'bold', fontSize: '11px' }}>JUNE 2025</button>
+                <button onClick={() => setActiveSeason('June 2026')} style={{ background: 'none', border: 'none', color: activeSeason === 'June 2026' ? '#a3e635' : '#64748b', fontWeight: 'bold', fontSize: '11px' }}>JUNE 2026</button>
             </div>
-          </section>
-
-          {/* RATIBA */}
-          <section id="ratiba" style={{...s.section, background:'#020617'}}>
-            <div className="grid-responsive">
-              <div>
-                <SectionHeader icon={Clock} title="RATIBA" highlight="& MATOKEO" />
-                <div style={{display:'flex', flexDirection:'column', gap:16}}>
-                  {filteredMatches.map((m,i) => (
-                    <div key={i} style={{...s.glassCard, padding:20, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                      <span style={{fontWeight:800, width:'35%', fontSize:14}}>{m.home}</span>
-                      <div style={{textAlign:'center'}}>
-                        <div style={{color:'#a3e635', fontWeight:900, fontSize:20}}>{m.score}</div>
-                        <div style={{fontSize:10, color:'#64748b', fontWeight:'bold'}}>{m.status}</div>
-                      </div>
-                      <span style={{fontWeight:800, width:'35%', textAlign:'right', fontSize:14}}>{m.away}</span>
+        </div>
+        {/* NAV */}
+        <nav style={styles.nav}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <a href="#"><PandeLogo /></a>
+                <div className="desktop-only" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                    <a href="#news" style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: '600', fontSize: '13px' }}>HABARI</a>
+                    <a href="#ratiba" style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: '600', fontSize: '13px' }}>RATIBA</a>
+                    <a href="#tv" style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: '600', fontSize: '13px' }}>PC TV</a>
+                    <button onClick={openModal} style={{...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px'}}>SAJILI TIMU</button>
+                </div>
+                <button onClick={() => setIsMobileMenuOpen(true)} style={{ background: 'none', border: 'none', color: 'white' }} className="mobile-only"><Menu /></button>
+            </div>
+        </nav>
+        {/* HERO */}
+        <div id="hero" style={styles.heroWrapper} className="hero-mobile">
+            {currentHero.bgImage && (
+              <img
+                src={currentHero.bgImage}
+                style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', filter: isGoba2025 ? 'grayscale(1)' : 'none' }}
+                alt="Hero Section"
+              />
+            )}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,0.4), rgba(15,23,42,0.9))' }}></div>
+            <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 20px', maxWidth: '800px' }}>
+                <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                    <button onClick={() => setActiveLocation('kiomoni')} style={{ padding: '10px 24px', borderRadius: '50px', border: activeLocation==='kiomoni'?'1px solid #a3e635':'1px solid white', background: activeLocation==='kiomoni'?'#a3e635':'transparent', color: activeLocation==='kiomoni'?'black':'white', fontWeight: 'bold' }}>KIOMONI</button>
+                    <button onClick={() => setActiveLocation('goba')} style={{ padding: '10px 24px', borderRadius: '50px', border: activeLocation==='goba'?'1px solid #a3e635':'1px solid white', background: activeLocation==='goba'?'#a3e635':'transparent', color: activeLocation==='goba'?'black':'white', fontWeight: 'bold' }}>GOBA</button>
+                </div>
+                {isGoba2025 ? (
+                    <div style={{ padding: '40px', background: 'rgba(0,0,0,0.5)', borderRadius: '16px' }}>
+                        <Info size={48} color="#a3e635" style={{margin:'0 auto 16px'}} /><h1 style={{ fontSize: '32px', margin: 0 }}>HAKUNA DATA</h1><p>Hakuna data za 2025 Goba.</p>
                     </div>
-                  ))}
-                  {filteredMatches.length === 0 && <p style={{color:'#64748b'}}>Hakuna mechi.</p>}
-                </div>
-              </div>
-              <div>
-                <SectionHeader icon={ListOrdered} title="MSIMAMO" highlight="WA LIGI" />
-                <div style={{...s.glassCard, padding:24}}>
-                  <table style={{width:'100%', borderCollapse:'collapse', fontSize:14}}>
-                    <thead>
-                      <tr style={{color:'#64748b', borderBottom:'1px solid #333'}}>
-                        <th style={{textAlign:'left', paddingBottom:12}}>POS</th>
-                        <th style={{textAlign:'left', paddingBottom:12}}>TIMU</th>
-                        <th style={{paddingBottom:12}}>P</th>
-                        <th style={{paddingBottom:12}}>PTS</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredStandings.map((t,i) => (
-                        <tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
-                          <td style={{padding:'12px 0', color: i===0?'#a3e635':'white', fontWeight:'bold'}}>{t.pos}</td>
-                          <td style={{padding:'12px 0', fontWeight:'bold'}}>{t.team}</td>
-                          <td style={{padding:'12px 0', textAlign:'center'}}>{t.p}</td>
-                          <td style={{padding:'12px 0', textAlign:'center', fontWeight:'bold'}}>{t.pts}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {filteredStandings.length === 0 && <p style={{color:'#64748b', marginTop:20}}>Msimamo haujatoka.</p>}
-                </div>
-              </div>
+                ) : (
+                    <>
+                        <h1 style={{ fontSize: 'clamp(3rem, 10vw, 6rem)', margin: '0 0 16px', lineHeight: 0.9, fontStyle: 'italic', textTransform: 'uppercase' }}>{displayTitle}</h1>
+                        <p style={{ fontSize: '18px', color: '#cbd5e1', marginBottom: '24px' }}>{displaySubtitle}</p>
+                        <p style={{ color: '#a3e635', fontSize: '16px', fontWeight: 'bold' }}>{displayTag}</p>
+                    </>
+                )}
             </div>
-          </section>
-
-          {/* VIDEO */}
-          <section id="tv" style={s.section}>
-            <SectionHeader icon={Video} title="PANDE CUP" highlight="TV" />
-            <div className="grid-responsive">
-              {filteredVideos.map((v,i) => (
-                <a key={i} href={v.videoUrl} target="_blank" rel="noreferrer" style={{...s.glassCard, display:'block', position:'relative', textDecoration:'none'}}>
-                  <div style={{height:180, background:'#000', position:'relative'}}>
-                    {v.thumbnail && <img src={v.thumbnail} style={{width:'100%', height:'100%', objectFit:'cover'}} alt="video" />}
-                    <div style={{position:'absolute', inset:0, background:'rgba(0,0,0,0.4)', display:'flex', alignItems:'center', justifyContent:'center'}}>
-                      <div style={{width:50, height:50, background:'#a3e635', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center'}}><Play color="black" fill="black" size={20} style={{marginLeft:4}}/></div>
+        </div>
+        {/* CONTENT SECTIONS */}
+        {!isGoba2025 && (
+            <>
+            <section id="news" style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' }}><Newspaper color="#a3e635" /><h2 style={{ fontSize: '24px', margin: 0, textTransform: 'uppercase', fontStyle: 'italic' }}>HABARI <span style={{ color: '#a3e635' }}>{activeSeason}</span></h2></div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+                    {filteredNews.map((item, i) => (
+                        <div key={i} onClick={() => setSelectedNews(item)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden' }}>
+                            <div style={{height: '200px', width: '100%', backgroundColor: '#1e293b'}}>
+                              {item.image && <img src={item.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={item.title} />}
+                            </div>
+                            <div style={{ padding: '24px' }}>
+                                <div style={{ color: '#a3e635', fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>{formatDate(item.date)}</div>
+                                <h3 style={{ fontSize: '18px', margin: '0 0 12px' }}>{item.title}</h3>
+                                <p style={{ color: '#94a3b8', fontSize: '14px' }}>{item.excerpt}</p>
+                                <button style={{background:'none', border:'none', color:'white', fontSize:'13px', fontWeight:'bold', marginTop:'12px', padding:0}}>SOMA ZAIDI &rarr;</button>
+                            </div>
+                        </div>
+                    ))}
+                    {filteredNews.length === 0 && <p style={{color:'#64748b'}}>Hakuna habari bado.</p>}
+                </div>
+            </section>
+            <section id="ratiba" style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px' }}>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' }}><Clock color="#a3e635" /><h2 style={{ fontSize: '24px', margin: 0, textTransform: 'uppercase', fontStyle: 'italic' }}>RATIBA & <span style={{ color: '#a3e635' }}>MATOKEO</span></h2></div>
+                        {upcomingMatches.map((m,i) => <div key={i} style={{background:'rgba(255,255,255,0.05)', padding:'24px', borderRadius:'16px', marginBottom:'16px', display:'flex', justifyContent:'space-between', alignItems:'center'}}><span style={{fontWeight:'900', width:'35%'}}>{m.home}</span><div style={{textAlign:'center'}}><div style={{color:'#a3e635', fontWeight:'900', fontSize:'20px'}}>{m.score}</div><small style={{color:'#64748b'}}>{m.status}</small></div><span style={{fontWeight:'900', width:'35%', textAlign:'right'}}>{m.away}</span></div>)}
+                        {upcomingMatches.length === 0 && pastMatches.length === 0 && <p style={{color:'#64748b'}}>Hakuna mechi.</p>}
                     </div>
-                  </div>
-                  <div style={{padding:16}}><p style={{margin:0, fontWeight:'bold', color:'white', fontSize:14}}>{v.title}</p></div>
-                </a>
-              ))}
-              {filteredVideos.length === 0 && <p style={{color:'#64748b'}}>Hakuna video.</p>}
-            </div>
-          </section>
-        </>
-      )}
-
-      {/* FOOTER */}
-      <footer style={{background:'black', padding:'80px 24px', borderTop:'1px solid #333'}}>
-        <div style={{maxWidth:1200, margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:60}}>
-          <div>
-            <div style={{marginBottom:24}}><PandeLogo size="large" /></div>
-            <p style={{color:'#94a3b8', fontSize:14, lineHeight:1.6}}>{ABOUT_TEXT.description}</p>
-            <div style={{display:'flex', gap:16, marginTop:24}}>
-              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Instagram size={20}/></a>
-              <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Facebook size={20}/></a>
-              <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Youtube size={20}/></a>
-              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><TikTokIcon size={20}/></a>
-            </div>
-          </div>
-          <div>
-            <h4 style={{color:'white', marginBottom:24}}>VIUNGO</h4>
-            <div style={{display:'flex', flexDirection:'column', gap:12}}>
-              <a href="#news" style={{color:'#64748b', textDecoration:'none', fontSize:14}}>Habari</a>
-              <a href="#ratiba" style={{color:'#64748b', textDecoration:'none', fontSize:14}}>Ratiba</a>
-              <button onClick={openModal} style={{background:'none', border:'none', color:'#a3e635', textAlign:'left', padding:0, fontWeight:'bold', cursor:'pointer', fontSize:14}}>Sajili Timu</button>
-            </div>
-          </div>
-          <div>
-            <h4 style={{color:'white', marginBottom:24}}>MAWASILIANO</h4>
-            <div style={{display:'flex', flexDirection:'column', gap:12, color:'#94a3b8', fontSize:14}}>
-              <div style={{display:'flex', gap:10}}><Phone size={16}/> +255 700 000 000</div>
-              <div style={{display:'flex', gap:10}}><MapPin size={16}/> Goba & Kiomoni</div>
-            </div>
-          </div>
-        </div>
-        <div style={{textAlign:'center', marginTop:60, paddingTop:40, borderTop:'1px solid #222', color:'#444', fontSize:12}}>© 2026 Pande Cup.</div>
-      </footer>
-
-      {/* MODAL */}
-      {isModalOpen && (
-        <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:20, backdropFilter:'blur(5px)'}}>
-          <div style={{background:'#0f172a', padding:32, borderRadius:24, width:'100%', maxWidth:450, border:'1px solid #333', position:'relative'}}>
-            <button onClick={closeModal} style={{position:'absolute', top:20, right:20, background:'none', border:'none', color:'#64748b', cursor:'pointer'}}><X/></button>
-            {modalStep === 1 && (
-              <>
-                <h2 style={{margin:'0 0 8px', textTransform:'uppercase'}}>Fomu ya <span style={{color:'#a3e635'}}>Maombi</span></h2>
-                <p style={{color:'#94a3b8', fontSize:14, marginBottom:24}}>Jaza taarifa sahihi.</p>
-                <input placeholder="Jina la Timu" value={teamData.name} onChange={e=>setTeamData({...teamData, name:e.target.value})} style={{width:'100%', padding:14, background:'#020617', border:'1px solid #333', borderRadius:8, color:'white', marginBottom:12}} />
-                <input placeholder="Jina la Kocha" value={teamData.coach} onChange={e=>setTeamData({...teamData, coach:e.target.value})} style={{width:'100%', padding:14, background:'#020617', border:'1px solid #333', borderRadius:8, color:'white', marginBottom:12}} />
-                <input placeholder="Namba ya Simu" value={teamData.phone} onChange={e=>setTeamData({...teamData, phone:e.target.value})} style={{width:'100%', padding:14, background:'#020617', border:'1px solid #333', borderRadius:8, color:'white', marginBottom:24}} />
-                <button onClick={()=>setModalStep(2)} style={{...s.btn, width:'100%'}}>ENDELEA</button>
-              </>
-            )}
-            {modalStep === 2 && (
-              <div style={{textAlign:'center'}}>
-                <h2 style={{marginTop:0}}>Thibitisha</h2>
-                <div style={{background:'rgba(255,255,255,0.05)', padding:20, borderRadius:12, marginBottom:20}}>
-                  <div style={{display:'flex', justifyContent:'space-between', marginBottom:8}}><span style={{color:'#94a3b8'}}>Ada:</span> <b>{FEES.amount}</b></div>
-                  <div style={{display:'flex', justifyContent:'space-between'}}><span style={{color:'#94a3b8'}}>Namba:</span> <b style={{color:'#a3e635'}}>{FEES.number}</b></div>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' }}><ListOrdered color="#a3e635" /><h2 style={{ fontSize: '24px', margin: 0, textTransform: 'uppercase', fontStyle: 'italic' }}>MSIMAMO</h2></div>
+                        <div style={{background:'#020617', padding:'20px', borderRadius:'16px'}}><table style={{width:'100%', borderCollapse:'collapse', fontSize:'14px'}}><thead><tr><th style={{textAlign:'left', color:'#64748b', paddingBottom:'12px'}}>POS</th><th style={{textAlign:'left', color:'#64748b', paddingBottom:'12px'}}>TIMU</th><th style={{color:'#64748b', paddingBottom:'12px'}}>P</th><th style={{color:'#64748b', paddingBottom:'12px'}}>PTS</th></tr></thead><tbody>{filteredStandings.map((t,i)=><tr key={i}><td style={{padding:'12px 0', borderTop:'1px solid rgba(255,255,255,0.1)', color: i===0?'#a3e635':'white'}}>{t.pos}</td><td style={{padding:'12px 0', borderTop:'1px solid rgba(255,255,255,0.1)', fontWeight:'bold'}}>{t.team}</td><td style={{textAlign:'center', padding:'12px 0', borderTop:'1px solid rgba(255,255,255,0.1)'}}>{t.p}</td><td style={{textAlign:'center', padding:'12px 0', borderTop:'1px solid rgba(255,255,255,0.1)', fontWeight:'bold'}}>{t.pts}</td></tr>)}</tbody></table>{filteredStandings.length === 0 && <p style={{color:'#64748b'}}>Msimamo haujatoka.</p>}</div>
+                    </div>
                 </div>
-                <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:10, marginBottom:24}}>
-                  <input type="checkbox" checked={teamData.terms} onChange={e=>setTeamData({...teamData, terms:e.target.checked})} />
-                  <span style={{color:'#cbd5e1', fontSize:13}}>Nakubaliana na masharti</span>
+            </section>
+           
+            <section id="tv" style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' }}><Video color="#a3e635" /><h2 style={{ fontSize: '24px', margin: 0, textTransform: 'uppercase', fontStyle: 'italic' }}>PANDE CUP <span style={{ color: '#a3e635' }}>TV</span></h2></div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                    {filteredVideos.map((v, i) => (
+                        <a key={i} href={v.videoUrl} target="_blank" rel="noreferrer" style={{position:'relative', borderRadius:'16px', overflow:'hidden', aspectRatio:'16/9', display:'block'}}>
+                            {v.thumbnail && <img src={v.thumbnail} style={{width:'100%', height:'100%', objectFit:'cover'}} alt={v.title} />}
+                            <div style={{position:'absolute', inset:0, background:'rgba(0,0,0,0.3)', display:'flex', alignItems:'center', justifyContent:'center'}}><div style={{width:'50px', height:'50px', background:'#a3e635', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center'}}><Play size={20} color="black" fill="black" style={{marginLeft:'4px'}} /></div></div>
+                            <div style={{position:'absolute', bottom:0, left:0, right:0, padding:'16px', background:'linear-gradient(to top, rgba(0,0,0,0.9), transparent)'}}><p style={{margin:0, fontWeight:'bold', fontSize:'14px'}}>{v.title}</p></div>
+                        </a>
+                    ))}
+                    {filteredVideos.length === 0 && <p style={{color:'#64748b'}}>Hakuna video.</p>}
                 </div>
-                <button disabled={!teamData.terms} onClick={handleFinalSubmit} style={{...s.btn, width:'100%', opacity:teamData.terms?1:0.5}}>TUMA MAOMBI</button>
-              </div>
-            )}
-            {modalStep === 3 && (
-              <div style={{textAlign:'center', padding:'20px 0'}}>
-                <div style={{width:60, height:60, background:'rgba(34,197,94,0.1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px'}}><Check color="#22c55e" size={32}/></div>
-                <h2>Imepokelewa!</h2>
-                <button onClick={closeModal} style={{background:'none', border:'none', color:'#a3e635', fontWeight:'bold', marginTop:16, cursor:'pointer'}}>FUNGA</button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* NEWS POPUP (ADDED THIS FIX) */}
-      {selectedNews && (
-        <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.95)', zIndex:110, padding:20, overflowY:'auto'}}>
-          <button onClick={()=>setSelectedNews(null)} style={{position:'fixed', top:20, right:20, background:'white', border:'none', borderRadius:'50%', width:40, height:40, zIndex:120}}><X color="black"/></button>
-          <div style={{maxWidth:600, margin:'40px auto', color:'white'}}>
-            <h1>{selectedNews.title}</h1>
-            {selectedNews.image && <img src={selectedNews.image} style={{width:'100%', borderRadius:16}} alt="full" />}
-            <p style={{lineHeight:1.8, fontSize:18, marginTop:24, whiteSpace:'pre-wrap'}}>{selectedNews.body || selectedNews.excerpt}</p>
-          </div>
-        </div>
-      )}
-    </div>
+            </section>
+            </>
+        )}
+        {/* WADHAMINI */}
+        <section style={{ padding: '60px 24px', background: '#020617', textAlign: 'center', borderTop:'1px solid rgba(255,255,255,0.1)' }}>
+             <p style={{ color: '#64748b', fontSize: '12px', letterSpacing: '2px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom:'40px' }}>Wanaofanikisha Msimu huu</p>
+             <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap', opacity: 0.7 }}>
+                 {cmsData.sponsors.map((s,i) => <div key={i} style={{fontSize:'24px', fontWeight:'900', fontStyle:'italic'}}>{s.logo ? <img src={s.logo} style={{height:'40px'}} alt={s.name} /> : s.name}</div>)}
+             </div>
+        </section>
+        {/* FOOTER */}
+        <footer style={{ padding: '80px 24px', background: 'black' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px' }}>
+                <div>
+                    <div style={{ marginBottom: '24px' }}><PandeLogo size="large" /></div>
+                    <h4 style={{color:'#a3e635', marginBottom:'12px', textTransform:'uppercase'}}>{ABOUT_TEXT.title}</h4>
+                    <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', whiteSpace: 'pre-wrap' }}>{ABOUT_TEXT.description}</p>
+                    <div style={{ marginTop:'20px', borderLeft: '3px solid #a3e635', paddingLeft: '12px', fontStyle: 'italic', color: '#a3e635', fontSize: '13px', lineHeight:'1.8' }}>
+                        {ABOUT_TEXT.slogans.split('•').map((s,i) => <div key={i}>{s.trim()}</div>)}
+                    </div>
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '32px' }}>
+                        <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Instagram /></a>
+                        <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Facebook /></a>
+                        <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><Youtube /></a>
+                        <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" style={{color:'white', opacity:0.7}}><TikTokIcon /></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 style={{ color: 'white', marginBottom: '24px' }}>VIUNGO</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <a href="#news" style={{ color: '#64748b', textDecoration: 'none' }}>Habari</a>
+                        <a href="#ratiba" style={{ color: '#64748b', textDecoration: 'none' }}>Ratiba</a>
+                        <button onClick={openModal} style={{ color: '#a3e635', background: 'none', border: 'none', padding: 0, fontWeight: 'bold', textAlign:'left', cursor:'pointer' }}>Sajili Timu</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 style={{ color: 'white', marginBottom: '24px' }}>MAWASILIANO</h4>
+                    <p style={{ color: '#64748b', marginBottom: '12px', display: 'flex', gap: '8px' }}><Phone size={16} /> +255 700 000 000</p>
+                    <p style={{ color: '#64748b', marginBottom: '12px', display: 'flex', gap: '8px' }}><MapPin size={16} /> Goba Center & Kiomoni Tanga</p>
+                </div>
+            </div>
+            <div style={{textAlign:'center', marginTop:'60px', borderTop:'1px solid #333', paddingTop:'40px', color:'#475569', fontSize:'12px'}}>© 2026 Pande Cup Events. All rights reserved.</div>
+        </footer>
+        {/* MODAL */}
+        {isModalOpen && (
+             <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px'}}>
+                 <div style={{background:'#0f172a', padding:'32px', borderRadius:'24px', width:'100%', maxWidth:'450px', border:'1px solid rgba(255,255,255,0.1)', position:'relative'}}>
+                     <button onClick={closeModal} style={{position:'absolute', top:'20px', right:'20px', background:'none', border:'none', color:'white', cursor:'pointer'}}><X /></button>
+                     {modalStep === 1 && (
+                         <>
+                             <h2 style={{marginTop:0, textTransform:'uppercase'}}>Fomu ya <span style={{color:'#a3e635'}}>Maombi</span></h2>
+                             <p style={{color:'#94a3b8', fontSize:'14px'}}>Jaza taarifa sahihi.</p>
+                             <input placeholder="Jina la Timu" value={teamData.name} onChange={e=>setTeamData({...teamData, name:e.target.value})} style={{width:'100%', padding:'14px', marginBottom:'12px', borderRadius:'8px', border:'1px solid #333', background:'black', color:'white'}} />
+                             <input placeholder="Jina la Kocha" value={teamData.coachName} onChange={e=>setTeamData({...teamData, coachName:e.target.value})} style={{width:'100%', padding:'14px', marginBottom:'12px', borderRadius:'8px', border:'1px solid #333', background:'black', color:'white'}} />
+                             <input placeholder="Namba ya Simu" value={teamData.phone} onChange={e=>setTeamData({...teamData, phone:e.target.value})} style={{width:'100%', padding:'14px', marginBottom:'24px', borderRadius:'8px', border:'1px solid #333', background:'black', color:'white'}} />
+                             <button onClick={()=>setModalStep(2)} style={{...styles.buttonPrimary, width:'100%'}}>ENDELEA</button>
+                         </>
+                     )}
+                     {modalStep === 2 && (
+                         <div style={{textAlign:'center'}}>
+                             <h2 style={{marginTop:0}}>Thibitisha</h2>
+                             <div style={{background:'rgba(255,255,255,0.05)', padding:'20px', borderRadius:'16px', marginBottom:'20px'}}>
+                                 <div style={{display:'flex', justifyContent:'space-between', marginBottom:'10px'}}><span style={{color:'#94a3b8'}}>Ada:</span> <b>{FEES.amount}</b></div>
+                                 <div style={{display:'flex', justifyContent:'space-between'}}><span style={{color:'#94a3b8'}}>Namba:</span> <b style={{color:'#a3e635'}}>{FEES.number}</b></div>
+                             </div>
+                             <div style={{display:'flex', alignItems:'center', gap:'10px', justifyContent:'center', marginBottom:'20px'}}>
+                                 <input type="checkbox" checked={teamData.termsAccepted} onChange={e=>setTeamData({...teamData, termsAccepted:e.target.checked})} />
+                                 <span style={{color:'#cbd5e1', fontSize:'13px'}}>Nakubaliana na Sheria na Masharti</span>
+                             </div>
+                             <button disabled={!teamData.termsAccepted} onClick={handleFinalSubmit} style={{...styles.buttonPrimary, width:'100%', background: teamData.termsAccepted?'#a3e635':'#333', color: teamData.termsAccepted?'black':'#666'}}>WASILISHA</button>
+                         </div>
+                     )}
+                     {modalStep === 3 && (
+                         <div style={{textAlign:'center'}}>
+                             <div style={{width:'60px', height:'60px', background:'rgba(34,197,94,0.1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px'}}><Check color="#22c55e" /></div>
+                             <h2>Imepokelewa!</h2>
+                             <button onClick={closeModal} style={{color:'#a3e635', background:'none', border:'none', fontWeight:'bold', cursor:'pointer'}}>FUNGA</button>
+                         </div>
+                     )}
+                 </div>
+             </div>
+        )}
+        {/* NEWS POPUP */}
+        {selectedNews && (
+            <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.95)', zIndex:110, padding:'20px', overflowY:'auto'}}>
+                <button onClick={closeNews} style={{position:'fixed', top:'20px', right:'20px', background:'white', border:'none', borderRadius:'50%', width:'40px', height:'40px', zIndex:120}}><X color="black" /></button>
+                <div style={{maxWidth:'600px', margin:'40px auto', color:'white'}}>
+                    <h1>{selectedNews.title}</h1>
+                    {selectedNews.image && <img src={selectedNews.image} style={{width:'100%', borderRadius:'16px'}} alt={selectedNews.title} />}
+                    <p style={{lineHeight:1.8, fontSize:'18px', marginTop:'24px', whiteSpace:'pre-wrap'}}>{selectedNews.body || selectedNews.excerpt}</p>
+                </div>
+            </div>
+        )}
+      </div>
+    </>
   );
 };
-
 export default App;
