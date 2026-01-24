@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* FESTO: MAREKEBISHO YA MWISHO KABISA.
+  
+  SULUHISHO:
+  1. Kwenye VS Code, upande wa kushoto, tafuta faili la ".postcssrc.json"
+  2. Lifute hilo faili (Delete).
+  3. Simamisha terminal (Ctrl + C) kisha andika "npm start".
+*/
+
+@theme {
+  --color-pande-lime: #a3e635;
+  --color-pande-dark: #0f172a;
+}
+
+:root {
+  --pande-bg: #0f172a;
+  --pande-text: #ffffff;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--pande-bg);
+    color: var(--pande-text);
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .neon-glow {
+    text-shadow: 0 0 20px rgba(163, 230, 53, 0.5);
+  }
+}
