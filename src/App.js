@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy
+  ListOrdered, Video, Play, Phone, Info, History, Newspaper
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -12,30 +12,28 @@ const USE_IMAGE_LOGO = true;
 
 // --- SOCIAL MEDIA LINKS ---
 const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/pande_cup/", 
-  facebook: "https://facebook.com/p/Pande-Cup-61550512517305/",
-  youtube: "https://youtube.com/@PandeCup",
-  tiktok: "https://www.tiktok.com/@pande.cup"
+  instagram: "https://instagram.com/pande_cup", 
+  facebook: "https://facebook.com/pande_cup",
+  youtube: "https://youtube.com/@pande_cup",
+  tiktok: "https://tiktok.com/@pande_cup"
 };
 
-// --- STATIC TEXT (KILLER WORDS) ---
-// Haya maneno yamewekwa hapa ili yasipotee hata kama Contentful inasumbua
+// --- STATIC ABOUT TEXT (Hii haitegemei Contentful) ---
 const ABOUT_TEXT = {
   title: "Kuhusu Pande Cup",
   description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
-// --- FALLBACK DATA ---
 const FALLBACK_DATA = {
   hero: [
-    { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600" },
-    { location: 'goba', title: "HII GAME NI YETU.", subtitle: "Pande Cup Imetua Jijini!", bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" }
+    { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
+    { location: 'goba', title: "HII GAME NI YETU.", subtitle: "Pande Cup Imetua Jijini!", bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" }
   ],
-  matches: [], standings: [], news: [], videos: [],
+  matches: [], news: [], videos: [], standings: [],
   sponsors: [
     { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB BANK", logo: "/images/crdb.png" },
-    { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI TANZANIA", logo: "/images/polisi.png" },
+    { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI", logo: "/images/polisi.png" },
     { name: "AZAM TV", logo: "/images/azam.png" }
   ]
 };
@@ -43,7 +41,7 @@ const FALLBACK_DATA = {
 const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
 
 // --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal', useImage = true }) => {
+const PandeLogo = ({ size = 'normal' }) => {
   const height = size === 'large' ? '120px' : '56px';
   const [imgError, setImgError] = useState(false);
   if (USE_IMAGE_LOGO && !imgError) {
@@ -67,80 +65,83 @@ const App = () => {
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- HANDLERS ---
-  const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); document.body.style.overflow = 'hidden'; };
-  const closeModal = () => { setIsModalOpen(false); document.body.style.overflow = 'auto'; };
-  const toggleMobileMenu = () => { setIsMobileMenuOpen(!isMobileMenuOpen); };
-  const handleFinalSubmit = () => { alert(`Asante ${teamData.coachName}! Maombi yamepokelewa.`); setModalStep(3); };
-  const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
-  const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
+  // --- SAFE FETCHING LOGIC (Hii ndiyo dawa ya Contents Kupotea) ---
+  useEffect(() => {
+    const fetchContentfulData = async () => {
+      const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
+      
+      // Helper function: Inajaribu kuvuta data, ikishindikana inarudisha empty list (haiuwi site)
+      const fetchSafe = async (type) => {
+        try {
+          const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
+          if (!res.ok) throw new Error(type);
+          return await res.json();
+        } catch (e) {
+          console.warn(`Failed to load ${type}`, e);
+          return { items: [] }; 
+        }
+      };
+
+      // Vuta data moja baada ya nyingine kwa usalama
+      const heroData = await fetchSafe('heroSection');
+      const matchesData = await fetchSafe('match');
+      const newsData = await fetchSafe('news');
+      const standingsData = await fetchSafe('standing');
+      const videosData = await fetchSafe('video');
+
+      const getAssetUrl = (id, assets) => { if (!assets) return null; const asset = assets.find(a => a.sys.id === id); return asset?.fields?.file ? `https:${asset.fields.file.url}` : null; };
+
+      // Process Hero
+      const fetchedHero = heroData.items.map(item => ({
+          title: item.fields.title, subtitle: item.fields.subtitle, location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
+          bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
+      }));
+
+      // Process Matches
+      const fetchedMatches = matchesData.items.map(item => ({
+          home: item.fields.homeTeam, away: item.fields.awayTeam, score: item.fields.score, status: item.fields.status, location: item.fields.location, season: item.fields.season
+      }));
+
+      // Process News
+      const fetchedNews = newsData.items.map(item => ({
+          date: item.fields.date, title: item.fields.title, excerpt: item.fields.excerpt, body: item.fields.body,
+          image: getAssetUrl(item.fields.image?.sys?.id, newsData.includes) || "https://via.placeholder.com/500",
+          location: item.fields.location, season: item.fields.season
+      }));
+
+      // Process Standings
+      const fetchedStandings = standingsData.items.map(item => ({
+          pos: item.fields.position, team: item.fields.teamName, p: item.fields.played, gd: item.fields.goalDifference, pts: item.fields.points,
+          location: item.fields.location, season: item.fields.season
+      })).sort((a,b) => a.pos - b.pos);
+
+      // Process Videos
+      const fetchedVideos = videosData.items.map(item => ({
+          title: item.fields.title, videoUrl: item.fields.videoUrl, duration: item.fields.duration,
+          thumbnail: getAssetUrl(item.fields.thumbnail?.sys?.id, videosData.includes) || "https://via.placeholder.com/500",
+          location: item.fields.location, season: item.fields.season
+      }));
+
+      setCmsData({ 
+          hero: fetchedHero.length > 0 ? fetchedHero : FALLBACK_DATA.hero, 
+          matches: fetchedMatches, news: fetchedNews, standings: fetchedStandings, videos: fetchedVideos, 
+          sponsors: FALLBACK_DATA.sponsors 
+      });
+      setIsLoading(false);
+    };
+
+    fetchContentfulData();
+  }, []);
 
   const getFilteredData = (dataArray) => {
     if (!dataArray) return [];
     return dataArray.filter(item => {
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
-        const isLocationMatch = itemLoc.includes(activeLocation);
-        const itemSeasonRaw = item.season ? String(item.season) : 'June 2026';
-        const itemSeasonClean = itemSeasonRaw.trim().toLowerCase();
+        const itemSeason = item.season ? String(item.season) : 'June 2026'; // Default season protection
         const activeSeasonClean = activeSeason.trim().toLowerCase();
-        return isLocationMatch && itemSeasonClean === activeSeasonClean;
+        return itemLoc.includes(activeLocation) && itemSeason.trim().toLowerCase() === activeSeasonClean;
     });
   };
-
-  useEffect(() => {
-    const fetchContentfulData = async () => {
-      try {
-        const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
-        const fetchData = async (type) => { const res = await fetch(`${baseUrl}&content_type=${type}&include=1`); return res.ok ? await res.json() : { items: [] }; };
-        
-        // NIMEOONDOA 'aboutSection' HAPA ILI KUEPUKA CRASH
-        const [heroData, matchesData, newsData, standingsData, videosData] = await Promise.all([
-            fetchData('heroSection'), fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video')
-        ]);
-
-        const getAssetUrl = (id, assets) => { if (!assets) return null; const asset = assets.find(a => a.sys.id === id); return asset?.fields?.file ? `https:${asset.fields.file.url}` : null; };
-
-        // Process Hero
-        const fetchedHero = heroData.items.map(item => ({
-            title: item.fields.title, subtitle: item.fields.subtitle, location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
-            bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
-        }));
-
-        // Process Matches
-        const fetchedMatches = matchesData.items.map(item => ({
-            home: item.fields.homeTeam, away: item.fields.awayTeam, score: item.fields.score, status: item.fields.status, location: item.fields.location, season: item.fields.season
-        }));
-
-        // Process News
-        const fetchedNews = newsData.items.map(item => ({
-            date: item.fields.date, title: item.fields.title, excerpt: item.fields.excerpt, body: item.fields.body,
-            image: getAssetUrl(item.fields.image?.sys?.id, newsData.includes) || "https://via.placeholder.com/500",
-            location: item.fields.location, season: item.fields.season
-        }));
-
-        // Process Standings
-        const fetchedStandings = standingsData.items.map(item => ({
-            pos: item.fields.position, team: item.fields.teamName, p: item.fields.played, gd: item.fields.goalDifference, pts: item.fields.points,
-            location: item.fields.location, season: item.fields.season
-        })).sort((a,b) => a.pos - b.pos);
-
-        // Process Videos
-        const fetchedVideos = videosData.items.map(item => ({
-            title: item.fields.title, videoUrl: item.fields.videoUrl, duration: item.fields.duration,
-            thumbnail: getAssetUrl(item.fields.thumbnail?.sys?.id, videosData.includes) || "https://via.placeholder.com/500",
-            location: item.fields.location, season: item.fields.season
-        }));
-
-        setCmsData({ 
-            hero: fetchedHero.length > 0 ? fetchedHero : FALLBACK_DATA.hero, 
-            matches: fetchedMatches, news: fetchedNews, standings: fetchedStandings, videos: fetchedVideos, 
-            sponsors: FALLBACK_DATA.sponsors 
-        });
-
-      } catch (err) { console.error(err); } finally { setIsLoading(false); }
-    };
-    fetchContentfulData();
-  }, []);
 
   const currentHero = (cmsData.hero.find(h => h.location.includes(activeLocation))) || cmsData.hero[0] || FALLBACK_DATA.hero[0];
   const filteredMatches = getFilteredData(cmsData.matches);
@@ -151,11 +152,12 @@ const App = () => {
   const filteredVideos = getFilteredData(cmsData.videos);
   const isGoba2025 = activeLocation === 'goba' && activeSeason === 'June 2025';
 
-  let displayTitle = currentHero.title;
+  let displayTitle = currentHero.title || "HII GAME NI YETU.";
   let displaySubtitle = currentHero.subtitle;
   let displayTag = `${activeSeason} • ${activeLocation.toUpperCase()}`;
   if (activeSeason === 'June 2025' && !isGoba2025) { displayTitle = "HISTORIA: JUNI 2025"; displaySubtitle = "Msimu wa Historia. Bingwa alipatikana kwa jasho na damu."; }
 
+  // --- STYLES ---
   const styles = {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif' },
     topBar: { backgroundColor: '#1e293b', padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
@@ -314,7 +316,7 @@ const App = () => {
             <div style={{textAlign:'center', marginTop:'60px', borderTop:'1px solid #333', paddingTop:'40px', color:'#475569', fontSize:'12px'}}>© 2026 Pande Cup Events. All rights reserved.</div>
         </footer>
 
-        {/* MODAL */}
+        {/* MODAL & NEWS - (MODAL Logic Included Below) */}
         {isModalOpen && (
              <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px'}}>
                  <div style={{background:'#0f172a', padding:'32px', borderRadius:'24px', width:'100%', maxWidth:'450px', border:'1px solid rgba(255,255,255,0.1)', position:'relative'}}>
