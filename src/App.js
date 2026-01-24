@@ -80,7 +80,7 @@ const App = () => {
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- ACTIONS (ZILIZOKOSEKANA) ---
+  // --- ACTIONS (ZIMEONGEZWA HAPA KUREKEBISHA ERROR) ---
   const handleFinalSubmit = () => { 
     alert(`Asante ${teamData.coachName}! Maombi yamepokelewa. Tutawasiliana nawe.`); 
     setModalStep(3); 
@@ -90,6 +90,16 @@ const App = () => {
     setIsModalOpen(true);
     setModalStep(1);
     setIsMobileMenuOpen(false);
+  };
+
+  // HII HAPA NDIO ILIKUWA INAKOSEKANA:
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // NA HII PIA:
+  const closeNews = () => {
+    setSelectedNews(null);
   };
 
   // --- SAFE FETCHING LOGIC ---
@@ -343,7 +353,7 @@ const App = () => {
         {isModalOpen && (
              <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px'}}>
                  <div style={{background:'#0f172a', padding:'32px', borderRadius:'24px', width:'100%', maxWidth:'450px', border:'1px solid rgba(255,255,255,0.1)', position:'relative'}}>
-                     <button onClick={()=>setIsModalOpen(false)} style={{position:'absolute', top:'20px', right:'20px', background:'none', border:'none', color:'white', cursor:'pointer'}}><X /></button>
+                     <button onClick={closeModal} style={{position:'absolute', top:'20px', right:'20px', background:'none', border:'none', color:'white', cursor:'pointer'}}><X /></button>
                      {modalStep === 1 && (
                          <>
                              <h2 style={{marginTop:0, textTransform:'uppercase'}}>Fomu ya <span style={{color:'#a3e635'}}>Maombi</span></h2>
@@ -372,29 +382,17 @@ const App = () => {
                          <div style={{textAlign:'center'}}>
                              <div style={{width:'60px', height:'60px', background:'rgba(34,197,94,0.1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px'}}><Check color="#22c55e" /></div>
                              <h2>Imepokelewa!</h2>
-                             <button onClick={()=>setIsModalOpen(false)} style={{color:'#a3e635', background:'none', border:'none', fontWeight:'bold', cursor:'pointer'}}>FUNGA</button>
+                             <button onClick={closeModal} style={{color:'#a3e635', background:'none', border:'none', fontWeight:'bold', cursor:'pointer'}}>FUNGA</button>
                          </div>
                      )}
                  </div>
              </div>
         )}
 
-        {/* MOBILE MENU */}
-        {isMobileMenuOpen && (
-            <div style={styles.mobileMenu}>
-                <button onClick={()=>setIsMobileMenuOpen(false)} style={{position:'absolute', top:'24px', right:'24px', background:'none', border:'none', color:'white'}}><X size={32}/></button>
-                <div style={{marginTop:'60px', display:'flex', flexDirection:'column', gap:'24px'}}>
-                    <a href="#news" onClick={()=>setIsMobileMenuOpen(false)} style={{color:'white', fontSize:'24px', fontWeight:'bold', textDecoration:'none'}}>Habari</a>
-                    <a href="#ratiba" onClick={()=>setIsMobileMenuOpen(false)} style={{color:'white', fontSize:'24px', fontWeight:'bold', textDecoration:'none'}}>Ratiba</a>
-                    <button onClick={()=>{setIsMobileMenuOpen(false); openModal()}} style={{...styles.buttonPrimary, fontSize:'18px'}}>SAJILI TIMU</button>
-                </div>
-            </div>
-        )}
-        
         {/* NEWS POPUP */}
         {selectedNews && (
             <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.95)', zIndex:110, padding:'20px', overflowY:'auto'}}>
-                <button onClick={()=>setSelectedNews(null)} style={{position:'fixed', top:'20px', right:'20px', background:'white', border:'none', borderRadius:'50%', width:'40px', height:'40px', zIndex:120}}><X color="black" /></button>
+                <button onClick={closeNews} style={{position:'fixed', top:'20px', right:'20px', background:'white', border:'none', borderRadius:'50%', width:'40px', height:'40px', zIndex:120}}><X color="black" /></button>
                 <div style={{maxWidth:'600px', margin:'40px auto', color:'white'}}>
                     <h1>{selectedNews.title}</h1>
                     <img src={selectedNews.image} style={{width:'100%', borderRadius:'16px'}} alt="news" />
