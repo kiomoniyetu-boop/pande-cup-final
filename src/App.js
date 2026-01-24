@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, Phone, Info, History, Newspaper
+  ListOrdered, Video, Play, Phone, History, Newspaper
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -25,7 +25,7 @@ const ABOUT_TEXT = {
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
-// --- FALLBACK DATA (SAFETY NET) ---
+// --- FALLBACK DATA ---
 const FALLBACK_DATA = {
   hero: [
     { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
@@ -181,7 +181,6 @@ const App = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap');
         body { margin: 0; font-family: 'Inter', sans-serif; }
         h1, h2, h3 { font-family: 'Oswald', sans-serif; }
         @media (max-width: 768px) { .desktop-only { display: none !important; } .mobile-center { justify-content: center !important; width: 100%; } .hero-mobile { min-height: 70vh !important; } }
