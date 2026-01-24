@@ -10,7 +10,7 @@ const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
 const LOGO_PATH = "/logo.png";
 const USE_IMAGE_LOGO = true;
 
-// --- LINKS ZA SOCIAL MEDIA HALISI ---
+// --- LINKS ZA SOCIAL MEDIA ---
 const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/pande_cup/", 
   facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
@@ -18,12 +18,21 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- DATA ZA KUAZIMIA (FALLBACK & STATIC ABOUT) ---
+// --- ABOUT TEXT (ILIYOPANGILIWA) ---
+const ABOUT_TEXT = {
+  description: `Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya soka kuunganisha jamii. Ilizaliwa Pande, Tanga na sasa imefika Goba, Dar es Salaam.
+
+Maono yetu ni kuwa kitovu cha:
+• Umoja wa Jamii: Kuwajengea vijana hisia ya "Sense of Belonging".
+• Fursa za Kiuchumi: Kufungua milango ya biashara.
+• Maendeleo ya Kijamii: Elimu na afya kupitia michezo.
+
+Kutoka dimba la Uruguayi Tanga hadi Goba, tunaandika historia.`,
+  slogan: `"Umoja Katika Kila Shuti" • "Pamoja Sisi Ni Pande" • "Mimi Na Mto Zigi Dam Dam"`
+};
+
+// --- DATA ZA KUAZIMIA (FALLBACK) ---
 const FALLBACK_DATA = {
-  about: {
-    description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Kutoka vumbi la Kiomoni hadi taa za Goba, tunajenga undugu na kukuza vipaji.",
-    slogan: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande"
-  },
   hero: [
     {
       location: 'kiomoni',
@@ -110,7 +119,6 @@ const App = () => {
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Added nidaNumber to state
   const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', nidaNumber: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
@@ -163,15 +171,15 @@ const App = () => {
             }
         }
 
-        // 2. DATA ZOTE + ABOUT
+        // 2. DATA ZOTE
         const fetchData = async (type) => {
             const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
             if (!res.ok) return [];
             return await res.json();
         };
 
-        const [matchesData, newsData, standingsData, videosData, aboutData] = await Promise.all([
-            fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video'), fetchData('about')
+        const [matchesData, newsData, standingsData, videosData] = await Promise.all([
+            fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video')
         ]);
 
         // Process Matches
@@ -230,23 +238,13 @@ const App = () => {
              };
         }) : [];
 
-        // Process About (New)
-        let fetchedAbout = FALLBACK_DATA.about;
-        if (aboutData.items && aboutData.items.length > 0) {
-            fetchedAbout = {
-                description: aboutData.items[0].fields.description || FALLBACK_DATA.about.description,
-                slogan: aboutData.items[0].fields.slogan || FALLBACK_DATA.about.slogan
-            };
-        }
-
         setCmsData({
             hero: fetchedHero,
             matches: fetchedMatches,
             news: fetchedNews,
             standings: fetchedStandings, 
             videos: fetchedVideos,
-            sponsors: FALLBACK_DATA.sponsors,
-            about: fetchedAbout
+            sponsors: FALLBACK_DATA.sponsors
         });
 
       } catch (error) {
@@ -527,10 +525,10 @@ const App = () => {
           <div>
             <div style={{ marginBottom: '24px' }}><PandeLogo size="large" /></div>
             <div style={{ marginBottom: '20px' }}>
-                <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', margin: '0 0 16px' }}>
-                  {cmsData.about ? cmsData.about.description : "Inapakia..."}
+                <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', margin: '0 0 16px', whiteSpace: 'pre-line' }}>
+                  {ABOUT_TEXT.description}
                 </p>
-                <div style={{ borderLeft: '3px solid #a3e635', paddingLeft: '12px', fontStyle: 'italic', color: '#a3e635', fontSize: '13px' }}>"{cmsData.about ? cmsData.about.slogan : "Pamoja Sisi Ni Pande"}"</div>
+                <div style={{ borderLeft: '3px solid #a3e635', paddingLeft: '12px', fontStyle: 'italic', color: '#a3e635', fontSize: '13px' }}>"{ABOUT_TEXT.slogan}"</div>
             </div>
             {/* SOCIAL LINKS - UPDATED */}
             <div style={{ display: 'flex', gap: '16px' }}>
