@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, Phone, History, Newspaper, Trophy
+  Menu, X, Check, MapPin, Instagram, Facebook, Youtube,
+  Phone, History
 } from 'lucide-react';
 
 // --- CONSTANTS ---
@@ -43,6 +43,11 @@ const MANUAL_DATA = {
   ]
 };
 
+const ABOUT_TEXT = {
+  description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya.",
+  slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande"
+};
+
 // --- COMPONENTS ---
 const PandeLogo = ({ size = 'normal' }) => (
   <div style={{ 
@@ -57,6 +62,8 @@ const PandeLogo = ({ size = 'normal' }) => (
     PANDE<span style={{ color: '#a3e635' }}>CUP</span>
   </div>
 );
+
+const TikTokIcon = ({ size = 24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>);
 
 const SectionTitle = ({ title, highlight }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' }}>
@@ -73,10 +80,9 @@ const App = () => {
   const [modalStep, setModalStep] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [teamData, setTeamData] = useState({ name: '', coach: '', phone: '', terms: false });
-  const [selectedNews, setSelectedNews] = useState(null);
 
   // Handlers
-  const handleFinalSubmit = () => { alert("Asante! Tufawasiliana."); setModalStep(3); };
+  const handleFinalSubmit = () => { alert("Asante! Tutawasiliana."); setModalStep(3); };
   const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); };
 
   // Styles Object
@@ -127,7 +133,6 @@ const App = () => {
             <button onClick={openModal} style={s.btnPrimary}>SAJILI TIMU</button>
           </div>
           <button onClick={() => setIsMobileMenuOpen(true)} className="desktop-only" style={{ display: window.innerWidth < 768 ? 'block' : 'none', background: 'none', border: 'none', color: 'white' }}><Menu size={28} /></button>
-          {/* Force Mobile Menu Button for safety */}
           <button onClick={() => setIsMobileMenuOpen(true)} style={{ display: 'block', background: 'none', border: 'none', color: 'white', cursor:'pointer' }} className="mobile-only-btn"><Menu size={28} /></button>
         </div>
       </nav>
@@ -287,9 +292,24 @@ const App = () => {
               <>
                 <h2 style={{ margin: '0 0 8px', fontSize: '24px', textTransform: 'uppercase' }}>Fomu ya <span style={{ color: '#a3e635' }}>Maombi</span></h2>
                 <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>Jaza taarifa sahihi ili kusajili timu.</p>
-                <input placeholder="Jina la Timu" style={{ width: '100%', padding: '14px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', marginBottom: '12px' }} />
-                <input placeholder="Jina la Kocha" style={{ width: '100%', padding: '14px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', marginBottom: '12px' }} />
-                <input placeholder="Namba ya Simu" style={{ width: '100%', padding: '14px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', marginBottom: '24px' }} />
+                <input 
+                  placeholder="Jina la Timu" 
+                  value={teamData.name}
+                  onChange={(e) => setTeamData({...teamData, name: e.target.value})}
+                  style={{ width: '100%', padding: '14px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', marginBottom: '12px' }} 
+                />
+                <input 
+                  placeholder="Jina la Kocha" 
+                  value={teamData.coach}
+                  onChange={(e) => setTeamData({...teamData, coach: e.target.value})}
+                  style={{ width: '100%', padding: '14px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', marginBottom: '12px' }} 
+                />
+                <input 
+                  placeholder="Namba ya Simu" 
+                  value={teamData.phone}
+                  onChange={(e) => setTeamData({...teamData, phone: e.target.value})}
+                  style={{ width: '100%', padding: '14px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', marginBottom: '24px' }} 
+                />
                 <button onClick={() => setModalStep(2)} style={{ ...s.btnPrimary, width: '100%' }}>ENDELEA</button>
               </>
             ) : modalStep === 2 ? (
@@ -300,7 +320,7 @@ const App = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#94a3b8' }}>Namba:</span> <b style={{ color: '#a3e635' }}>{FEES.number}</b></div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
-                  <input type="checkbox" onChange={(e) => setTeamData({...teamData, terms: e.target.checked})} />
+                  <input type="checkbox" checked={teamData.terms} onChange={(e) => setTeamData({...teamData, terms: e.target.checked})} />
                   <span style={{ color: '#cbd5e1', fontSize: '13px' }}>Nakubaliana na masharti</span>
                 </div>
                 <button disabled={!teamData.terms} onClick={handleFinalSubmit} style={{ ...s.btnPrimary, width: '100%', opacity: teamData.terms ? 1 : 0.5 }}>TUMA MAOMBI</button>
