@@ -1,68 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, Phone, History, Newspaper, Info
-} from 'lucide-react';
+{/* MODAL */}
+    {isModalOpen && (
+         <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px'}}>
+             <div style={{background:'#0f172a', padding:'32px', borderRadius:'24px', width:'100%', maxWidth:'450px', border:'1px solid rgba(255,255,255,0.1)', position:'relative'}}>
+                 <button onClick={closeModal} style={{position:'absolute', top:'20px', right:'20px', background:'none', border:'none', color:'white', cursor:'pointer'}}><X /></button>
+                 {modalStep === 1 && (
+                     <>
+                         <h2 style={{marginTop:0, textTransform:'uppercase'}}>Fomu ya <span style={{color:'#a3e635'}}>Maombi</span></h2>
+                         <p style={{color:'#94a3b8', fontSize:'14px'}}>Jaza taarifa sahihi.</p>
+                         <input placeholder="Jina la Timu" value={teamData.name} onChange={e=>setTeamData({...teamData, name:e.target.value})} style={{width:'100%', padding:'14px', marginBottom:'12px', borderRadius:'8px', border:'1px solid #333', background:'black', color:'white'}} />
+                         <input placeholder="Jina la Kocha" value={teamData.coachName} onChange={e=>setTeamData({...teamData, coachName:e.target.value})} style={{width:'100%', padding:'14px', marginBottom:'12px', borderRadius:'8px', border:'1px solid #333', background:'black', color:'white'}} />
+                         <input placeholder="Namba ya Simu" value={teamData.phone} onChange={e=>setTeamData({...teamData, phone:e.target.value})} style={{width:'100%', padding:'14px', marginBottom:'24px', borderRadius:'8px', border:'1px solid #333', background:'black', color:'white'}} />
+                         <button onClick={()=>setModalStep(2)} style={{...styles.buttonPrimary, width:'100%'}}>ENDELEA</button>
+                     </>
+                 )}
+                 {modalStep === 2 && (
+                     <div style={{textAlign:'center'}}>
+                         <h2 style={{marginTop:0}}>Thibitisha</h2>
+                         <div style={{background:'rgba(255,255,255,0.05)', padding:'20px', borderRadius:'16px', marginBottom:'20px'}}>
+                             <div style={{display:'flex', justifyContent:'space-between', marginBottom:'10px'}}><span style={{color:'#94a3b8'}}>Ada:</span> <b>{FEES.amount}</b></div>
+                             <div style={{display:'flex', justifyContent:'space-between'}}><span style={{color:'#94a3b8'}}>Namba:</span> <b style={{color:'#a3e635'}}>{FEES.number}</b></div>
+                         </div>
+                         <div style={{display:'flex', alignItems:'center', gap:'10px', justifyContent:'center', marginBottom:'20px'}}>
+                             <input type="checkbox" checked={teamData.termsAccepted} onChange={e=>setTeamData({...teamData, termsAccepted:e.target.checked})} />
+                             <span style={{color:'#cbd5e1', fontSize:'13px'}}>Nakubaliana na Sheria na Masharti</span>
+                         </div>
+                         <button disabled={!teamData.termsAccepted} onClick={handleFinalSubmit} style={{...styles.buttonPrimary, width:'100%', background: teamData.termsAccepted?'#a3e635':'#333', color: teamData.termsAccepted?'black':'#666', cursor: teamData.termsAccepted?'pointer':'not-allowed'}}>WASILISHA</button>
+                     </div>
+                 )}
+                 {modalStep === 3 && (
+                     <div style={{textAlign:'center'}}>
+                         <div style={{width:'60px', height:'60px', background:'rgba(34,197,94,0.1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px'}}><Check color="#22c55e" /></div>
+                         <h2>Imepokelewa!</h2>
+                         <button onClick={closeModal} style={{color:'#a3e635', background:'none', border:'none', fontWeight:'bold', cursor:'pointer'}}>FUNGA</button>
+                     </div>
+                 )}
+             </div>
+         </div>
+    )}
 
-// --- USANIDI WA CMS ---
-const SPACE_ID = 'ax6wvfd84net'; 
-const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
-const LOGO_PATH = "/logo.png";
-const USE_IMAGE_LOGO = true;
+    {/* NEWS POPUP */}
+    {selectedNews && (
+        <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.95)', zIndex:110, padding:'20px', overflowY:'auto'}}>
+            <button onClick={closeNews} style={{position:'fixed', top:'20px', right:'20px', background:'white', border:'none', borderRadius:'50%', width:'40px', height:'40px', zIndex:120, cursor:'pointer'}}><X color="black" /></button>
+            <div style={{maxWidth:'600px', margin:'40px auto', color:'white'}}>
+                <h1>{selectedNews.title}</h1>
+                <img src={selectedNews.image} style={{width:'100%', borderRadius:'16px'}} alt={selectedNews.title} />
+                <p style={{lineHeight:1.8, fontSize:'18px', marginTop:'24px', whiteSpace:'pre-wrap'}}>{selectedNews.body || selectedNews.excerpt}</p>
+            </div>
+        </div>
+    )}
 
-// --- SOCIAL MEDIA LINKS ---
-const SOCIAL_LINKS = {
-  instagram: "https://www.instagram.com/pande_cup/", 
-  facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
-  youtube: "https://www.youtube.com/@PandeCup",
-  tiktok: "https://www.tiktok.com/@pande.cup"
-};
-
-// --- STATIC TEXT ---
-const ABOUT_TEXT = {
-  title: "Kuhusu Pande Cup",
-  description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
-  slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
-};
-
-// --- FALLBACK DATA ---
-const FALLBACK_DATA = {
-  hero: [
-    { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
-    { location: 'goba', title: "HII GAME NI YETU.", subtitle: "Pande Cup Imetua Jijini!", bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" }
-  ],
-  matches: [
-    { home: "MTI PESA FC", away: "MABAYANI FC", score: "2-1", status: "FT", location: "kiomoni", season: "June 2025" },
-    { home: "MPIRANI FC", away: "MNYENZANI", score: "5-2", status: "FT", location: "kiomoni", season: "June 2025" }
-  ],
-  news: [
-    { date: "2025-06-29", title: "Shangwe la Ufunguzi: Zaidi ya Soka", excerpt: "Vumbi la Kiomoni lilitimka si kwa soka tu! Kufukuza kuku, kuvuta kamba...", image: "https://images.unsplash.com/photo-1522778119026-d647f0565c6d", location: "kiomoni", season: "June 2025" },
-    { date: "2025-08-30", title: "Historia Imeandikwa: Mpirani Bingwa!", excerpt: "Mpirani (Uruguay) wanyakua taji la kwanza mbele ya umati wa kihistoria.", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018", location: "kiomoni", season: "June 2025" }
-  ],
-  videos: [
-    { title: "Highlights: Fainali 2025", videoUrl: "#", duration: "10:00", thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018", location: "kiomoni", season: "June 2025" }
-  ],
-  standings: [
-    { pos: 1, team: "Mti Pesa FC", p: 3, gd: "+4", pts: 9, location: "kiomoni", season: "June 2025" },
-    { pos: 2, team: "Mpirani FC", p: 3, gd: "+3", pts: 7, location: "kiomoni", season: "June 2025" }
-  ],
-  sponsors: [
-    { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB BANK", logo: "/images/crdb.png" },
-    { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI TANZANIA", logo: "/images/polisi.png" },
-    { name: "AZAM TV", logo: "/images/azam.png" }
-  ]
-};
-
-const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
-
-// --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal' }) => {
-  const height = size === 'large' ? '120px' : '56px';
-  const [imgError, setImgError] = useState(false);
-  if (USE_IMAGE_LOGO && !imgError) {
-    return <div style={{ display: 'flex', alignItems: 'center' }}><img src={LOGO_PATH} alt="Pande Cup Logo" style={{ height: height, objectFit: 'contain' }} onError={() => setImgError(true)} /></div>;
-  }
-  return <div style={{ fontSize: size === 'large' ? '32px' : '24px', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', color: 'white' }}>PANDE<span style={{ color: '#a3e635' }}>CUP</span></div>;
-};
-
-const TikTokIcon = ({ size = 24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+  </div>
+</>
