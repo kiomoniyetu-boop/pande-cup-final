@@ -10,7 +10,7 @@ const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
 const LOGO_PATH = "/logo.png";
 const USE_IMAGE_LOGO = true;
 
-// --- SOCIAL MEDIA LINKS (UPDATED OFFICIAL) ---
+// --- SOCIAL MEDIA LINKS (HIZI HAPA SAHIHI KABISA) ---
 const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/pande_cup/", 
   facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
@@ -18,13 +18,14 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- STATIC ABOUT TEXT ---
+// --- MANENO YA KUHUSU SISI (KILLER WORDS) ---
 const ABOUT_TEXT = {
   title: "Kuhusu Pande Cup",
   description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
+// --- DATA ZA KUAZIMIA (FALLBACK) ---
 const FALLBACK_DATA = {
   hero: [
     { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
@@ -33,7 +34,7 @@ const FALLBACK_DATA = {
   matches: [], news: [], videos: [], standings: [],
   sponsors: [
     { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB BANK", logo: "/images/crdb.png" },
-    { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI", logo: "/images/polisi.png" },
+    { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI TANZANIA", logo: "/images/polisi.png" },
     { name: "AZAM TV", logo: "/images/azam.png" }
   ]
 };
@@ -65,11 +66,12 @@ const App = () => {
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- SAFE FETCHING LOGIC ---
+  // --- SAFE FETCHING LOGIC (Hii inazuia site kupotea) ---
   useEffect(() => {
     const fetchContentfulData = async () => {
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
       
+      // Helper function: Inajaribu kuvuta data, ikishindikana inarudisha empty list (haiuwi site)
       const fetchSafe = async (type) => {
         try {
           const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
@@ -81,6 +83,7 @@ const App = () => {
         }
       };
 
+      // Vuta data moja baada ya nyingine kwa usalama
       const heroData = await fetchSafe('heroSection');
       const matchesData = await fetchSafe('match');
       const newsData = await fetchSafe('news');
@@ -89,31 +92,27 @@ const App = () => {
 
       const getAssetUrl = (id, assets) => { if (!assets) return null; const asset = assets.find(a => a.sys.id === id); return asset?.fields?.file ? `https:${asset.fields.file.url}` : null; };
 
-      // Process Hero
+      // Process Data
       const fetchedHero = heroData.items.map(item => ({
           title: item.fields.title, subtitle: item.fields.subtitle, location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
           bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
       }));
 
-      // Process Matches
       const fetchedMatches = matchesData.items.map(item => ({
           home: item.fields.homeTeam, away: item.fields.awayTeam, score: item.fields.score, status: item.fields.status, location: item.fields.location, season: item.fields.season
       }));
 
-      // Process News
       const fetchedNews = newsData.items.map(item => ({
           date: item.fields.date, title: item.fields.title, excerpt: item.fields.excerpt, body: item.fields.body,
           image: getAssetUrl(item.fields.image?.sys?.id, newsData.includes) || "https://via.placeholder.com/500",
           location: item.fields.location, season: item.fields.season
       }));
 
-      // Process Standings
       const fetchedStandings = standingsData.items.map(item => ({
           pos: item.fields.position, team: item.fields.teamName, p: item.fields.played, gd: item.fields.goalDifference, pts: item.fields.points,
           location: item.fields.location, season: item.fields.season
       })).sort((a,b) => a.pos - b.pos);
 
-      // Process Videos
       const fetchedVideos = videosData.items.map(item => ({
           title: item.fields.title, videoUrl: item.fields.videoUrl, duration: item.fields.duration,
           thumbnail: getAssetUrl(item.fields.thumbnail?.sys?.id, videosData.includes) || "https://via.placeholder.com/500",
@@ -155,7 +154,6 @@ const App = () => {
   let displayTag = `${activeSeason} • ${activeLocation.toUpperCase()}`;
   if (activeSeason === 'June 2025' && !isGoba2025) { displayTitle = "HISTORIA: JUNI 2025"; displaySubtitle = "Msimu wa Historia. Bingwa alipatikana kwa jasho na damu."; }
 
-  // --- STYLES ---
   const styles = {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif' },
     topBar: { backgroundColor: '#1e293b', padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
