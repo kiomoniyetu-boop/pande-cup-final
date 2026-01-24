@@ -25,9 +25,28 @@ const ABOUT_TEXT = {
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
-// --- DATA TUPU (KAMA CONTENTFUL IKIGOMA KABISA) ---
-const EMPTY_DATA = {
-  hero: [], matches: [], news: [], videos: [], standings: [],
+// --- FALLBACK DATA (DATA ZA UHAKIKA 2025) ---
+const FALLBACK_DATA = {
+  hero: [
+    { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
+    { location: 'goba', title: "HII GAME NI YETU.", subtitle: "Pande Cup Imetua Jijini!", bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c" }
+  ],
+  matches: [
+    { home: "MTI PESA FC", away: "MABAYANI FC", score: "2-1", status: "FT", location: "kiomoni", season: "June 2025" },
+    { home: "MPIRANI FC", away: "MNYENZANI", score: "5-2", status: "FT", location: "kiomoni", season: "June 2025" },
+    { home: "URUGUAY", away: "PAMBA", score: "1-0", status: "FT", location: "kiomoni", season: "June 2025" }
+  ],
+  news: [
+    { date: "2025-06-29", title: "Shangwe la Ufunguzi: Zaidi ya Soka", excerpt: "Vumbi la Kiomoni lilitimka si kwa soka tu! Kufukuza kuku, kuvuta kamba...", image: "https://images.unsplash.com/photo-1522778119026-d647f0565c6d", location: "kiomoni", season: "June 2025" },
+    { date: "2025-08-30", title: "Historia Imeandikwa: Mpirani Bingwa!", excerpt: "Mpirani (Uruguay) wanyakua taji la kwanza mbele ya umati wa kihistoria.", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018", location: "kiomoni", season: "June 2025" }
+  ],
+  videos: [
+    { title: "Highlights: Fainali 2025", videoUrl: "#", duration: "10:00", thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018", location: "kiomoni", season: "June 2025" }
+  ],
+  standings: [
+    { pos: 1, team: "Mti Pesa FC", p: 3, gd: "+4", pts: 9, location: "kiomoni", season: "June 2025" },
+    { pos: 2, team: "Mpirani FC", p: 3, gd: "+3", pts: 7, location: "kiomoni", season: "June 2025" }
+  ],
   sponsors: [
     { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB BANK", logo: "/images/crdb.png" },
     { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI TANZANIA", logo: "/images/polisi.png" },
@@ -53,15 +72,16 @@ const renderWithLinks = (text) => { if (!text) return ""; return text.split(/(ht
 
 const App = () => {
   const [activeLocation, setActiveLocation] = useState('kiomoni');
-  const [activeSeason, setActiveSeason] = useState('June 2026'); 
+  const [activeSeason, setActiveSeason] = useState('June 2025'); // Default 2025 ili data zionekane
+  
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
   
-  const [cmsData, setCmsData] = useState(EMPTY_DATA);
-  const [isLoading, setIsLoading] = useState(true);
+  // *** INIT NA FALLBACK DATA (Hakuna kuchelewa) ***
+  const [cmsData, setCmsData] = useState(FALLBACK_DATA);
 
   // --- ACTIONS ---
   const handleFinalSubmit = () => { 
@@ -81,18 +101,8 @@ const App = () => {
     document.head.appendChild(link);
   }, []);
 
-  // --- CONTENTFUL FETCHING (WITH TIMEOUT SAFETY) ---
+  // --- BACKGROUND FETCH (Hai-block site) ---
   useEffect(() => {
-    let isMounted = true;
-
-    // 1. SAFETY TIMER: Force loading to stop after 4 seconds if Contentful is slow
-    const timer = setTimeout(() => {
-      if (isMounted) {
-        console.log("Contentful timed out - Force opening");
-        setIsLoading(false);
-      }
-    }, 4000);
-
     const fetchContentfulData = async () => {
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
       
@@ -112,8 +122,6 @@ const App = () => {
       const newsData = await fetchSafe('news');
       const standingsData = await fetchSafe('standing');
       const videosData = await fetchSafe('video');
-
-      if (!isMounted) return;
 
       const getAssetUrl = (id, assets) => { if (!assets) return null; const asset = assets.find(a => a.sys.id === id); return asset?.fields?.file ? `https:${asset.fields.file.url}` : null; };
 
@@ -162,21 +170,20 @@ const App = () => {
           season: item.fields.season || "June 2026"
       }));
 
-      setCmsData({ 
-          hero: fetchedHero,
-          matches: fetchedMatches,
-          news: fetchedNews,
-          standings: fetchedStandings,
-          videos: fetchedVideos,
-          sponsors: EMPTY_DATA.sponsors 
-      });
-      
-      clearTimeout(timer); // Clear the safety timer since we got data
-      setIsLoading(false);
+      // Update state ONLY if we got something useful, otherwise keep fallback
+      if (fetchedMatches.length > 0 || fetchedNews.length > 0) {
+          setCmsData({ 
+              hero: fetchedHero.length > 0 ? fetchedHero : FALLBACK_DATA.hero, 
+              matches: fetchedMatches,
+              news: fetchedNews,
+              standings: fetchedStandings,
+              videos: fetchedVideos,
+              sponsors: FALLBACK_DATA.sponsors 
+          });
+      }
     };
 
     fetchContentfulData();
-    return () => { isMounted = false; clearTimeout(timer); };
   }, []);
 
   const getFilteredData = (dataArray) => {
@@ -189,7 +196,7 @@ const App = () => {
     });
   };
 
-  const currentHero = (cmsData.hero.find(h => h.location.includes(activeLocation))) || cmsData.hero[0] || {title: "PANDE CUP", subtitle: "Msimu Mpya", bgImage: null};
+  const currentHero = (cmsData.hero.find(h => h.location.includes(activeLocation))) || cmsData.hero[0] || FALLBACK_DATA.hero[0];
   const filteredMatches = getFilteredData(cmsData.matches);
   const upcomingMatches = filteredMatches.filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'));
   const pastMatches = filteredMatches.filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'));
@@ -211,16 +218,6 @@ const App = () => {
     mobileMenu: { position: 'fixed', top: 0, right: 0, width: '85%', maxWidth: '320px', height: '100vh', backgroundColor: '#0f172a', zIndex: 60, padding: '32px', transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s ease' },
     buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: '14px 28px', borderRadius: '8px', fontWeight: '800', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px' }
   };
-
-  if (isLoading) {
-    return (
-      <div style={{height: '100vh', width: '100%', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
-        <PandeLogo size="large" />
-        <p style={{color: '#a3e635', marginTop: '20px', fontWeight: 'bold', animation: 'pulse 1s infinite'}}>INAPAKIA...</p>
-        <style>{`@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }`}</style>
-      </div>
-    );
-  }
 
   return (
     <>
