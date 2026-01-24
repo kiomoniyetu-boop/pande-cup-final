@@ -1,30 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
   ListOrdered, Video, Play, Phone, History, Newspaper
 } from 'lucide-react';
-
 // --- CONFIG ---
-const SPACE_ID = 'ax6wvfd84net'; 
+const SPACE_ID = 'ax6wvfd84net';
 const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
-
 const SOCIAL_LINKS = {
-  instagram: "https://www.instagram.com/pande_cup/", 
+  instagram: "https://www.instagram.com/pande_cup/",
   facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
   youtube: "https://www.youtube.com/@PandeCup",
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
-
 const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
-
 // --- COMPONENTS ---
 const PandeLogo = ({ size = 'normal' }) => (
-  <div style={{ 
-    fontSize: size === 'large' ? '36px' : '28px', 
-    fontWeight: '900', 
-    fontStyle: 'italic', 
-    textTransform: 'uppercase', 
-    color: 'white', 
+  <div style={{
+    fontSize: size === 'large' ? '36px' : '28px',
+    fontWeight: '900',
+    fontStyle: 'italic',
+    textTransform: 'uppercase',
+    color: 'white',
     fontFamily: '"Oswald", sans-serif',
     letterSpacing: '-1px',
     textShadow: '0 2px 10px rgba(0,0,0,0.5)'
@@ -32,9 +28,7 @@ const PandeLogo = ({ size = 'normal' }) => (
     PANDE<span style={{ color: '#a3e635' }}>CUP</span>
   </div>
 );
-
 const TikTokIcon = ({ size = 24 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>);
-
 const SectionHeader = ({ icon: Icon, title, highlight }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' }}>
     {Icon && <Icon color="#a3e635" size={24} />}
@@ -43,105 +37,133 @@ const SectionHeader = ({ icon: Icon, title, highlight }) => (
     </h2>
   </div>
 );
-
 const App = () => {
   // DEFAULT SEASON: June 2026 (Kama ilivyokuwa mwanzo)
   const [activeLocation, setActiveLocation] = useState('kiomoni');
-  const [activeSeason, setActiveSeason] = useState('June 2026'); 
-  
+  const [activeSeason, setActiveSeason] = useState('June 2026');
+ 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalStep, setModalStep] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [teamData, setTeamData] = useState({ name: '', coach: '', phone: '', terms: false });
   const [selectedNews, setSelectedNews] = useState(null);
-  
+ 
   // Start EMPTY (No wazungu fallback), fill with Contentful
   const [cmsData, setCmsData] = useState({
-    hero: [], matches: [], news: [], videos: [], standings: [], 
+    hero: [], matches: [], news: [], videos: [], standings: [],
     sponsors: [
       { name: "VODACOM", logo: "/images/vodacom.png" }, { name: "CRDB", logo: "/images/crdb.png" },
       { name: "YAS", logo: "/images/yas.png" }, { name: "POLISI", logo: "/images/polisi.png" },
       { name: "AZAM", logo: "/images/azam.png" }
     ]
   });
-
+  const [isLoading, setIsLoading] = useState(true);
   // Handlers
   const handleFinalSubmit = () => { alert("Asante! Tutawasiliana."); setModalStep(3); };
   const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); };
   const closeModal = () => setIsModalOpen(false);
-
   // --- CONTENTFUL FETCHING (THE ORIGINAL LOGIC) ---
   useEffect(() => {
+    let isMounted = true;
+    const timer = setTimeout(() => {
+      if (isMounted) {
+        console.log("Contentful timed out - Using empty data");
+        setIsLoading(false);
+      }
+    }, 10000); // 10 seconds timeout
     const fetchContentfulData = async () => {
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
       const fetchSafe = async (type) => {
         try {
           const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
-          return res.ok ? await res.json() : { items: [] };
-        } catch { return { items: [] }; }
+          return res.ok ? await res.json() : { items: [], includes: { Asset: [] } };
+        } catch (e) {
+          console.warn(`Failed to fetch ${type}:`, e);
+          return { items: [], includes: { Asset: [] } };
+        }
       };
-
       // Fetch Everything
       const [hero, matches, news, standings, videos] = await Promise.all([
         fetchSafe('heroSection'), fetchSafe('match'), fetchSafe('news'), fetchSafe('standing'), fetchSafe('video')
       ]);
-
-      const getUrl = (item) => item?.fields?.file?.url ? `https:${item.fields.file.url}` : null;
-      const getAsset = (id, assets) => assets?.find(a => a.sys.id === id);
-
+      if (!isMounted) return;
+      const getAssetUrl = (id, includes) => {
+        const asset = includes?.Asset?.find(a => a.sys.id === id);
+        return asset?.fields?.file?.url ? `https:${asset.fields.file.url}` : null;
+      };
       // Populate State
-      setCmsData({
-        hero: hero.items.map(i => ({
-          title: i.fields.title, 
-          subtitle: i.fields.subtitle, 
-          location: i.fields.location ? String(i.fields.location).toLowerCase() : 'kiomoni',
-          bgImage: getUrl(getAsset(i.fields.backgroundImage?.sys?.id || i.fields.image?.sys?.id, hero.includes)),
-          season: i.fields.season
-        })),
-        matches: matches.items.map(i => ({
-          home: i.fields.homeTeam, away: i.fields.awayTeam, score: i.fields.score, status: i.fields.status,
-          location: i.fields.location, season: i.fields.season
-        })),
-        news: news.items.map(i => ({
-          date: i.fields.date, title: i.fields.title, excerpt: i.fields.excerpt, body: i.fields.body,
-          image: getUrl(getAsset(i.fields.image?.sys?.id, news.includes)),
-          location: i.fields.location, season: i.fields.season
-        })),
-        standings: standings.items.map(i => ({
-          pos: i.fields.position, team: i.fields.teamName, p: i.fields.played, gd: i.fields.goalDifference, pts: i.fields.points,
-          location: i.fields.location, season: i.fields.season
-        })).sort((a,b)=>a.pos-b.pos),
-        videos: videos.items.map(i => ({
-          title: i.fields.title, videoUrl: i.fields.videoUrl, 
-          thumbnail: getUrl(getAsset(i.fields.thumbnail?.sys?.id, videos.includes)),
-          location: i.fields.location, season: i.fields.season
-        })),
-        sponsors: cmsData.sponsors
-      });
+      try {
+        setCmsData({
+          hero: hero.items.map(i => ({
+            title: i.fields.title || "PANDE CUP",
+            subtitle: i.fields.subtitle || "",
+            location: i.fields.location ? String(i.fields.location).toLowerCase() : 'kiomoni',
+            bgImage: getAssetUrl(i.fields.backgroundImage?.sys?.id || i.fields.image?.sys?.id, hero.includes),
+            season: i.fields.season || "June 2026"
+          })),
+          matches: matches.items.map(i => ({
+            home: i.fields.homeTeam || "Team A",
+            away: i.fields.awayTeam || "Team B",
+            score: i.fields.score || "VS",
+            status: i.fields.status || "-",
+            location: i.fields.location || "kiomoni",
+            season: i.fields.season || "June 2026"
+          })),
+          news: news.items.map(i => ({
+            date: i.fields.date || new Date().toISOString(),
+            title: i.fields.title || "Habari",
+            excerpt: i.fields.excerpt || "",
+            body: i.fields.body || "",
+            image: getAssetUrl(i.fields.image?.sys?.id, news.includes),
+            location: i.fields.location || "kiomoni",
+            season: i.fields.season || "June 2026"
+          })),
+          standings: standings.items.map(i => ({
+            pos: i.fields.position || 0,
+            team: i.fields.teamName || "Team",
+            p: i.fields.played || 0,
+            gd: i.fields.goalDifference || "0",
+            pts: i.fields.points || 0,
+            location: i.fields.location || "kiomoni",
+            season: i.fields.season || "June 2026"
+          })).sort((a,b)=>a.pos-b.pos),
+          videos: videos.items.map(i => ({
+            title: i.fields.title || "Video",
+            videoUrl: i.fields.videoUrl || "#",
+            thumbnail: getAssetUrl(i.fields.thumbnail?.sys?.id, videos.includes),
+            location: i.fields.location || "kiomoni",
+            season: i.fields.season || "June 2026"
+          })),
+          sponsors: cmsData.sponsors
+        });
+      } catch (e) {
+        console.warn('Error processing data:', e);
+      } finally {
+        clearTimeout(timer);
+        setIsLoading(false);
+      }
     };
     fetchContentfulData();
+    return () => { isMounted = false; clearTimeout(timer); };
   }, []); // Empty dependency array = Run once on mount
-
   // --- FILTER LOGIC (LOOSE FILTERING TO SHOW DATA) ---
   const filterData = (arr) => {
     if (!arr) return [];
     return arr.filter(i => {
       // Kama hakuna location, assume 'kiomoni'. Kama hakuna season, assume 'June 2026'
-      const iLoc = (i.location || 'kiomoni').toLowerCase();
-      const iSea = (i.season || 'June 2026').trim(); 
+      const iLoc = (i.location || 'kiomoni').toLowerCase().trim();
+      const iSea = (i.season || 'June 2026').trim();
       return iLoc.includes(activeLocation) && iSea === activeSeason;
     });
   };
-
-  const currentHero = cmsData.hero.find(h => h.location.includes(activeLocation)) || cmsData.hero[0] || {};
+  const currentHero = cmsData.hero.find(h => (h.location || 'kiomoni').includes(activeLocation)) || cmsData.hero[0] || {title: "PANDE CUP", subtitle: ""};
   const filteredMatches = filterData(cmsData.matches);
   const filteredNews = filterData(cmsData.news);
   const filteredStandings = filterData(cmsData.standings);
   const filteredVideos = filterData(cmsData.videos);
-  
+ 
   // Kama ni 2025 na Goba (Hakuna data), onyesha data za Kiomoni kama backup au onyesha ujumbe
   const isGoba2025 = activeLocation === 'goba' && activeSeason === 'June 2025';
-
   // --- STYLES ---
   const s = {
     container: { backgroundColor: '#0f172a', color: '#f8fafc', minHeight: '100vh', fontFamily: '"Inter", sans-serif' },
@@ -152,7 +174,15 @@ const App = () => {
     btnSeason: (active) => ({ background: 'none', border: 'none', color: active ? '#a3e635' : '#64748b', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px', fontFamily: '"Inter", sans-serif' }),
     btnLoc: (active) => ({ padding: '8px 20px', borderRadius: '50px', border: active ? '1px solid #a3e635' : '1px solid rgba(255,255,255,0.3)', background: active ? '#a3e635' : 'transparent', color: active ? 'black' : 'white', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' })
   };
-
+  if (isLoading) {
+    return (
+      <div style={{height: '100vh', width: '100%', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
+        <PandeLogo size="large" />
+        <p style={{color: '#a3e635', marginTop: '20px', fontWeight: 'bold', animation: 'pulse 1s infinite'}}>INAPAKIA...</p>
+        <style>{`@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }`}</style>
+      </div>
+    );
+  }
   return (
     <div style={s.container}>
       {/* FONTS FORCED HERE */}
@@ -165,7 +195,6 @@ const App = () => {
         .bg-gradient-hero { background: linear-gradient(to bottom, rgba(15,23,42,0.3), #0f172a); }
         @media(max-width:768px){ .desktop{display:none} .mobile-hero{min-height:70vh} .hero-text{font-size:3.5rem!important} }
       `}</style>
-
       {/* TOP BAR */}
       <div style={{ background: '#020617', padding: '8px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #1e293b' }}>
         <div className="desktop" style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}><History size={12}/> SEASON: <span style={{color:'#22c55e', fontWeight:'bold'}}>{activeSeason}</span></div>
@@ -174,7 +203,6 @@ const App = () => {
            <button onClick={()=>setActiveSeason('June 2026')} style={s.btnSeason(activeSeason==='June 2026')}>2026 (LIVE)</button>
         </div>
       </div>
-
       {/* NAV */}
       <nav style={s.nav}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -187,24 +215,23 @@ const App = () => {
           <button onClick={()=>setIsMobileMenuOpen(true)} style={{background:'none', border:'none', color:'white'}} className="mobile-only-btn"><Menu/></button>
         </div>
       </nav>
-
       {/* HERO */}
       <div style={{ position: 'relative', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 20 }} className="mobile-hero">
         {/* HERO IMAGE: ONLY SHOW IF CONTENTFUL PROVIDES IT, OTHERWISE DARK BG */}
         {currentHero.bgImage ? (
             <img src={currentHero.bgImage} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} alt="hero" />
         ) : (
-            <div style={{ position: 'absolute', inset: 0, background: '#1e293b' }}></div> 
+            <div style={{ position: 'absolute', inset: 0, background: '#1e293b' }}></div>
         )}
-        
+       
         <div className="bg-gradient-hero" style={{ position: 'absolute', inset: 0 }}></div>
-        
+       
         <div style={{ position: 'relative', zIndex: 10, maxWidth: 900 }}>
           <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', gap: 12 }}>
             <button onClick={()=>setActiveLocation('kiomoni')} style={s.btnLoc(activeLocation==='kiomoni')}>KIOMONI</button>
             <button onClick={()=>setActiveLocation('goba')} style={s.btnLoc(activeLocation==='goba')}>GOBA</button>
           </div>
-          
+         
           <h1 className="hero-text" style={{ fontSize: '5.5rem', lineHeight: 0.9, textTransform: 'uppercase', fontStyle: 'italic', marginBottom: 24, textShadow: '0 4px 30px rgba(0,0,0,0.8)' }}>
             {currentHero.title || (isGoba2025 ? "HISTORIA: JUNI 2025" : "PANDE CUP")}
           </h1>
@@ -216,7 +243,6 @@ const App = () => {
           </div>
         </div>
       </div>
-
       {/* CONTENT */}
       {!isGoba2025 && (
         <>
@@ -239,7 +265,6 @@ const App = () => {
               {filteredNews.length === 0 && <p style={{color:'#64748b'}}>Inatafuta habari...</p>}
             </div>
           </section>
-
           {/* RATIBA */}
           <section id="ratiba" style={{...s.section, background:'#020617'}}>
             <div className="grid-responsive">
@@ -287,7 +312,6 @@ const App = () => {
               </div>
             </div>
           </section>
-
           {/* VIDEO */}
           <section id="tv" style={s.section}>
             <SectionHeader icon={Video} title="PANDE CUP" highlight="TV" />
@@ -308,7 +332,6 @@ const App = () => {
           </section>
         </>
       )}
-
       {/* FOOTER */}
       <footer style={{background:'black', padding:'80px 24px', borderTop:'1px solid #333'}}>
         <div style={{maxWidth:1200, margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:60}}>
@@ -340,7 +363,6 @@ const App = () => {
         </div>
         <div style={{textAlign:'center', marginTop:60, paddingTop:40, borderTop:'1px solid #222', color:'#444', fontSize:12}}>© 2026 Pande Cup Events. All rights reserved.</div>
       </footer>
-
       {/* MODAL */}
       {isModalOpen && (
         <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:20, backdropFilter:'blur(5px)'}}>
@@ -380,7 +402,6 @@ const App = () => {
           </div>
         </div>
       )}
-
       {/* NEWS POPUP */}
       {selectedNews && (
         <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.95)', zIndex:110, padding:20, overflowY:'auto'}}>
@@ -395,5 +416,4 @@ const App = () => {
     </div>
   );
 };
-
 export default App;
