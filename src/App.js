@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, Phone, Info, History, Newspaper, Trophy
+  ListOrdered, Video, Play, Phone, Info, History, Newspaper
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -18,15 +18,14 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- STATIC TEXT (Haya maneno hayategemei internet) ---
+// --- STATIC TEXT ---
 const ABOUT_TEXT = {
   title: "Kuhusu Pande Cup",
   description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
-// --- DATA ZA AKIBA (HIZI HAZIPOTEl KAMWE) ---
-// Hata Contentful ikigoma, hizi zitaonekana.
+// --- FALLBACK DATA (SAFETY NET) ---
 const FALLBACK_DATA = {
   hero: [
     { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
@@ -81,14 +80,6 @@ const App = () => {
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- FONT INJECTION (DAWA YA FONTS) ---
-  useEffect(() => {
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-  }, []);
-
   // --- SAFE FETCHING LOGIC ---
   useEffect(() => {
     const fetchContentfulData = async () => {
@@ -139,7 +130,6 @@ const App = () => {
           location: item.fields.location, season: item.fields.season
       }));
 
-      // KAMA CONTENTFUL HAINA KITU, TUMIA FALLBACK
       setCmsData({ 
           hero: fetchedHero.length > 0 ? fetchedHero : FALLBACK_DATA.hero, 
           matches: fetchedMatches.length > 0 ? fetchedMatches : FALLBACK_DATA.matches, 
@@ -160,7 +150,6 @@ const App = () => {
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
         const itemSeason = item.season ? String(item.season) : 'June 2026';
         const activeSeasonClean = activeSeason.trim().toLowerCase();
-        // Fallback items might strictly match 'June 2025' or 'June 2026'
         const itemSeasonClean = itemSeason.trim().toLowerCase();
         return itemLoc.includes(activeLocation) && itemSeasonClean === activeSeasonClean;
     });
@@ -192,6 +181,7 @@ const App = () => {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap');
         body { margin: 0; font-family: 'Inter', sans-serif; }
         h1, h2, h3 { font-family: 'Oswald', sans-serif; }
         @media (max-width: 768px) { .desktop-only { display: none !important; } .mobile-center { justify-content: center !important; width: 100%; } .hero-mobile { min-height: 70vh !important; } }
