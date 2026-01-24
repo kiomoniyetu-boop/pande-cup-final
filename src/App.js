@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, 
-  ListOrdered, Video, Play, Calendar, Newspaper, History, Trophy, Image as ImageIcon, ChevronRight, Phone, Info
+  ListOrdered, Video, Play, Image as ImageIcon, ChevronRight, Phone, Info, History, Newspaper, Trophy
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -26,35 +26,10 @@ const FALLBACK_DATA = {
       bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600"
     }
   ],
-  matches: [
-    { home: "MADALE UNITED", away: "GOBA CENTER", score: "VS", status: "KESHO 16:00", location: "goba", season: "June 2026" },
-    { home: "MTI PESA FC", away: "MABAYANI FC", score: "2-1", status: "FT", location: "kiomoni", season: "June 2025" }
-  ],
-  standings: [
-    { pos: 1, team: "Goba Center", p: 0, gd: "0", pts: 0, location: "goba", season: "June 2026" },
-    { pos: 1, team: "Mti Pesa FC", p: 3, gd: "+4", pts: 9, location: "kiomoni", season: "June 2025" }
-  ],
-  news: [
-    { 
-      date: "JUNE 01", 
-      title: "Pande Cup yateka soko la Goba", 
-      excerpt: "Wafanyabiashara wa Goba wakiri kuongezeka kwa mzunguko wa pesa...",
-      body: "Habari kamili...",
-      image: "https://images.unsplash.com/photo-1522778119026-d647f0565c6d?auto=format&fit=crop&q=80&w=500",
-      location: "goba",
-      season: "June 2026"
-    }
-  ],
-  videos: [
-    {
-      title: "Highlights: Mti Pesa vs Mabayani",
-      thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=500",
-      videoUrl: "#",
-      duration: "10:05",
-      location: "kiomoni",
-      season: "June 2025"
-    }
-  ],
+  matches: [],
+  standings: [],
+  news: [],
+  videos: [],
   sponsors: [
     { name: "VODACOM", logo: "/images/vodacom.png" }, 
     { name: "CRDB BANK", logo: "/images/crdb.png" },
@@ -123,12 +98,10 @@ const App = () => {
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', phone: '' });
   const [selectedNews, setSelectedNews] = useState(null);
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState('connecting');
 
   // --- HANDLERS ---
   const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); document.body.style.overflow = 'hidden'; };
@@ -138,30 +111,33 @@ const App = () => {
   const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
   const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
 
-  // --- FILTER LOGIC ---
+  // --- FILTER LOGIC (STRICT FIX) ---
   const getFilteredData = (dataArray) => {
     if (!dataArray) return [];
+    
     return dataArray.filter(item => {
+        // 1. Location Logic
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
         const isLocationMatch = itemLoc.includes(activeLocation);
-        const itemSeason = item.season ? String(item.season).trim() : 'June 2026';
-        const isSeasonMatch = itemSeason.toLowerCase() === activeSeason.toLowerCase();
+
+        // 2. Season Logic (STRICT)
+        // Tunahakikisha tunalinganisha 'june 2026' na 'june 2026' bila kujali herufi kubwa/ndogo
+        // Kama item haina season, tunaipa default ya 'June 2026'
+        const itemSeasonRaw = item.season ? String(item.season) : 'June 2026';
+        
+        // Safisha data: toa spaces, weka herufi ndogo
+        const itemSeasonClean = itemSeasonRaw.trim().toLowerCase();
+        const activeSeasonClean = activeSeason.trim().toLowerCase();
+
+        const isSeasonMatch = itemSeasonClean === activeSeasonClean;
+
         return isLocationMatch && isSeasonMatch;
     });
   };
 
   // --- EFFECTS ---
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-
     const fetchContentfulData = async () => {
-      if (!SPACE_ID || ACCESS_TOKEN.includes('WEKA')) {
-        setConnectionStatus('fallback');
-        setIsLoading(false);
-        return;
-      }
-
       try {
         const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
 
@@ -185,86 +161,73 @@ const App = () => {
             }
         }
 
-        // 2. MATCHES
-        const matchesRes = await fetch(`${baseUrl}&content_type=match`);
-        let fetchedMatches = FALLBACK_DATA.matches;
-        if (matchesRes.ok) {
-            const matchesJson = await matchesRes.json();
-            if (matchesJson.items) {
-                fetchedMatches = matchesJson.items.map(item => ({
-                    home: String(item.fields.homeTeam || "Home"),
-                    away: String(item.fields.awayTeam || "Away"),
-                    score: String(item.fields.score || "VS"),
-                    status: String(item.fields.status || "Ratiba"),
-                    location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-                    season: item.fields.season || "June 2026"
-                }));
-            }
-        }
+        // 2. DATA ZOTE
+        const fetchData = async (type) => {
+            const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
+            if (!res.ok) return [];
+            const json = await res.json();
+            return json;
+        };
 
-        // 3. NEWS
-        const newsRes = await fetch(`${baseUrl}&content_type=news&include=1`);
-        let fetchedNews = FALLBACK_DATA.news;
-        if (newsRes.ok) {
-            const newsJson = await newsRes.json();
-            const getNewsImage = (id, includes) => {
-                if (!id || !includes || !includes.Asset) return null;
-                const asset = includes.Asset.find(a => a.sys.id === id);
+        const [matchesData, newsData, standingsData, videosData] = await Promise.all([
+            fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video')
+        ]);
+
+        // Process Matches
+        const fetchedMatches = matchesData.items ? matchesData.items.map(item => ({
+            home: String(item.fields.homeTeam || "Home"),
+            away: String(item.fields.awayTeam || "Away"),
+            score: String(item.fields.score || "VS"),
+            status: String(item.fields.status || "Ratiba"),
+            location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
+            season: item.fields.season || "June 2026"
+        })) : [];
+
+        // Process News (With Image)
+        const fetchedNews = newsData.items ? newsData.items.map(item => {
+             const getNewsImage = (id) => {
+                if (!id || !newsData.includes || !newsData.includes.Asset) return null;
+                const asset = newsData.includes.Asset.find(a => a.sys.id === id);
                 return asset && asset.fields.file ? `https:${asset.fields.file.url}` : null;
-            };
-            if (newsJson.items) {
-                fetchedNews = newsJson.items.map(item => ({
-                    date: String(item.fields.date || "Mpya"),
-                    title: String(item.fields.title || "Habari Mpya"),
-                    excerpt: String(item.fields.excerpt || "Soma zaidi..."),
-                    body: item.fields.body || "",
-                    image: getNewsImage(item.fields.image?.sys?.id, newsJson.includes) || "/images/IMG_5866.jpeg",
-                    location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-                    season: item.fields.season || "June 2026"
-                }));
-            }
-        }
+             };
+             return {
+                date: String(item.fields.date || "Mpya"),
+                title: String(item.fields.title || "Habari Mpya"),
+                excerpt: String(item.fields.excerpt || "Soma zaidi..."),
+                body: item.fields.body || "",
+                image: getNewsImage(item.fields.image?.sys?.id) || "/images/IMG_5866.jpeg",
+                location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
+                season: item.fields.season || "June 2026"
+             };
+        }) : [];
 
-        // 4. STANDINGS
-        const standingsRes = await fetch(`${baseUrl}&content_type=standing&order=fields.position`);
-        let fetchedStandings = FALLBACK_DATA.standings;
-        if (standingsRes.ok) {
-            const standingsJson = await standingsRes.json();
-            if (standingsJson.items) {
-                fetchedStandings = standingsJson.items.map(item => ({
-                    pos: item.fields.position || 0,
-                    team: String(item.fields.teamName || "Team"),
-                    p: item.fields.played || 0,
-                    gd: String(item.fields.goalDifference || "0"),
-                    pts: item.fields.points || 0,
-                    location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-                    season: item.fields.season || "June 2026"
-                }));
-                fetchedStandings.sort((a, b) => a.pos - b.pos);
-            }
-        }
+        // Process Standings
+        const fetchedStandings = standingsData.items ? standingsData.items.map(item => ({
+            pos: item.fields.position || 0,
+            team: String(item.fields.teamName || "Team"),
+            p: item.fields.played || 0,
+            gd: String(item.fields.goalDifference || "0"),
+            pts: item.fields.points || 0,
+            location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
+            season: item.fields.season || "June 2026"
+        })).sort((a, b) => a.pos - b.pos) : [];
 
-        // 5. VIDEOS
-        const videosRes = await fetch(`${baseUrl}&content_type=video`);
-        let fetchedVideos = FALLBACK_DATA.videos;
-        if (videosRes.ok) {
-            const videosJson = await videosRes.json();
-            const getVideoThumbnail = (id, includes) => {
-                if (!id || !includes || !includes.Asset) return null;
-                const asset = includes.Asset.find(a => a.sys.id === id);
+        // Process Videos
+        const fetchedVideos = videosData.items ? videosData.items.map(item => {
+             const getThumb = (id) => {
+                if (!id || !videosData.includes || !videosData.includes.Asset) return null;
+                const asset = videosData.includes.Asset.find(a => a.sys.id === id);
                 return asset && asset.fields.file ? `https:${asset.fields.file.url}` : null;
-            };
-            if (videosJson.items) {
-                fetchedVideos = videosJson.items.map(item => ({
-                    title: String(item.fields.title || "Video"),
-                    videoUrl: String(item.fields.videoUrl || "#"),
-                    duration: String(item.fields.duration || ""),
-                    thumbnail: getVideoThumbnail(item.fields.thumbnail?.sys?.id, videosJson.includes) || "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=500",
-                    location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-                    season: item.fields.season || "June 2026"
-                }));
-            }
-        }
+             };
+             return {
+                title: String(item.fields.title || "Video"),
+                videoUrl: String(item.fields.videoUrl || "#"),
+                duration: String(item.fields.duration || ""),
+                thumbnail: getThumb(item.fields.thumbnail?.sys?.id) || "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=500",
+                location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
+                season: item.fields.season || "June 2026"
+             };
+        }) : [];
 
         setCmsData({
             hero: fetchedHero,
@@ -274,18 +237,15 @@ const App = () => {
             videos: fetchedVideos,
             sponsors: FALLBACK_DATA.sponsors
         });
-        setConnectionStatus('success');
 
       } catch (error) {
         console.error("CMS Error:", error);
-        setConnectionStatus('error');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchContentfulData();
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const getCurrentHero = () => {
@@ -311,29 +271,28 @@ const App = () => {
 
   const styles = {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif', scrollBehavior: 'smooth', position: 'relative', overflowX: 'hidden' },
-    // MOBILE FIX: Top Bar optimized
     topBar: { 
       backgroundColor: '#1e293b', 
-      padding: isMobile ? '8px 12px' : '8px 24px', 
+      padding: '8px 24px', 
       display: 'flex', 
-      justifyContent: isMobile ? 'center' : 'space-between', 
+      justifyContent: 'space-between', 
       alignItems: 'center', 
       fontSize: '11px', 
       borderBottom: '1px solid rgba(255,255,255,0.05)' 
     },
-    nav: { borderBottom: '1px solid rgba(255,255,255,0.05)', padding: isMobile ? '12px 0' : '16px 0', position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)' },
+    nav: { borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 0', position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)' },
     navContent: { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' },
     navLink: { color: '#94a3b8', textDecoration: 'none', fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', transition: 'color 0.2s', cursor: 'pointer', padding: '8px' },
-    heroWrapper: { position: 'relative', overflow: 'hidden', minHeight: isMobile ? '70vh' : '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(163, 230, 53, 0.1)' },
+    heroWrapper: { position: 'relative', overflow: 'hidden', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(163, 230, 53, 0.1)' },
     heroMedia: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, objectFit: 'cover' },
     heroOverlay: { position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.9))' },
-    heroContent: { position: 'relative', zIndex: 3, textAlign: 'center', padding: isMobile ? '0 16px' : '0 24px', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+    heroContent: { position: 'relative', zIndex: 3, textAlign: 'center', padding: '0 24px', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' },
     mainTitle: { fontSize: 'clamp(3rem, 11vw, 7rem)', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', lineHeight: '0.9', letterSpacing: '-0.03em', margin: '0 0 24px', textShadow: '0 10px 30px rgba(0,0,0,0.8)' },
     limeText: { color: '#a3e635' },
-    buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: isMobile ? '16px 28px' : '14px 28px', borderRadius: '8px', fontWeight: '800', textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(163, 230, 53, 0.2)' },
-    locationButton: { padding: isMobile ? '12px 20px' : '10px 24px', borderRadius: '50px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease', border: '1px solid' },
+    buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: '14px 28px', borderRadius: '8px', fontWeight: '800', textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(163, 230, 53, 0.2)' },
+    locationButton: { padding: '10px 24px', borderRadius: '50px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease', border: '1px solid' },
     sectionHeader: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', borderLeft: '4px solid #a3e635', paddingLeft: '16px' },
-    sectionTitle: { fontSize: isMobile ? '20px' : '24px', fontWeight: '900', textTransform: 'uppercase', fontStyle: 'italic', margin: 0 },
+    sectionTitle: { fontSize: '24px', fontWeight: '900', textTransform: 'uppercase', fontStyle: 'italic', margin: 0 },
     newsCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', height: '100%' },
     mobileMenu: { position: 'fixed', top: '0', right: '0', width: '85%', maxWidth: '320px', height: '100vh', backgroundColor: '#0f172a', zIndex: 60, padding: '32px 24px', boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', borderLeft: '1px solid rgba(255,255,255,0.1)' },
     matchCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '24px', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
@@ -351,36 +310,45 @@ const App = () => {
           h1, h2, h3, .logo-text { font-family: 'Oswald', sans-serif; }
           .hover-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(163, 230, 53, 0.2); border-color: rgba(163, 230, 53, 0.3) !important; }
           .nav-glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(15, 23, 42, 0.85) !important; }
+          
+          /* MOBILE HIDING MAGIC */
+          @media (max-width: 768px) {
+            .desktop-only { display: none !important; }
+            .mobile-center { justify-content: center !important; width: 100%; }
+            .top-bar-mobile { padding: 8px 12px !important; }
+            .nav-mobile { padding: 12px 0 !important; }
+            .hero-mobile { min-height: 70vh !important; }
+          }
         `}
       </style>
       <div style={styles.container}>
-      {/* 1. TOP BAR (MOBILE FIX APPLIED) */}
-      <div style={styles.topBar}>
-        <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
+      {/* 1. TOP BAR (FIXED) */}
+      <div style={styles.topBar} className="top-bar-mobile">
+        <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
             <History size={14} /><span style={{ fontWeight: 'bold' }}>SEASON:</span>
             {isLoading ? 
                 <span style={{ fontSize: '10px', color: '#94a3b8', marginLeft: 8 }}>Loading...</span> : 
                 <span style={{ fontSize: '10px', color: '#22c55e', marginLeft: 8, fontWeight: 'bold' }}>{activeSeason}</span>
             }
         </div>
-        <div style={{ display: 'flex', gap: '16px', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}>
+        <div className="mobile-center" style={{ display: 'flex', gap: '16px' }}>
             <button style={{ background: 'none', border: 'none', color: activeSeason === 'June 2025' ? '#a3e635' : '#64748b', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => { setActiveSeason('June 2025'); setActiveLocation('kiomoni'); }}>JUNE 2025 (HISTORIA)</button>
             <button style={{ background: 'none', border: 'none', color: activeSeason === 'June 2026' ? '#a3e635' : '#64748b', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setActiveSeason('June 2026')}>JUNE 2026 (LIVE)</button>
         </div>
       </div>
 
       {/* 2. MAIN NAVIGATION */}
-      <nav style={{ ...styles.nav, ...(isMobile ? {} : { className: 'nav-glass' }) }}>
+      <nav style={styles.nav} className="nav-glass nav-mobile">
         <div style={styles.navContent}>
           <a href="#hero" style={{ textDecoration: 'none', cursor: 'pointer' }}><PandeLogo /></a>
-          <div className="desktop-links" style={{ display: isMobile ? 'none' : 'flex', gap: '24px', alignItems: 'center' }}>
+          <div className="desktop-only" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
             <a onClick={() => window.location.href='#news'} style={styles.navLink}>Habari</a>
             <a onClick={() => window.location.href='#ratiba'} style={styles.navLink}>Ratiba</a>
             <a onClick={() => window.location.href='#tv'} style={styles.navLink}>PC TV</a>
             <button onClick={openModal} style={{ ...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px' }}>SAJILI TIMU</button>
           </div>
-          <div style={{ display: isMobile ? 'block' : 'none' }}>
-            <button onClick={toggleMobileMenu} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>{isMobileMenuOpen ? <X size={32} /> : <Menu size={32} />}</button>
+          <div style={{ display: 'block' }} className="mobile-only-trigger">
+             <button onClick={toggleMobileMenu} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: window.innerWidth <= 768 ? 'block' : 'none' }}>{isMobileMenuOpen ? <X size={32} /> : <Menu size={32} />}</button>
           </div>
         </div>
       </nav>
@@ -397,7 +365,7 @@ const App = () => {
       {isMobileMenuOpen && <div onClick={() => setIsMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 55, backdropFilter: 'blur(4px)' }}></div>}
 
       {/* 3. HERO & LOCATION */}
-      <div id="hero" style={styles.heroWrapper}>
+      <div id="hero" style={styles.heroWrapper} className="hero-mobile">
         <img 
             src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : currentHero.bgImage}
             style={{...styles.heroMedia, filter: isGoba2025 ? 'grayscale(100%) brightness(0.4)' : 'none'}}
