@@ -10,15 +10,15 @@ const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
 const LOGO_PATH = "/logo.png";
 const USE_IMAGE_LOGO = true;
 
-// --- SOCIAL MEDIA LINKS ---
+// --- SOCIAL MEDIA LINKS (UPDATED OFFICIAL) ---
 const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/pande_cup", 
-  facebook: "https://facebook.com/pande_cup",
-  youtube: "https://youtube.com/@pande_cup",
-  tiktok: "https://tiktok.com/@pande_cup"
+  instagram: "https://www.instagram.com/pande_cup/", 
+  facebook: "https://www.facebook.com/p/Pande-Cup-61550512517305/",
+  youtube: "https://www.youtube.com/@PandeCup",
+  tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- STATIC ABOUT TEXT (Hii haitegemei Contentful) ---
+// --- STATIC ABOUT TEXT ---
 const ABOUT_TEXT = {
   title: "Kuhusu Pande Cup",
   description: "Pande Cup si ligi ya soka ya kawaida; ni jukwaa la kijamii na kiuchumi linalotumia nguvu ya mchezo wa mpira wa miguu kuunganisha jamii na kuleta mabadiliko chanya. Ilizaliwa katika kijiji cha Pande, Kata ya Kiomoni mkoani Tanga, na sasa imepanua mbawa zake mpaka Goba, Dar es Salaam.\n\nMaono yetu ni kuwa zaidi ya mashindano ya uwanjani. Tunalenga kujenga Umoja wa Jamii, Fursa za Kiuchumi, na Maendeleo ya Kijamii kupitia elimu na afya.",
@@ -41,7 +41,7 @@ const FALLBACK_DATA = {
 const FEES = { amount: "Tsh 100,000/=", number: "556677", name: "PANDE SPORTS ENT" };
 
 // --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal' }) => {
+const PandeLogo = ({ size = 'normal', useImage = true }) => {
   const height = size === 'large' ? '120px' : '56px';
   const [imgError, setImgError] = useState(false);
   if (USE_IMAGE_LOGO && !imgError) {
@@ -65,12 +65,11 @@ const App = () => {
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- SAFE FETCHING LOGIC (Hii ndiyo dawa ya Contents Kupotea) ---
+  // --- SAFE FETCHING LOGIC ---
   useEffect(() => {
     const fetchContentfulData = async () => {
       const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
       
-      // Helper function: Inajaribu kuvuta data, ikishindikana inarudisha empty list (haiuwi site)
       const fetchSafe = async (type) => {
         try {
           const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
@@ -82,7 +81,6 @@ const App = () => {
         }
       };
 
-      // Vuta data moja baada ya nyingine kwa usalama
       const heroData = await fetchSafe('heroSection');
       const matchesData = await fetchSafe('match');
       const newsData = await fetchSafe('news');
@@ -137,7 +135,7 @@ const App = () => {
     if (!dataArray) return [];
     return dataArray.filter(item => {
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
-        const itemSeason = item.season ? String(item.season) : 'June 2026'; // Default season protection
+        const itemSeason = item.season ? String(item.season) : 'June 2026';
         const activeSeasonClean = activeSeason.trim().toLowerCase();
         return itemLoc.includes(activeLocation) && itemSeason.trim().toLowerCase() === activeSeasonClean;
     });
@@ -316,7 +314,7 @@ const App = () => {
             <div style={{textAlign:'center', marginTop:'60px', borderTop:'1px solid #333', paddingTop:'40px', color:'#475569', fontSize:'12px'}}>© 2026 Pande Cup Events. All rights reserved.</div>
         </footer>
 
-        {/* MODAL & NEWS - (MODAL Logic Included Below) */}
+        {/* MODAL */}
         {isModalOpen && (
              <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px'}}>
                  <div style={{background:'#0f172a', padding:'32px', borderRadius:'24px', width:'100%', maxWidth:'450px', border:'1px solid rgba(255,255,255,0.1)', position:'relative'}}>
