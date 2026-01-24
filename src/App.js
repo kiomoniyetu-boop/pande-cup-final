@@ -25,7 +25,7 @@ const ABOUT_TEXT = {
   slogans: "Pande Cup Umoja Katika Kila Shuti • Pamoja Sisi Ni Pande • Pamoja Sisi Ni Kiomoni • Mimi Na Mto Zigi Dam dam"
 };
 
-// --- FALLBACK DATA (SAFETY NET) ---
+// --- FALLBACK DATA ---
 const FALLBACK_DATA = {
   hero: [
     { location: 'kiomoni', title: "HII GAME NI YETU.", subtitle: "Soka la mtaani lenye hadhi ya kitaifa.", bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66" },
@@ -79,6 +79,18 @@ const App = () => {
   const [selectedNews, setSelectedNews] = useState(null);
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
+
+  // --- ACTIONS (ZILIZOKOSEKANA) ---
+  const handleFinalSubmit = () => { 
+    alert(`Asante ${teamData.coachName}! Maombi yamepokelewa. Tutawasiliana nawe.`); 
+    setModalStep(3); 
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+    setModalStep(1);
+    setIsMobileMenuOpen(false);
+  };
 
   // --- SAFE FETCHING LOGIC ---
   useEffect(() => {
@@ -205,7 +217,7 @@ const App = () => {
                     <a href="#news" style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: '600', fontSize: '13px' }}>HABARI</a>
                     <a href="#ratiba" style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: '600', fontSize: '13px' }}>RATIBA</a>
                     <a href="#tv" style={{ color: '#94a3b8', textDecoration: 'none', fontWeight: '600', fontSize: '13px' }}>PC TV</a>
-                    <button onClick={() => setIsModalOpen(true)} style={{...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px'}}>SAJILI TIMU</button>
+                    <button onClick={openModal} style={{...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px'}}>SAJILI TIMU</button>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(true)} style={{ background: 'none', border: 'none', color: 'white' }} className="mobile-only"><Menu /></button>
             </div>
@@ -331,7 +343,7 @@ const App = () => {
         {isModalOpen && (
              <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:100, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px'}}>
                  <div style={{background:'#0f172a', padding:'32px', borderRadius:'24px', width:'100%', maxWidth:'450px', border:'1px solid rgba(255,255,255,0.1)', position:'relative'}}>
-                     <button onClick={closeModal} style={{position:'absolute', top:'20px', right:'20px', background:'none', border:'none', color:'white', cursor:'pointer'}}><X /></button>
+                     <button onClick={()=>setIsModalOpen(false)} style={{position:'absolute', top:'20px', right:'20px', background:'none', border:'none', color:'white', cursor:'pointer'}}><X /></button>
                      {modalStep === 1 && (
                          <>
                              <h2 style={{marginTop:0, textTransform:'uppercase'}}>Fomu ya <span style={{color:'#a3e635'}}>Maombi</span></h2>
@@ -360,7 +372,7 @@ const App = () => {
                          <div style={{textAlign:'center'}}>
                              <div style={{width:'60px', height:'60px', background:'rgba(34,197,94,0.1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px'}}><Check color="#22c55e" /></div>
                              <h2>Imepokelewa!</h2>
-                             <button onClick={closeModal} style={{color:'#a3e635', background:'none', border:'none', fontWeight:'bold', cursor:'pointer'}}>FUNGA</button>
+                             <button onClick={()=>setIsModalOpen(false)} style={{color:'#a3e635', background:'none', border:'none', fontWeight:'bold', cursor:'pointer'}}>FUNGA</button>
                          </div>
                      )}
                  </div>
