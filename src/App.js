@@ -213,7 +213,7 @@ const App = () => {
                 return asset && asset.fields.file ? `https:${asset.fields.file.url}` : null;
              };
              return {
-                date: String(item.fields.date || "Mpya"),
+                date: String(item.fields.date || ""), // REMOVED DEFAULT TEXT to help sorter
                 title: String(item.fields.title || "Habari Mpya"),
                 excerpt: String(item.fields.excerpt || "Soma zaidi..."),
                 body: item.fields.body || "",
@@ -297,11 +297,21 @@ const App = () => {
         return dateB - dateA;
     });
 
-  // --- NEWS SORTING (NEWEST FIRST) ---
+  // --- NEWS SORTING (ROBUST FIX) ---
   const filteredNews = getFilteredData(cmsData.news).sort((a, b) => {
+      // Convert to Date Objects
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
-      return dateB - dateA;
+      
+      // Check if dates are valid
+      const isAValid = !isNaN(dateA.getTime());
+      const isBValid = !isNaN(dateB.getTime());
+
+      // Sorting Logic
+      if (isAValid && isBValid) return dateB - dateA; // Both Valid: Newest First
+      if (!isAValid && isBValid) return 1; // A is Bad: Push Down
+      if (isAValid && !isBValid) return -1; // B is Bad: Push Down
+      return 0; // Both Bad: Keep Order
   });
 
   const filteredStandings = getFilteredData(cmsData.standings);
