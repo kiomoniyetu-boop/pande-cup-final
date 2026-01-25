@@ -297,7 +297,13 @@ const App = () => {
         return dateB - dateA;
     });
 
-  const filteredNews = getFilteredData(cmsData.news);
+  // --- NEWS SORTING (NEWEST FIRST) ---
+  const filteredNews = getFilteredData(cmsData.news).sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB - dateA;
+  });
+
   const filteredStandings = getFilteredData(cmsData.standings);
   const filteredVideos = getFilteredData(cmsData.videos);
 
