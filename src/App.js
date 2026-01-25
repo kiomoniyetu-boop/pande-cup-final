@@ -101,14 +101,13 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-// Helper for Match Time/Date (UPDATED TO 24H FORMAT)
+// Helper for Match Time/Date (24H FORMAT)
 const formatMatchTime = (dateString) => {
     if (!dateString) return { date: '', time: '' };
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return { date: '', time: '' };
     return {
         date: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
-        // Change: hour12: false forces 24-hour format (e.g., 16:00 instead of 04:00 PM)
         time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
     };
 };
@@ -280,8 +279,26 @@ const App = () => {
   const currentHero = getCurrentHero();
   
   const filteredMatches = getFilteredData(cmsData.matches);
-  const upcomingMatches = filteredMatches.filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'));
-  const pastMatches = filteredMatches.filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'));
+
+  // --- SORTING LOGIC ---
+  // 1. Ratiba (Upcoming): Sort by Date ASCENDING (Earliest first)
+  const upcomingMatches = filteredMatches
+    .filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'))
+    .sort((a, b) => {
+        const dateA = new Date(a.matchDate || '9999-12-31');
+        const dateB = new Date(b.matchDate || '9999-12-31');
+        return dateA - dateB;
+    });
+
+  // 2. Matokeo (Past): Sort by Date DESCENDING (Latest first)
+  const pastMatches = filteredMatches
+    .filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'))
+    .sort((a, b) => {
+        const dateA = new Date(a.matchDate || '1970-01-01');
+        const dateB = new Date(b.matchDate || '1970-01-01');
+        return dateB - dateA;
+    });
+
   const filteredNews = getFilteredData(cmsData.news);
   const filteredStandings = getFilteredData(cmsData.standings);
   const filteredVideos = getFilteredData(cmsData.videos);
@@ -290,7 +307,6 @@ const App = () => {
 
   let displayTitle = currentHero.title;
   let displaySubtitle = currentHero.subtitle;
-  // let displayTag = `${activeSeason} • ${activeLocation.toUpperCase()}`; // REMOVED
 
   if (activeSeason === 'June 2025' && !isGoba2025) {
      displayTitle = "HISTORIA: JUNI 2025";
@@ -422,7 +438,6 @@ const App = () => {
                <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: '0 auto 16px', lineHeight: '1.6' }}>
                   {displaySubtitle}
                </p>
-               {/* TAGLINE REMOVED HERE AS REQUESTED */}
              </>
            )}
         </section>
