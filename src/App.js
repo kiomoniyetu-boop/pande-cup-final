@@ -101,14 +101,15 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-// Helper for Match Time/Date
+// Helper for Match Time/Date (UPDATED TO 24H FORMAT)
 const formatMatchTime = (dateString) => {
     if (!dateString) return { date: '', time: '' };
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return { date: '', time: '' };
     return {
         date: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
-        time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        // Change: hour12: false forces 24-hour format (e.g., 16:00 instead of 04:00 PM)
+        time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
     };
 };
 
@@ -193,7 +194,7 @@ const App = () => {
             fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video')
         ]);
 
-        // Process Matches (UPDATED with Date and Stadium)
+        // Process Matches
         const fetchedMatches = matchesData.items ? matchesData.items.map(item => ({
             home: String(item.fields.homeTeam || "Home"),
             away: String(item.fields.awayTeam || "Away"),
@@ -201,8 +202,8 @@ const App = () => {
             status: String(item.fields.status || "Ratiba"),
             location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
             season: item.fields.season || "June 2026",
-            matchDate: item.fields.matchDate || null, // New Field
-            stadium: item.fields.stadium || "" // New Field
+            matchDate: item.fields.matchDate || null,
+            stadium: item.fields.stadium || ""
         })) : [];
 
         // Process News
@@ -289,7 +290,7 @@ const App = () => {
 
   let displayTitle = currentHero.title;
   let displaySubtitle = currentHero.subtitle;
-  let displayTag = `${activeSeason} • ${activeLocation.toUpperCase()}`;
+  // let displayTag = `${activeSeason} • ${activeLocation.toUpperCase()}`; // REMOVED
 
   if (activeSeason === 'June 2025' && !isGoba2025) {
      displayTitle = "HISTORIA: JUNI 2025";
@@ -421,7 +422,7 @@ const App = () => {
                <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: '0 auto 16px', lineHeight: '1.6' }}>
                   {displaySubtitle}
                </p>
-               <p style={{ color: '#a3e635', fontSize: '16px', fontWeight: 'bold', fontStyle: 'italic', margin: '0 auto 30px', textTransform: 'uppercase', letterSpacing: '1px' }}>{displayTag}</p>
+               {/* TAGLINE REMOVED HERE AS REQUESTED */}
              </>
            )}
         </section>
