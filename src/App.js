@@ -324,6 +324,10 @@ const App = () => {
           h1, h2, h3, .logo-text { font-family: 'Oswald', sans-serif; }
           .hover-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(163, 230, 53, 0.2); border-color: rgba(163, 230, 53, 0.3) !important; }
           .nav-glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(15, 23, 42, 0.85) !important; }
+          .custom-scroll::-webkit-scrollbar { width: 6px; }
+          .custom-scroll::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); borderRadius: 10px; }
+          .custom-scroll::-webkit-scrollbar-thumb { background: rgba(163, 230, 53, 0.3); borderRadius: 10px; }
+          .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(163, 230, 53, 0.6); }
           
           /* MOBILE ADJUSTMENTS */
           @media (max-width: 768px) {
@@ -437,12 +441,12 @@ const App = () => {
         {/* 5. MATCH CENTER */}
         <section id="ratiba" style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px' }}>
-            {/* COLUMN 1: RATIBA & MATOKEO */}
+            {/* COLUMN 1: RATIBA & MATOKEO (FIXED HEIGHT SCROLL) */}
             <div>
               {upcomingMatches.length > 0 && (
                   <div style={{ marginBottom: '48px' }}>
                       <div style={styles.sectionHeader}><Clock style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Ratiba <span style={styles.limeText}>Ijayo</span></h2></div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
                           {upcomingMatches.map((m, idx) => (
                               <div key={idx} className="hover-card" style={styles.matchCard}>
                                   <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
@@ -459,7 +463,7 @@ const App = () => {
               {pastMatches.length > 0 && (
                   <div>
                       <div style={styles.sectionHeader}><Trophy style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Matokeo <span style={styles.limeText}>Yaliyopita</span></h2></div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
                           {pastMatches.map((m, idx) => (
                               <div key={idx} className="hover-card" style={styles.matchCard}>
                                   <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
