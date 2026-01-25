@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail
+  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -101,6 +101,17 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+// Helper for Match Time/Date
+const formatMatchTime = (dateString) => {
+    if (!dateString) return { date: '', time: '' };
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return { date: '', time: '' };
+    return {
+        date: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+        time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
+};
+
 const renderWithLinks = (text) => {
   if (!text) return "";
   const parts = text.split(/(https?:\/\/[^\s]+)/g);
@@ -182,14 +193,16 @@ const App = () => {
             fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video')
         ]);
 
-        // Process Matches
+        // Process Matches (UPDATED with Date and Stadium)
         const fetchedMatches = matchesData.items ? matchesData.items.map(item => ({
             home: String(item.fields.homeTeam || "Home"),
             away: String(item.fields.awayTeam || "Away"),
             score: String(item.fields.score || "VS"),
             status: String(item.fields.status || "Ratiba"),
             location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
-            season: item.fields.season || "June 2026"
+            season: item.fields.season || "June 2026",
+            matchDate: item.fields.matchDate || null, // New Field
+            stadium: item.fields.stadium || "" // New Field
         })) : [];
 
         // Process News
@@ -309,7 +322,7 @@ const App = () => {
     sectionTitle: { fontSize: '24px', fontWeight: '900', textTransform: 'uppercase', fontStyle: 'italic', margin: 0 },
     newsCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', height: '100%' },
     mobileMenu: { position: 'fixed', top: '0', right: '0', width: '85%', maxWidth: '320px', height: '100vh', backgroundColor: '#0f172a', zIndex: 60, padding: '32px 24px', boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', borderLeft: '1px solid rgba(255,255,255,0.1)' },
-    matchCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '24px', borderRadius: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+    matchCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '24px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' },
     table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px' },
     th: { textAlign: 'left', padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#64748b', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px' },
     td: { padding: '16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
@@ -447,16 +460,28 @@ const App = () => {
                   <div style={{ marginBottom: '48px' }}>
                       <div style={styles.sectionHeader}><Clock style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Ratiba <span style={styles.limeText}>Ijayo</span></h2></div>
                       <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
-                          {upcomingMatches.map((m, idx) => (
+                          {upcomingMatches.map((m, idx) => {
+                              const { date, time } = formatMatchTime(m.matchDate);
+                              return (
                               <div key={idx} className="hover-card" style={styles.matchCard}>
-                                  <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
-                                  <div style={{ textAlign: 'center' }}>
-                                      <div style={{ color: '#a3e635', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
-                                      <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', marginTop: '4px' }}>{m.status}</div>
+                                  {/* MATCH INFO HEADER */}
+                                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#64748b', fontWeight: 'bold', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px', width: '100%' }}>
+                                      {date && <span>{date}</span>}
+                                      {time && <span style={{ color: '#a3e635' }}>• {time}</span>}
+                                      {m.stadium && <span>• {m.stadium}</span>}
                                   </div>
-                                  <div style={{ fontWeight: '900', fontSize: '15px', textAlign: 'right', width: '35%' }}>{m.away}</div>
+                                  
+                                  {/* TEAMS & SCORE */}
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                      <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
+                                      <div style={{ textAlign: 'center' }}>
+                                          <div style={{ color: '#a3e635', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
+                                          <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', marginTop: '4px' }}>{m.status}</div>
+                                      </div>
+                                      <div style={{ fontWeight: '900', fontSize: '15px', textAlign: 'right', width: '35%' }}>{m.away}</div>
+                                  </div>
                               </div>
-                          ))}
+                          )})}
                       </div>
                   </div>
               )}
@@ -464,16 +489,21 @@ const App = () => {
                   <div>
                       <div style={styles.sectionHeader}><Trophy style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Matokeo <span style={styles.limeText}>Yaliyopita</span></h2></div>
                       <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
-                          {pastMatches.map((m, idx) => (
+                          {pastMatches.map((m, idx) => {
+                              const { date } = formatMatchTime(m.matchDate);
+                              return (
                               <div key={idx} className="hover-card" style={styles.matchCard}>
-                                  <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
-                                  <div style={{ textAlign: 'center' }}>
-                                      <div style={{ color: 'white', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
-                                      <div style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{m.status}</div>
+                                  <div style={{ display: 'flex', justifyContent: 'center', fontSize: '10px', color: '#64748b', marginBottom: '4px' }}>{date} • {m.stadium}</div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                      <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
+                                      <div style={{ textAlign: 'center' }}>
+                                          <div style={{ color: 'white', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
+                                          <div style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{m.status}</div>
+                                      </div>
+                                      <div style={{ fontWeight: '900', fontSize: '15px', textAlign: 'right', width: '35%' }}>{m.away}</div>
                                   </div>
-                                  <div style={{ fontWeight: '900', fontSize: '15px', textAlign: 'right', width: '35%' }}>{m.away}</div>
                               </div>
-                          ))}
+                          )})}
                       </div>
                   </div>
               )}
@@ -482,11 +512,11 @@ const App = () => {
               )}
             </div>
 
-            {/* COLUMN 2: MSIMAMO */}
+            {/* COLUMN 2: MSIMAMO (NOW SCROLLABLE) */}
             <div>
               <div style={styles.sectionHeader}><ListOrdered style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Msimamo wa <span style={styles.limeText}>Ligi</span></h2></div>
               {filteredStandings.length > 0 ? (
-                <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '20px', overflowX: 'auto' }}>
+                <div className="custom-scroll" style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '20px', maxHeight: '400px', overflowY: 'auto' }}>
                   <table style={styles.table}><thead><tr><th style={styles.th}>Pos</th><th style={styles.th}>Timu</th><th style={{ ...styles.th, textAlign: 'center' }}>P</th><th style={{ ...styles.th, textAlign: 'center' }}>GD</th><th style={{ ...styles.th, textAlign: 'center' }}>PTS</th></tr></thead><tbody>{filteredStandings.map((team, idx) => (<tr key={idx}><td style={{ ...styles.td, fontWeight: 'bold', color: idx === 0 ? '#a3e635' : 'white' }}>{team.pos}</td><td style={{ ...styles.td, fontWeight: '900' }}>{team.team}</td><td style={{ ...styles.td, textAlign: 'center' }}>{team.p}</td><td style={{ ...styles.td, textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : 'white' }}>{team.gd}</td><td style={{ ...styles.td, textAlign: 'center', fontWeight: 'bold' }}>{team.pts}</td></tr>))}</tbody></table>
                 </div>
               ) : (<p style={{ color: '#64748b', fontStyle: 'italic' }}>Msimamo haujatoka bado kwa msimu huu.</p>)}
