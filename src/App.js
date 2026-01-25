@@ -306,13 +306,13 @@ const App = () => {
   let displayTitle = currentHero.title;
   let displaySubtitle = currentHero.subtitle;
 
-  // --- NEW GENESIS STORY & SLOGAN LOGIC ---
+  // --- NEW GENESIS STORY & SLOGAN LOGIC (Specific for History Mode) ---
   if (activeSeason === 'June 2025' && !isGoba2025) {
-     displayTitle = "HII GAME NI YETU."; // Maintaining consistency
+     displayTitle = "HII GAME NI YETU."; 
      displaySubtitle = (
         <span>
-            Ilianzia Kiomoni, Tanga kwenye vumbi la asili ambapo ndoto ilizaliwa. Sasa tumebeba moto huo na kuuwasha Goba, Dar es Salaam. Tunajenga daraja la undugu kati ya Pwani na Bara.<br/><br/>
-            <span style={{ color: '#a3e635', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>LIGI MOJA. UPENDO MMOJA. VUMBI MOJA.</span>
+            Ilianzia Kiomoni Pande, Tanga kwenye vumbi la asili ambapo ndoto ilizaliwa. Sasa tumebeba moto huo na kuuwasha Goba, Dar es Salaam.<br/><br/>
+            <span style={{ color: '#a3e635', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>KAMA KAWAIDA YETU UMOJA KATIKA KILA SHUTI.</span>
         </span>
      );
   }
@@ -335,7 +335,8 @@ const App = () => {
     heroMedia: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, objectFit: 'cover' },
     heroOverlay: { position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.9))' },
     heroContent: { position: 'relative', zIndex: 3, textAlign: 'center', padding: '0 24px', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' },
-    mainTitle: { fontSize: 'clamp(3rem, 11vw, 7rem)', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', lineHeight: '0.9', letterSpacing: '-0.03em', margin: '0 0 24px', textShadow: '0 10px 30px rgba(0,0,0,0.8)' },
+    // ADJUSTED FONT SIZE HERE: Reduced max from 7rem to 5.5rem, min from 3rem to 2.5rem
+    mainTitle: { fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', lineHeight: '0.9', letterSpacing: '-0.03em', margin: '0 0 24px', textShadow: '0 10px 30px rgba(0,0,0,0.8)' },
     limeText: { color: '#a3e635' },
     buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: '14px 28px', borderRadius: '8px', fontWeight: '800', textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(163, 230, 53, 0.2)' },
     locationButton: { padding: '10px 24px', borderRadius: '50px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease', border: '1px solid' },
