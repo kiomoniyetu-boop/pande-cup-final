@@ -281,7 +281,6 @@ const App = () => {
   const filteredMatches = getFilteredData(cmsData.matches);
 
   // --- SORTING LOGIC ---
-  // 1. Ratiba (Upcoming): Sort by Date ASCENDING (Earliest first)
   const upcomingMatches = filteredMatches
     .filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'))
     .sort((a, b) => {
@@ -290,7 +289,6 @@ const App = () => {
         return dateA - dateB;
     });
 
-  // 2. Matokeo (Past): Sort by Date DESCENDING (Latest first)
   const pastMatches = filteredMatches
     .filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'))
     .sort((a, b) => {
@@ -308,9 +306,15 @@ const App = () => {
   let displayTitle = currentHero.title;
   let displaySubtitle = currentHero.subtitle;
 
+  // --- NEW GENESIS STORY & SLOGAN LOGIC ---
   if (activeSeason === 'June 2025' && !isGoba2025) {
-     displayTitle = "HISTORIA: JUNI 2025";
-     displaySubtitle = "Msimu wa Historia. Bingwa alipatikana kwa jasho na damu mbele ya maelfu ya wakazi wa Kiomoni.";
+     displayTitle = "HII GAME NI YETU."; // Maintaining consistency
+     displaySubtitle = (
+        <span>
+            Ilianzia Kiomoni, Tanga kwenye vumbi la asili ambapo ndoto ilizaliwa. Sasa tumebeba moto huo na kuuwasha Goba, Dar es Salaam. Tunajenga daraja la undugu kati ya Pwani na Bara.<br/><br/>
+            <span style={{ color: '#a3e635', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>LIGI MOJA. UPENDO MMOJA. VUMBI MOJA.</span>
+        </span>
+     );
   }
 
   const styles = {
