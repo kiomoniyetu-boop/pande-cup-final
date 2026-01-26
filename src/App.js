@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield
+  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -132,6 +132,10 @@ const App = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', nidaNumber: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
+  
+  // NEW: State for Group Modal
+  const [selectedGroup, setSelectedGroup] = useState(null);
+
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -142,6 +146,10 @@ const App = () => {
   const handleFinalSubmit = () => { alert(`Asante ${teamData.coachName}! Maombi ya timu ya ${teamData.name} yamepokelewa. Ofisi itawasiliana nawe kwa hatua zaidi.`); setModalStep(3); };
   const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
   const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
+  
+  // NEW: Group Modal Handlers
+  const openGroupModal = (groupName, teams) => { setSelectedGroup({ name: groupName, teams: teams }); document.body.style.overflow = 'hidden'; };
+  const closeGroupModal = () => { setSelectedGroup(null); document.body.style.overflow = 'auto'; };
 
   // --- FILTER LOGIC ---
   const getFilteredData = (dataArray) => {
@@ -230,7 +238,7 @@ const App = () => {
             p: item.fields.played || 0,
             gd: String(item.fields.goalDifference || "0"),
             pts: item.fields.points || 0,
-            group: String(item.fields.group || "").toUpperCase(), // Normalizing Group
+            group: String(item.fields.group || "").toUpperCase(), 
             location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
             season: item.fields.season || "June 2026"
         })) : [];
@@ -315,16 +323,15 @@ const App = () => {
   
   // 1. Sort ALL teams by Points (DESC), then GD (DESC)
   const sortedTeams = [...filteredStandings].sort((a, b) => {
-      if (b.pts !== a.pts) return b.pts - a.pts; // Higher points first
-      // Handle GD comparison (e.g. "+3" vs "-1")
+      if (b.pts !== a.pts) return b.pts - a.pts; 
       const gdA = parseInt(a.gd) || 0;
       const gdB = parseInt(b.gd) || 0;
-      return gdB - gdA; // Higher GD first
+      return gdB - gdA; 
   });
 
   // 2. Group them
   const groupedStandings = sortedTeams.reduce((groups, team) => {
-      const groupName = team.group ? `GROUP ${team.group}` : 'LIGI KUU'; // Default if no group
+      const groupName = team.group ? `GROUP ${team.group}` : 'LIGI KUU'; 
       if (!groups[groupName]) {
           groups[groupName] = [];
       }
@@ -515,7 +522,7 @@ const App = () => {
               {upcomingMatches.length > 0 && (
                   <div style={{ marginBottom: '48px' }}>
                       <div style={styles.sectionHeader}><Clock style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Ratiba <span style={styles.limeText}>Ijayo</span></h2></div>
-                      <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
+                      <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto', paddingRight: '10px' }}>
                           {upcomingMatches.map((m, idx) => {
                               const { date, time } = formatMatchTime(m.matchDate);
                               return (
@@ -544,7 +551,7 @@ const App = () => {
               {pastMatches.length > 0 && (
                   <div>
                       <div style={styles.sectionHeader}><Trophy style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Matokeo <span style={styles.limeText}>Yaliyopita</span></h2></div>
-                      <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
+                      <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto', paddingRight: '10px' }}>
                           {pastMatches.map((m, idx) => {
                               const { date } = formatMatchTime(m.matchDate);
                               return (
@@ -568,11 +575,11 @@ const App = () => {
               )}
             </div>
 
-            {/* COLUMN 2: MAKUNDI (GROUP STAGE) - AUTOMATIC SORTED */}
+            {/* COLUMN 2: MAKUNDI (GROUP STAGE) - AUTOMATIC SORTED + POPUP */}
             <div>
               <div style={styles.sectionHeader}><Grid style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Msimamo wa <span style={styles.limeText}>Makundi</span></h2></div>
               {filteredStandings.length > 0 ? (
-                <div className="custom-scroll" style={{ maxHeight: '600px', overflowY: 'auto', paddingRight: '10px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div className="custom-scroll" style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '10px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   {sortedGroupKeys.map((groupName, gIdx) => (
                     <div key={gIdx} className="hover-card" style={styles.groupCard}>
                       {/* Group Header */}
@@ -583,10 +590,14 @@ const App = () => {
                               {groupName}
                             </span>
                         </div>
-                        <span style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', backgroundColor: 'rgba(163, 230, 53, 0.2)', padding: '4px 8px', borderRadius: '4px' }}>{groupedStandings[groupName].length} Teams</span>
+                        {/* POPUP BUTTON */}
+                        <button onClick={() => openGroupModal(groupName, groupedStandings[groupName])} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a3e635', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }}>Open</span>
+                            <Maximize2 size={16} />
+                        </button>
                       </div>
                       
-                      {/* Table */}
+                      {/* Table (Preview - Showing Top 4 or All) */}
                       <table style={styles.table}>
                         <thead>
                           <tr style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
@@ -598,11 +609,10 @@ const App = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {/* AUTO-GENERATED ROWS */}
-                          {groupedStandings[groupName].map((team, idx) => (
+                          {groupedStandings[groupName].slice(0, 5).map((team, idx) => (
                             <tr key={idx} style={{ 
-                                borderBottom: idx !== groupedStandings[groupName].length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                                backgroundColor: idx < 2 ? 'rgba(34, 197, 94, 0.05)' : 'transparent' // Highlight top 2
+                                borderBottom: idx !== Math.min(groupedStandings[groupName].length, 5) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                                backgroundColor: idx < 2 ? 'rgba(34, 197, 94, 0.05)' : 'transparent' 
                             }}>
                               <td style={{ ...styles.td, paddingLeft: '16px', fontWeight: 'bold', color: idx === 0 ? '#a3e635' : (idx === 1 ? '#4ade80' : 'white') }}>{idx + 1}</td>
                               <td style={{ ...styles.td, fontWeight: 'bold', fontSize: '14px' }}>{team.team}</td>
@@ -773,6 +783,62 @@ const App = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL - GROUP STANDINGS (NEW) */}
+      {selectedGroup && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 120, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(8px)' }}>
+          <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+            {/* Modal Header */}
+            <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(163, 230, 53, 0.05)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Shield size={28} color="#a3e635" />
+                    <div>
+                        <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '900', textTransform: 'uppercase', color: 'white' }}>{selectedGroup.name}</h2>
+                        <p style={{ margin: 0, fontSize: '12px', color: '#a3e635', fontWeight: 'bold', letterSpacing: '1px' }}>MSIMAMO WA KUNDI</p>
+                    </div>
+                </div>
+                <button onClick={closeGroupModal} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '50%', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <X size={24} />
+                </button>
+            </div>
+            
+            {/* Modal Content (Table) */}
+            <div className="custom-scroll" style={{ padding: '0', overflowY: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                    <thead style={{ position: 'sticky', top: 0, backgroundColor: '#0f172a', zIndex: 10 }}>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                            <th style={{...styles.th, width: '50px', padding: '16px'}}>#</th>
+                            <th style={{...styles.th, padding: '16px'}}>Timu</th>
+                            <th style={{...styles.th, textAlign: 'center', padding: '16px'}}>P</th>
+                            <th style={{...styles.th, textAlign: 'center', padding: '16px'}}>GD</th>
+                            <th style={{...styles.th, textAlign: 'center', padding: '16px'}}>PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {selectedGroup.teams.map((team, idx) => (
+                        <tr key={idx} style={{ 
+                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            backgroundColor: idx < 2 ? 'rgba(34, 197, 94, 0.05)' : 'transparent' 
+                        }}>
+                            <td style={{ ...styles.td, padding: '16px', fontWeight: 'bold', color: idx === 0 ? '#a3e635' : (idx === 1 ? '#4ade80' : 'white'), fontSize: '16px' }}>{team.pos}</td>
+                            <td style={{ ...styles.td, padding: '16px', fontWeight: 'bold', fontSize: '16px' }}>{team.team}</td>
+                            <td style={{ ...styles.td, padding: '16px', textAlign: 'center', color: '#94a3b8' }}>{team.p}</td>
+                            <td style={{ ...styles.td, padding: '16px', textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : (team.gd.startsWith('-') ? '#f87171' : 'white'), fontWeight: 'bold' }}>{team.gd}</td>
+                            <td style={{ ...styles.td, padding: '16px', textAlign: 'center', fontWeight: '900', color: 'white', fontSize: '18px' }}>{team.pts}</td>
+                        </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            
+            {/* Modal Footer */}
+            <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', fontSize: '11px', color: '#64748b' }}>
+                <p style={{ margin: 0 }}>*Nafasi mbili za juu zinafuzu hatua inayofuata.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     </>
   );
