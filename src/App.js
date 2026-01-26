@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from "react-helmet"; 
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
   ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp
@@ -360,6 +361,10 @@ const App = () => {
      );
   }
 
+  // --- SEO LOGIC (Kichwa cha Habari Kabadilika) ---
+  const seoTitle = activeLocation === 'goba' ? 'Pande Cup Goba - Soka la Mtaani' : 'Pande Cup Kiomoni - Tanga';
+  const seoDescription = "Ratiba, Matokeo na Habari za Pande Cup. Soka la mtaani lenye hadhi ya kimataifa.";
+
   const styles = {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif', scrollBehavior: 'smooth', position: 'relative', overflowX: 'hidden' },
     topBar: { 
@@ -416,6 +421,20 @@ const App = () => {
           }
         `}
       </style>
+
+      {/* --- SEO HELMET START --- */}
+      <Helmet>
+        <title>{selectedNews ? selectedNews.title : seoTitle}</title>
+        <meta name="description" content={selectedNews ? selectedNews.excerpt : seoDescription} />
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://pandecup.co.tz/" />
+        <meta property="og:title" content={selectedNews ? selectedNews.title : "Pande Cup - Hii Game Ni Yetu"} />
+        <meta property="og:description" content={selectedNews ? selectedNews.excerpt : seoDescription} />
+        <meta property="og:image" content={selectedNews ? selectedNews.image : "https://pandecup.co.tz/logo.png"} />
+      </Helmet>
+      {/* --- SEO HELMET END --- */}
+
       <div style={styles.container}>
       {/* 1. TOP BAR */}
       <div style={styles.topBar} className="top-bar-mobile">
@@ -876,3 +895,4 @@ const App = () => {
 };
 
 export default App;
+// MWISHO WA CODE
