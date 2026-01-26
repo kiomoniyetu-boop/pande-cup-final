@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2
+  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -132,9 +132,10 @@ const App = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', nidaNumber: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
-  
-  // NEW: State for Group Modal
   const [selectedGroup, setSelectedGroup] = useState(null);
+  
+  // NEW: News Pagination State
+  const [visibleNewsCount, setVisibleNewsCount] = useState(3);
 
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
@@ -146,8 +147,6 @@ const App = () => {
   const handleFinalSubmit = () => { alert(`Asante ${teamData.coachName}! Maombi ya timu ya ${teamData.name} yamepokelewa. Ofisi itawasiliana nawe kwa hatua zaidi.`); setModalStep(3); };
   const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
   const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
-  
-  // NEW: Group Modal Handlers
   const openGroupModal = (groupName, teams) => { setSelectedGroup({ name: groupName, teams: teams }); document.body.style.overflow = 'hidden'; };
   const closeGroupModal = () => { setSelectedGroup(null); document.body.style.overflow = 'auto'; };
 
@@ -165,6 +164,11 @@ const App = () => {
   };
 
   // --- EFFECTS ---
+  useEffect(() => {
+    // Reset news count when filters change
+    setVisibleNewsCount(3);
+  }, [activeLocation, activeSeason]);
+
   useEffect(() => {
     const fetchContentfulData = async () => {
       try {
@@ -231,7 +235,7 @@ const App = () => {
              };
         }) : [];
 
-        // Process Standings (WITH GROUP FIELD)
+        // Process Standings
         const fetchedStandings = standingsData.items ? standingsData.items.map(item => ({
             pos: item.fields.position || 0,
             team: String(item.fields.teamName || "Team"),
@@ -321,7 +325,6 @@ const App = () => {
   // --- STANDINGS GROUPING & AUTO-SORTING LOGIC ---
   const filteredStandings = getFilteredData(cmsData.standings);
   
-  // 1. Sort ALL teams by Points (DESC), then GD (DESC)
   const sortedTeams = [...filteredStandings].sort((a, b) => {
       if (b.pts !== a.pts) return b.pts - a.pts; 
       const gdA = parseInt(a.gd) || 0;
@@ -329,7 +332,6 @@ const App = () => {
       return gdB - gdA; 
   });
 
-  // 2. Group them
   const groupedStandings = sortedTeams.reduce((groups, team) => {
       const groupName = team.group ? `GROUP ${team.group}` : 'LIGI KUU'; 
       if (!groups[groupName]) {
@@ -339,7 +341,6 @@ const App = () => {
       return groups;
   }, {});
   
-  // 3. Sort Group Keys (A, B, C...)
   const sortedGroupKeys = Object.keys(groupedStandings).sort();
 
   const filteredVideos = getFilteredData(cmsData.videos);
@@ -496,20 +497,50 @@ const App = () => {
         <section id="news" style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={styles.sectionHeader}><Newspaper style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Habari <span style={styles.limeText}>{activeSeason}</span></h2></div>
           {filteredNews.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
-                {filteredNews.map((item, idx) => (
-                    <div key={idx} className="hover-card" style={styles.newsCard}>
-                        <div style={{ height: '200px', overflow: 'hidden' }}>
-                          <img src={item.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="News" onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&q=80&w=500"; }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+                    {filteredNews.slice(0, visibleNewsCount).map((item, idx) => (
+                        <div key={idx} className="hover-card" style={styles.newsCard}>
+                            <div style={{ height: '200px', overflow: 'hidden' }}>
+                            <img src={item.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="News" onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&q=80&w=500"; }} />
+                            </div>
+                            <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', marginBottom: '8px' }}>{formatDate(item.date)}</span>
+                                <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 12px', lineHeight: '1.4' }}>{item.title}</h3>
+                                <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: '1.6', margin: '0 0 20px', flex: 1 }}>{item.excerpt}</p>
+                                <button onClick={() => openNews(item)} style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>SOMA ZAIDI <ChevronRight size={14} color="#a3e635" /></button>
+                            </div>
                         </div>
-                        <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', marginBottom: '8px' }}>{formatDate(item.date)}</span>
-                            <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 12px', lineHeight: '1.4' }}>{item.title}</h3>
-                            <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: '1.6', margin: '0 0 20px', flex: 1 }}>{item.excerpt}</p>
-                            <button onClick={() => openNews(item)} style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>SOMA ZAIDI <ChevronRight size={14} color="#a3e635" /></button>
-                        </div>
+                    ))}
+                </div>
+                {/* LOAD MORE BUTTON */}
+                {filteredNews.length > 3 && (
+                    <div style={{ textAlign: 'center' }}>
+                        <button 
+                            onClick={() => setVisibleNewsCount(prev => prev === 3 ? filteredNews.length : 3)} 
+                            style={{ 
+                                padding: '12px 32px', 
+                                backgroundColor: 'white', 
+                                color: 'black', 
+                                borderRadius: '50px', 
+                                border: 'none', 
+                                fontWeight: 'bold', 
+                                cursor: 'pointer',
+                                fontSize: '13px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                boxShadow: '0 4px 15px rgba(255,255,255,0.1)'
+                            }}
+                        >
+                            {visibleNewsCount === 3 ? (
+                                <>ONYESHA HABARI ZAIDI <ChevronDown size={16} /></>
+                            ) : (
+                                <>PUNGUZA HABARI <ChevronUp size={16} /></>
+                            )}
+                        </button>
                     </div>
-                ))}
+                )}
             </div>
           ) : ( <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}><p>Hakuna habari zilizopakiwa kwa msimu huu bado.</p></div> )}
         </section>
@@ -784,7 +815,7 @@ const App = () => {
         </div>
       )}
 
-      {/* MODAL - GROUP STANDINGS (NEW) */}
+      {/* MODAL - GROUP STANDINGS */}
       {selectedGroup && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 120, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(8px)' }}>
           <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
@@ -820,7 +851,7 @@ const App = () => {
                             borderBottom: '1px solid rgba(255,255,255,0.05)',
                             backgroundColor: idx < 2 ? 'rgba(34, 197, 94, 0.05)' : 'transparent' 
                         }}>
-                            <td style={{ ...styles.td, padding: '16px', fontWeight: 'bold', color: idx === 0 ? '#a3e635' : (idx === 1 ? '#4ade80' : 'white'), fontSize: '16px' }}>{team.pos}</td>
+                            <td style={{ ...styles.td, padding: '16px', fontWeight: 'bold', color: idx === 0 ? '#a3e635' : (idx === 1 ? '#4ade80' : 'white'), fontSize: '16px' }}>{idx + 1}</td>
                             <td style={{ ...styles.td, padding: '16px', fontWeight: 'bold', fontSize: '16px' }}>{team.team}</td>
                             <td style={{ ...styles.td, padding: '16px', textAlign: 'center', color: '#94a3b8' }}>{team.p}</td>
                             <td style={{ ...styles.td, padding: '16px', textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : (team.gd.startsWith('-') ? '#f87171' : 'white'), fontWeight: 'bold' }}>{team.gd}</td>
