@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar
+  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -213,7 +213,7 @@ const App = () => {
                 return asset && asset.fields.file ? `https:${asset.fields.file.url}` : null;
              };
              return {
-                date: String(item.fields.date || ""), // REMOVED DEFAULT TEXT to help sorter
+                date: String(item.fields.date || ""), 
                 title: String(item.fields.title || "Habari Mpya"),
                 excerpt: String(item.fields.excerpt || "Soma zaidi..."),
                 body: item.fields.body || "",
@@ -223,16 +223,17 @@ const App = () => {
              };
         }) : [];
 
-        // Process Standings
+        // Process Standings (WITH GROUP FIELD)
         const fetchedStandings = standingsData.items ? standingsData.items.map(item => ({
             pos: item.fields.position || 0,
             team: String(item.fields.teamName || "Team"),
             p: item.fields.played || 0,
             gd: String(item.fields.goalDifference || "0"),
             pts: item.fields.points || 0,
+            group: String(item.fields.group || "").toUpperCase(), // Normalizing Group
             location: item.fields.location ? String(item.fields.location).toLowerCase() : "kiomoni",
             season: item.fields.season || "June 2026"
-        })).sort((a, b) => a.pos - b.pos) : [];
+        })) : [];
 
         // Process Videos
         const fetchedVideos = videosData.items ? videosData.items.map(item => {
@@ -297,24 +298,43 @@ const App = () => {
         return dateB - dateA;
     });
 
-  // --- NEWS SORTING (ROBUST FIX) ---
+  // --- NEWS SORTING ---
   const filteredNews = getFilteredData(cmsData.news).sort((a, b) => {
-      // Convert to Date Objects
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
-      
-      // Check if dates are valid
       const isAValid = !isNaN(dateA.getTime());
       const isBValid = !isNaN(dateB.getTime());
-
-      // Sorting Logic
-      if (isAValid && isBValid) return dateB - dateA; // Both Valid: Newest First
-      if (!isAValid && isBValid) return 1; // A is Bad: Push Down
-      if (isAValid && !isBValid) return -1; // B is Bad: Push Down
-      return 0; // Both Bad: Keep Order
+      if (isAValid && isBValid) return dateB - dateA; 
+      if (!isAValid && isBValid) return 1; 
+      if (isAValid && !isBValid) return -1; 
+      return 0; 
   });
 
+  // --- STANDINGS GROUPING & AUTO-SORTING LOGIC ---
   const filteredStandings = getFilteredData(cmsData.standings);
+  
+  // 1. Sort ALL teams by Points (DESC), then GD (DESC)
+  const sortedTeams = [...filteredStandings].sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts; // Higher points first
+      // Handle GD comparison (e.g. "+3" vs "-1")
+      const gdA = parseInt(a.gd) || 0;
+      const gdB = parseInt(b.gd) || 0;
+      return gdB - gdA; // Higher GD first
+  });
+
+  // 2. Group them
+  const groupedStandings = sortedTeams.reduce((groups, team) => {
+      const groupName = team.group ? `GROUP ${team.group}` : 'LIGI KUU'; // Default if no group
+      if (!groups[groupName]) {
+          groups[groupName] = [];
+      }
+      groups[groupName].push(team);
+      return groups;
+  }, {});
+  
+  // 3. Sort Group Keys (A, B, C...)
+  const sortedGroupKeys = Object.keys(groupedStandings).sort();
+
   const filteredVideos = getFilteredData(cmsData.videos);
 
   const isGoba2025 = activeLocation === 'goba' && activeSeason === 'June 2025';
@@ -322,7 +342,6 @@ const App = () => {
   let displayTitle = currentHero.title;
   let displaySubtitle = currentHero.subtitle;
 
-  // --- NEW GENESIS STORY & SLOGAN LOGIC (Specific for History Mode) ---
   if (activeSeason === 'June 2025' && !isGoba2025) {
      displayTitle = "HII GAME NI YETU."; 
      displaySubtitle = (
@@ -351,7 +370,6 @@ const App = () => {
     heroMedia: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, objectFit: 'cover' },
     heroOverlay: { position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.9))' },
     heroContent: { position: 'relative', zIndex: 3, textAlign: 'center', padding: '0 24px', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' },
-    // ADJUSTED FONT SIZE: Reduced max from 7rem to 5.5rem, min from 3rem to 2.5rem
     mainTitle: { fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', lineHeight: '0.9', letterSpacing: '-0.03em', margin: '0 0 24px', textShadow: '0 10px 30px rgba(0,0,0,0.8)' },
     limeText: { color: '#a3e635' },
     buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: '14px 28px', borderRadius: '8px', fontWeight: '800', textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(163, 230, 53, 0.2)' },
@@ -361,9 +379,10 @@ const App = () => {
     newsCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', height: '100%' },
     mobileMenu: { position: 'fixed', top: '0', right: '0', width: '85%', maxWidth: '320px', height: '100vh', backgroundColor: '#0f172a', zIndex: 60, padding: '32px 24px', boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', borderLeft: '1px solid rgba(255,255,255,0.1)' },
     matchCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '24px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' },
-    table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px', fontSize: '14px' },
-    th: { textAlign: 'left', padding: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#64748b', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px' },
-    td: { padding: '16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
+    table: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' },
+    th: { textAlign: 'left', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#64748b', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px' },
+    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
+    groupCard: { backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }
   };
 
   return (
@@ -488,10 +507,10 @@ const App = () => {
           ) : ( <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}><p>Hakuna habari zilizopakiwa kwa msimu huu bado.</p></div> )}
         </section>
 
-        {/* 5. MATCH CENTER */}
+        {/* 5. MATCH CENTER & GROUPS */}
         <section id="ratiba" style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px' }}>
-            {/* COLUMN 1: RATIBA & MATOKEO (FIXED HEIGHT SCROLL) */}
+            {/* COLUMN 1: RATIBA & MATOKEO */}
             <div>
               {upcomingMatches.length > 0 && (
                   <div style={{ marginBottom: '48px' }}>
@@ -549,12 +568,53 @@ const App = () => {
               )}
             </div>
 
-            {/* COLUMN 2: MSIMAMO (NOW SCROLLABLE) */}
+            {/* COLUMN 2: MAKUNDI (GROUP STAGE) - AUTOMATIC SORTED */}
             <div>
-              <div style={styles.sectionHeader}><ListOrdered style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Msimamo wa <span style={styles.limeText}>Ligi</span></h2></div>
+              <div style={styles.sectionHeader}><Grid style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Msimamo wa <span style={styles.limeText}>Makundi</span></h2></div>
               {filteredStandings.length > 0 ? (
-                <div className="custom-scroll" style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '20px', maxHeight: '400px', overflowY: 'auto' }}>
-                  <table style={styles.table}><thead><tr><th style={styles.th}>Pos</th><th style={styles.th}>Timu</th><th style={{ ...styles.th, textAlign: 'center' }}>P</th><th style={{ ...styles.th, textAlign: 'center' }}>GD</th><th style={{ ...styles.th, textAlign: 'center' }}>PTS</th></tr></thead><tbody>{filteredStandings.map((team, idx) => (<tr key={idx}><td style={{ ...styles.td, fontWeight: 'bold', color: idx === 0 ? '#a3e635' : 'white' }}>{team.pos}</td><td style={{ ...styles.td, fontWeight: '900' }}>{team.team}</td><td style={{ ...styles.td, textAlign: 'center' }}>{team.p}</td><td style={{ ...styles.td, textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : 'white' }}>{team.gd}</td><td style={{ ...styles.td, textAlign: 'center', fontWeight: 'bold' }}>{team.pts}</td></tr>))}</tbody></table>
+                <div className="custom-scroll" style={{ maxHeight: '600px', overflowY: 'auto', paddingRight: '10px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {sortedGroupKeys.map((groupName, gIdx) => (
+                    <div key={gIdx} className="hover-card" style={styles.groupCard}>
+                      {/* Group Header */}
+                      <div style={{ backgroundColor: 'rgba(163, 230, 53, 0.1)', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Shield size={18} color="#a3e635" />
+                            <span style={{ color: 'white', fontWeight: '900', textTransform: 'uppercase', fontSize: '16px', letterSpacing: '1px' }}>
+                              {groupName}
+                            </span>
+                        </div>
+                        <span style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', backgroundColor: 'rgba(163, 230, 53, 0.2)', padding: '4px 8px', borderRadius: '4px' }}>{groupedStandings[groupName].length} Teams</span>
+                      </div>
+                      
+                      {/* Table */}
+                      <table style={styles.table}>
+                        <thead>
+                          <tr style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                            <th style={{...styles.th, width: '40px', paddingLeft: '16px'}}>#</th>
+                            <th style={styles.th}>Timu</th>
+                            <th style={{...styles.th, textAlign: 'center'}}>P</th>
+                            <th style={{...styles.th, textAlign: 'center'}}>GD</th>
+                            <th style={{...styles.th, textAlign: 'center', paddingRight: '16px'}}>PTS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {/* AUTO-GENERATED ROWS */}
+                          {groupedStandings[groupName].map((team, idx) => (
+                            <tr key={idx} style={{ 
+                                borderBottom: idx !== groupedStandings[groupName].length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                                backgroundColor: idx < 2 ? 'rgba(34, 197, 94, 0.05)' : 'transparent' // Highlight top 2
+                            }}>
+                              <td style={{ ...styles.td, paddingLeft: '16px', fontWeight: 'bold', color: idx === 0 ? '#a3e635' : (idx === 1 ? '#4ade80' : 'white') }}>{idx + 1}</td>
+                              <td style={{ ...styles.td, fontWeight: 'bold', fontSize: '14px' }}>{team.team}</td>
+                              <td style={{ ...styles.td, textAlign: 'center', color: '#94a3b8' }}>{team.p}</td>
+                              <td style={{ ...styles.td, textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : (team.gd.startsWith('-') ? '#f87171' : 'white') }}>{team.gd}</td>
+                              <td style={{ ...styles.td, textAlign: 'center', fontWeight: '900', color: 'white', fontSize: '15px', paddingRight: '16px' }}>{team.pts}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
                 </div>
               ) : (<p style={{ color: '#64748b', fontStyle: 'italic' }}>Msimamo haujatoka bado kwa msimu huu.</p>)}
             </div>
