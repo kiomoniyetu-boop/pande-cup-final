@@ -171,7 +171,7 @@ const App = () => {
   const closeModal = () => { setIsModalOpen(false); document.body.style.overflow = 'auto'; };
   const toggleMobileMenu = () => { setIsMobileMenuOpen(!isMobileMenuOpen); };
   
-  // HANDLE REGISTRATION SUBMIT (API CONNECTED)
+  // HANDLE REGISTRATION SUBMIT (DEBUGGING VERSION)
   const handleRegistrationSubmit = async () => {
     setSubmitError('');
     
@@ -202,6 +202,12 @@ const App = () => {
             })
         });
 
+        // HAPA: Tunakamata error halisi ya Server
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server Error (${response.status}): ${errorText.substring(0, 100)}...`); 
+        }
+
         const result = await response.json();
 
         if (result.success) {
@@ -210,8 +216,9 @@ const App = () => {
             throw new Error(result.message || 'Tatizo la mtandao.');
         }
     } catch (error) {
-        console.error(error);
-        setSubmitError('Imeshindikana kusajili. Jaribu tena au wasiliana nasi.');
+        console.error("Submission Error:", error);
+        // Hii itakuonesha kosa halisi kwenye simu
+        setSubmitError(`SYSTEM ERROR: ${error.message}`);
     } finally {
         setIsSubmitting(false);
     }
