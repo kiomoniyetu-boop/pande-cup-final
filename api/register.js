@@ -19,24 +19,31 @@ module.exports = async (req, res) => {
     const space = await client.getSpace('ax6wvfd84net'); 
     const environment = await space.getEnvironment('master');
 
-    // TUMEHAKIKISHA MAJINA YA FIELDS YANAENDANA NA SCREENSHOT YAKO YA CONTENTFUL
+    // TUMEWEKA KILA KITU HERUFI NDOGO ILI KULINGANA NA ID ZA CONTENTFUL
     await environment.createEntry('registration', { 
       fields: {
         teamName: { 'en-US': teamName || 'Haikuwekwa' },
         coachName: { 'en-US': coachName || 'Haikuwekwa' },
         phoneNumber: { 'en-US': phoneNumber || 'Haikuwekwa' },
-        Location: { 'en-US': location || 'Haikuwekwa' }, // 'Location' kulingana na screenshot
+        location: { 'en-US': location || 'Haikuwekwa' }, // 'l' ndogo hapa
         jerseyColor: { 'en-US': jerseyColor || 'Haikuwekwa' },
-        paymentStatus: { 'en-US': false } // 'paymentStatus' kulingana na screenshot
+        paymentStatus: { 'en-US': false } 
       }
     });
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error('ERROR:', error);
+    console.error('FULL ERROR:', error);
+    
+    // HAPA: Tunachimba kosa halisi ili lijionyeshe kwenye simu yako
+    let detailMsg = error.message;
+    if (error.details && error.details.errors) {
+      detailMsg += " - " + JSON.stringify(error.details.errors);
+    }
+
     return res.status(500).json({ 
       success: false, 
-      message: `SYSTEM ERROR: ${error.message}`
+      message: `VALIDATION ERROR (422): ${detailMsg}`
     });
   }
 };
