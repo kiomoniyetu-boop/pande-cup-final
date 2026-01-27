@@ -8,7 +8,8 @@ import {
 // --- USANIDI WA CMS ---
 const SPACE_ID = 'ax6wvfd84net'; 
 const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
-const LOGO_PATH = const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
+// SENSEI FIX: Nimetumia link ya mtandaoni moja kwa moja ili isizingue
+const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 const USE_IMAGE_LOGO = true;
 
 // --- LINKS ZA SOCIAL MEDIA ---
@@ -429,10 +430,10 @@ const App = () => {
   if (activeSeason === 'June 2025' && !isGoba2025) {
      displayTitle = "HII GAME NI YETU."; 
      displaySubtitle = (
-        <span>
-            Ilianzia Kiomoni Pande, Tanga kwenye vumbi la asili ambapo ndoto ilizaliwa. Sasa tumebeba moto huo na kuuwasha Goba, Dar es Salaam.<br/><br/>
-            <span style={{ color: '#a3e635', fontWeight: 'bold', fontStyle: 'italic' }}>Ligi Moja. Upendo Mmoja. Vumbi Moja.</span>
-        </span>
+       <span>
+           Ilianzia Kiomoni Pande, Tanga kwenye vumbi la asili ambapo ndoto ilizaliwa. Sasa tumebeba moto huo na kuuwasha Goba, Dar es Salaam.<br/><br/>
+           <span style={{ color: '#a3e635', fontWeight: 'bold', fontStyle: 'italic' }}>Ligi Moja. Upendo Mmoja. Vumbi Moja.</span>
+       </span>
      );
   }
 
@@ -528,7 +529,7 @@ const App = () => {
             <button onClick={openModal} style={{ ...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px' }}>SAJILI TIMU</button>
           </div>
           <div style={{ display: 'block' }}>
-             <button onClick={toggleMobileMenu} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: window.innerWidth <= 768 ? 'block' : 'none' }}>{isMobileMenuOpen ? <X size={32} /> : <Menu size={32} />}</button>
+              <button onClick={toggleMobileMenu} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: window.innerWidth <= 768 ? 'block' : 'none' }}>{isMobileMenuOpen ? <X size={32} /> : <Menu size={32} />}</button>
           </div>
         </div>
       </nav>
@@ -565,14 +566,14 @@ const App = () => {
                 <h1 style={{...styles.mainTitle, fontSize: '32px', marginBottom: '16px'}}>HAKUNA DATA</h1>
                 <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', lineHeight: '1.6' }}>Mashindano ya Pande Cup Goba yalianza rasmi 2026. Hakuna data za 2025.</p>
               </div>
-           ) : (
-             <>
-               <h1 style={styles.mainTitle}>{displayTitle}</h1>
-               <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: '0 auto 16px', lineHeight: '1.6' }}>
-                  {displaySubtitle}
-               </p>
-             </>
-           )}
+            ) : (
+              <>
+                <h1 style={styles.mainTitle}>{displayTitle}</h1>
+                <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: '0 auto 16px', lineHeight: '1.6' }}>
+                   {displaySubtitle}
+                </p>
+              </>
+            )}
         </section>
       </div>
 
@@ -869,7 +870,7 @@ const App = () => {
 
             {/* STEP 2: PAYMENT POPUP (DISCOUNT APPLIED) */}
             {modalStep === 2 && (
-                 <div style={{ textAlign: 'center' }}>
+                  <div style={{ textAlign: 'center' }}>
                     <div style={{ backgroundColor: '#16a34a', padding: '16px', borderRadius: '16px', marginBottom: '24px', color: 'white' }}>
                         <div style={{ width: '50px', height: '50px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px auto' }}>
                              <CheckCircle size={28} />
