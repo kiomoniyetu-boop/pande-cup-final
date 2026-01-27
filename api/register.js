@@ -2,32 +2,19 @@
 const { createClient } = require('contentful-management');
 
 module.exports = async (req, res) => {
-  // 1. Ruhusu mawasiliano kutoka kwenye simu (CORS)
+  // 1. CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(200).end();
   }
 
   const { teamName, coachName, phoneNumber, location, jerseyColor } = req.body;
 
-  if (!teamName || !phoneNumber) {
-    return res.status(400).json({ message: 'Data haijakamilika' });
-  }
-
   try {
-    // --- USAJILI LIVE (HARDCODED TOKENS BY SENSEI YAS) ---
     const client = createClient({
       accessToken: 'CFPAT-Thhq98H2yEpRpYg8Pcyg8_cMv977e8nu4dJnfw6fRZU' 
     });
@@ -35,22 +22,27 @@ module.exports = async (req, res) => {
     const space = await client.getSpace('ax6wvfd84net'); 
     const environment = await space.getEnvironment('master');
 
-    // Hapa tunatengeneza entry mpya Contentful
-    await environment.createEntry('registration', {
+    // --- JARIBIO LA KUANDIKA ---
+    await environment.createEntry('registration', { // <--- HAPA: Hakikisha API ID ni 'registration'
       fields: {
-        teamName: { 'en-US': teamName },
-        coachName: { 'en-US': coachName },
-        phoneNumber: { 'en-US': phoneNumber },
-        Location: { 'en-US': location },
-        jerseyColor: { 'en-US': jerseyColor },
+        teamName: { 'en-US': teamName || 'Haikuwekwa' },
+        coachName: { 'en-US': coachName || 'Haikuwekwa' },
+        phoneNumber: { 'en-US': phoneNumber || 'Haikuwekwa' },
+        Location: { 'en-US': location || 'Haikuwekwa' },
+        jerseyColor: { 'en-US': jerseyColor || 'Haikuwekwa' },
         paymentStatus: { 'en-US': false }
       }
     });
 
-    res.status(200).json({ success: true });
+    return res.status(200).json({ success: true });
   } catch (error) {
-    console.error('Contentful Error:', error);
-    // Tunatuma kosa halisi ili uone kwenye box jekundu simuni
-    res.status(500).json({ success: false, message: error.message });
+    console.error('FULL ERROR:', error);
+    // Hii itatupa ujumbe wa kina zaidi kwenye simu yako
+    const errorMessage = error.message || 'Unknown Error';
+    return res.status(500).json({ 
+      success: false, 
+      message: `SYSTEM ERROR: ${errorMessage}`,
+      hint: "Hakikisha Content Model ID kule Contentful ni 'registration'"
+    });
   }
 };
