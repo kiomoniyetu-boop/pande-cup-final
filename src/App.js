@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from "react-helmet"; 
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp
+  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp, CheckCircle, Copy, Shirt 
 } from 'lucide-react';
+// Note: Added 'CheckCircle', 'Copy', 'Shirt' (Aliased as FaTshirt logic) to imports
 
 // --- USANIDI WA CMS ---
 const SPACE_ID = 'ax6wvfd84net'; 
@@ -18,6 +19,26 @@ const SOCIAL_LINKS = {
   youtube: "https://www.youtube.com/@PandeCup",
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
+
+// --- ORODHA YA MITAA (SMART LIST) ---
+const LOCATIONS_LIST = [
+  { 
+    group: 'KIOMONI (Nyumbani - The Root)', 
+    areas: ['Kiomoni', 'Mpirani', 'Mabayani', 'Ndumi', 'Mapande "A"', 'Kivulini', 'Cross Z', 'Mbogo', 'Kilimanjaro', 'Mowe', 'Masaini', 'Muheza', 'Kikuluni', 'Chote', 'Lwande', 'Magubeni', 'Marembwe', 'Mavumbi', 'Mijohoroni', 'Mjesani', 'Mnyenzani'] 
+  },
+  { 
+    group: 'TANGA MJINI (Kata & Mitaa)', 
+    areas: ['Ngamiani', 'Majengo', 'Mabawa', 'Central', 'Makorora', 'Mzingani', 'Tanga Sisi', 'Mnyanjani', 'Usagara', 'Nguvumali', 'Pongwe', 'Magaoni', 'Duga', 'Maweni', 'Chongoleani', 'Raskazone', 'Donge', 'Gofu'] 
+  },
+  { 
+    group: 'DAR ES SALAAM', 
+    areas: ['Goba', 'Madale', 'Makongo', 'Mbezi Mwisho', 'Kimara', 'Sinza', 'Ubungo', 'Mabibo', 'Tegeta', 'Bunju', 'Kinondoni', 'Ilala'] 
+  },
+  { 
+    group: 'ENGINE', 
+    areas: ['Nje ya Tanga/Dar'] 
+  }
+];
 
 // --- ABOUT TEXT ---
 const ABOUT_TEXT = {
@@ -61,14 +82,8 @@ const FALLBACK_DATA = {
   ]
 };
 
-const FEES = {
-  amount: "Tsh 100,000/=", 
-  number: "556677",
-  name: "PANDE SPORTS ENT"
-};
-
 // --- COMPONENTS ---
-const PandeLogo = ({ size = 'normal', useImage = true }) => {
+const PandeLogo = ({ size = 'normal' }) => {
   const height = size === 'large' ? '120px' : '56px';
   const [imgError, setImgError] = useState(false);
 
@@ -128,24 +143,86 @@ const App = () => {
   const [activeLocation, setActiveLocation] = useState('kiomoni');
   const [activeSeason, setActiveSeason] = useState('June 2026'); 
   
+  // Registration State
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // API Loading state
+  const [submitError, setSubmitError] = useState(''); // API Error state
+  const [teamData, setTeamData] = useState({ 
+    name: '', 
+    location: '', 
+    coachName: '', 
+    nidaNumber: '', // Optional now based on request, kept in state just in case
+    phone: '', 
+    jerseyColor: '' // Added Jersey Color
+  });
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', nidaNumber: '', phone: '', termsAccepted: false });
   const [selectedNews, setSelectedNews] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   
-  // NEW: News Pagination State
+  // News Pagination State
   const [visibleNewsCount, setVisibleNewsCount] = useState(3);
 
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
   // --- HANDLERS ---
-  const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); document.body.style.overflow = 'hidden'; };
+  const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); document.body.style.overflow = 'hidden'; setSubmitError(''); };
   const closeModal = () => { setIsModalOpen(false); document.body.style.overflow = 'auto'; };
   const toggleMobileMenu = () => { setIsMobileMenuOpen(!isMobileMenuOpen); };
-  const handleFinalSubmit = () => { alert(`Asante ${teamData.coachName}! Maombi ya timu ya ${teamData.name} yamepokelewa. Ofisi itawasiliana nawe kwa hatua zaidi.`); setModalStep(3); };
+  
+  // NEW: HANDLE REGISTRATION SUBMIT (API CONNECTED)
+  const handleRegistrationSubmit = async () => {
+    setSubmitError('');
+    
+    // Validation
+    if (!teamData.name || !teamData.coachName || !teamData.phone || !teamData.location) {
+        setSubmitError('Tafadhali jaza taarifa zote muhimu.');
+        return;
+    }
+
+    const phoneRegex = /^(06|07)\d{8}$/;
+    if (!phoneRegex.test(teamData.phone)) {
+        setSubmitError('Weka namba sahihi ya simu (mfano: 0712345678).');
+        return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                teamName: teamData.name,
+                coachName: teamData.coachName,
+                phoneNumber: teamData.phone,
+                location: teamData.location,
+                jerseyColor: teamData.jerseyColor || 'Haikuwekwa'
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            setModalStep(2); // Go to Payment Popup
+        } else {
+            throw new Error(result.message || 'Tatizo la mtandao.');
+        }
+    } catch (error) {
+        console.error(error);
+        setSubmitError('Imeshindikana kusajili. Jaribu tena au wasiliana nasi.');
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  const copyNumber = () => {
+    navigator.clipboard.writeText('43852599');
+    alert('Namba imekopiwa!');
+  };
+
   const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
   const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
   const openGroupModal = (groupName, teams) => { setSelectedGroup({ name: groupName, teams: teams }); document.body.style.overflow = 'hidden'; };
@@ -166,7 +243,6 @@ const App = () => {
 
   // --- EFFECTS ---
   useEffect(() => {
-    // Reset news count when filters change
     setVisibleNewsCount(3);
   }, [activeLocation, activeSeason]);
 
@@ -291,10 +367,8 @@ const App = () => {
   };
 
   const currentHero = getCurrentHero();
-  
   const filteredMatches = getFilteredData(cmsData.matches);
 
-  // --- SORTING LOGIC ---
   const upcomingMatches = filteredMatches
     .filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'))
     .sort((a, b) => {
@@ -311,7 +385,6 @@ const App = () => {
         return dateB - dateA;
     });
 
-  // --- NEWS SORTING ---
   const filteredNews = getFilteredData(cmsData.news).sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
@@ -323,9 +396,7 @@ const App = () => {
       return 0; 
   });
 
-  // --- STANDINGS GROUPING & AUTO-SORTING LOGIC ---
   const filteredStandings = getFilteredData(cmsData.standings);
-  
   const sortedTeams = [...filteredStandings].sort((a, b) => {
       if (b.pts !== a.pts) return b.pts - a.pts; 
       const gdA = parseInt(a.gd) || 0;
@@ -343,9 +414,7 @@ const App = () => {
   }, {});
   
   const sortedGroupKeys = Object.keys(groupedStandings).sort();
-
   const filteredVideos = getFilteredData(cmsData.videos);
-
   const isGoba2025 = activeLocation === 'goba' && activeSeason === 'June 2025';
 
   let displayTitle = currentHero.title;
@@ -361,21 +430,12 @@ const App = () => {
      );
   }
 
-  // --- SEO LOGIC (Kichwa cha Habari Kabadilika) ---
   const seoTitle = activeLocation === 'goba' ? 'Pande Cup Goba - Soka la Mtaani' : 'Pande Cup Kiomoni - Tanga';
   const seoDescription = "Ratiba, Matokeo na Habari za Pande Cup. Soka la mtaani lenye hadhi ya kimataifa.";
 
   const styles = {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif', scrollBehavior: 'smooth', position: 'relative', overflowX: 'hidden' },
-    topBar: { 
-      backgroundColor: '#1e293b', 
-      padding: '8px 24px', 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center', 
-      fontSize: '11px', 
-      borderBottom: '1px solid rgba(255,255,255,0.05)' 
-    },
+    topBar: { backgroundColor: '#1e293b', padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
     nav: { borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 0', position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)' },
     navContent: { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' },
     navLink: { color: '#94a3b8', textDecoration: 'none', fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', transition: 'color 0.2s', cursor: 'pointer', padding: '8px' },
@@ -411,6 +471,8 @@ const App = () => {
           .custom-scroll::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); borderRadius: 10px; }
           .custom-scroll::-webkit-scrollbar-thumb { background: rgba(163, 230, 53, 0.3); borderRadius: 10px; }
           .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(163, 230, 53, 0.6); }
+          .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
           
           /* MOBILE ADJUSTMENTS */
           @media (max-width: 768px) {
@@ -422,18 +484,16 @@ const App = () => {
         `}
       </style>
 
-      {/* --- SEO HELMET START --- */}
+      {/* --- SEO HELMET --- */}
       <Helmet>
         <title>{selectedNews ? selectedNews.title : seoTitle}</title>
         <meta name="description" content={selectedNews ? selectedNews.excerpt : seoDescription} />
-        {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://pandecup.co.tz/" />
         <meta property="og:title" content={selectedNews ? selectedNews.title : "Pande Cup - Hii Game Ni Yetu"} />
         <meta property="og:description" content={selectedNews ? selectedNews.excerpt : seoDescription} />
         <meta property="og:image" content={selectedNews ? selectedNews.image : "https://pandecup.co.tz/logo.png"} />
       </Helmet>
-      {/* --- SEO HELMET END --- */}
 
       <div style={styles.container}>
       {/* 1. TOP BAR */}
@@ -577,14 +637,11 @@ const App = () => {
                               const { date, time } = formatMatchTime(m.matchDate);
                               return (
                               <div key={idx} className="hover-card" style={styles.matchCard}>
-                                  {/* MATCH INFO HEADER */}
                                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#64748b', fontWeight: 'bold', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px', width: '100%' }}>
                                       {date && <span>{date}</span>}
                                       {time && <span style={{ color: '#a3e635' }}>• {time}</span>}
                                       {m.stadium && <span>• {m.stadium}</span>}
                                   </div>
-                                  
-                                  {/* TEAMS & SCORE */}
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                                       <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
                                       <div style={{ textAlign: 'center' }}>
@@ -625,14 +682,13 @@ const App = () => {
               )}
             </div>
 
-            {/* COLUMN 2: MAKUNDI (GROUP STAGE) - AUTOMATIC SORTED + POPUP */}
+            {/* COLUMN 2: MAKUNDI */}
             <div>
               <div style={styles.sectionHeader}><Grid style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Msimamo wa <span style={styles.limeText}>Makundi</span></h2></div>
               {filteredStandings.length > 0 ? (
                 <div className="custom-scroll" style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '10px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   {sortedGroupKeys.map((groupName, gIdx) => (
                     <div key={gIdx} className="hover-card" style={styles.groupCard}>
-                      {/* Group Header */}
                       <div style={{ backgroundColor: 'rgba(163, 230, 53, 0.1)', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <Shield size={18} color="#a3e635" />
@@ -640,14 +696,12 @@ const App = () => {
                               {groupName}
                             </span>
                         </div>
-                        {/* POPUP BUTTON */}
                         <button onClick={() => openGroupModal(groupName, groupedStandings[groupName])} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a3e635', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }}>Open</span>
                             <Maximize2 size={16} />
                         </button>
                       </div>
                       
-                      {/* Table (Preview - Showing Top 4 or All) */}
                       <table style={styles.table}>
                         <thead>
                           <tr style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
@@ -710,18 +764,15 @@ const App = () => {
         </div>
       </section>
 
-      {/* 8. FOOTER (UPDATED - DYNAMIC ABOUT & REAL LINKS) */}
+      {/* 8. FOOTER */}
       <footer id="about" style={{ padding: '80px 24px 40px', backgroundColor: '#000' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '60px' }}>
           <div>
             <div style={{ marginBottom: '24px' }}><PandeLogo size="large" /></div>
             <div style={{ marginBottom: '20px' }}>
-                <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', margin: '0 0 16px', whiteSpace: 'pre-line' }}>
-                  {ABOUT_TEXT.description}
-                </p>
+                <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', margin: '0 0 16px', whiteSpace: 'pre-line' }}>{ABOUT_TEXT.description}</p>
                 <div style={{ borderLeft: '3px solid #a3e635', paddingLeft: '12px', fontStyle: 'italic', color: '#a3e635', fontSize: '13px' }}>"{ABOUT_TEXT.slogan}"</div>
             </div>
-            {/* SOCIAL LINKS - UPDATED */}
             <div style={{ display: 'flex', gap: '16px' }}>
               <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" style={{ color: 'white', opacity: 0.7, transition: 'opacity 0.2s' }}><Instagram size={20} /></a>
               <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" style={{ color: 'white', opacity: 0.7, transition: 'opacity 0.2s' }}><Facebook size={20} /></a>
@@ -743,16 +794,24 @@ const App = () => {
         <div style={{ textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px', marginTop: '60px' }}><p style={{ fontSize: '11px', color: '#475569', textTransform: 'uppercase', letterSpacing: '1px' }}>© 2026 Pande Cup Events</p></div>
       </footer>
 
-      {/* MODAL - USAJILI (UPDATED WITH NIDA) */}
+      {/* --- MODAL YA USAJILI (REAL API + PAYMENT POPUP) --- */}
       {isModalOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(5px)' }}>
           <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '450px', borderRadius: '24px', padding: '32px', position: 'relative' }}>
             <button onClick={closeModal} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={24} /></button>
+            
+            {/* STEP 1: JAZA FOMU */}
             {modalStep === 1 && (
               <div>
                 <h2 style={{ fontSize: '20px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '8px' }}>Fomu ya <span style={styles.limeText}>Maombi</span></h2>
                 <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>Jaza taarifa sahihi ili kusajili timu yako.</p>
                 
+                {submitError && (
+                    <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#fca5a5', padding: '12px', borderRadius: '8px', fontSize: '12px', marginBottom: '16px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                        {submitError}
+                    </div>
+                )}
+
                 {/* JINA LA TIMU */}
                 <div style={{ position: 'relative', marginBottom: '12px' }}>
                     <input type="text" placeholder="Jina la Timu" value={teamData.name} onChange={(e) => setTeamData({...teamData, name: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
@@ -765,49 +824,87 @@ const App = () => {
                     <User size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
                 </div>
 
-                {/* NAMBA YA NIDA (NEW) */}
-                <div style={{ position: 'relative', marginBottom: '12px' }}>
-                    <input type="text" placeholder="Namba ya NIDA ya Kocha" value={teamData.nidaNumber} onChange={(e) => setTeamData({...teamData, nidaNumber: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
-                    <FileText size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                </div>
-
                 {/* NAMBA YA SIMU */}
-                <div style={{ position: 'relative', marginBottom: '24px' }}>
-                    <input type="tel" placeholder="Namba ya Simu" value={teamData.phone} onChange={(e) => setTeamData({...teamData, phone: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
+                <div style={{ position: 'relative', marginBottom: '12px' }}>
+                    <input type="tel" placeholder="Namba ya Simu (WhatsApp)" value={teamData.phone} onChange={(e) => setTeamData({...teamData, phone: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
                     <Phone size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }}>
-                    <button onClick={() => setTeamData({...teamData, location: 'Kiomoni'})} style={{ padding: '12px', borderRadius: '8px', border: teamData.location === 'Kiomoni' ? '1px solid #a3e635' : '1px solid rgba(255,255,255,0.1)', backgroundColor: teamData.location === 'Kiomoni' ? 'rgba(163,230,53,0.1)' : 'transparent', color: 'white', fontWeight: 'bold' }}>KIOMONI</button>
-                    <button onClick={() => setTeamData({...teamData, location: 'Goba'})} style={{ padding: '12px', borderRadius: '8px', border: teamData.location === 'Goba' ? '1px solid #a3e635' : '1px solid rgba(255,255,255,0.1)', backgroundColor: teamData.location === 'Goba' ? 'rgba(163,230,53,0.1)' : 'transparent', color: 'white', fontWeight: 'bold' }}>GOBA</button>
+                {/* LOCATIONS (DROPDOWN) */}
+                <div style={{ position: 'relative', marginBottom: '12px' }}>
+                    <select value={teamData.location} onChange={(e) => setTeamData({...teamData, location: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white', appearance: 'none' }}>
+                        <option value="">Chagua Eneo / Kata</option>
+                        {LOCATIONS_LIST.map((group, idx) => (
+                            <optgroup key={idx} label={group.group}>
+                                {group.areas.map((area, aIdx) => (
+                                    <option key={aIdx} value={area}>{area}</option>
+                                ))}
+                            </optgroup>
+                        ))}
+                    </select>
+                    <MapPin size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
                 </div>
-                <button onClick={() => setModalStep(2)} style={{ ...styles.buttonPrimary, width: '100%', justifyContent: 'center' }}>ENDELEA</button>
+
+                {/* RANGI ZA JEZI */}
+                <div style={{ position: 'relative', marginBottom: '24px' }}>
+                    <input type="text" placeholder="Rangi za Jezi (Mfano: Njano/Nyeusi)" value={teamData.jerseyColor} onChange={(e) => setTeamData({...teamData, jerseyColor: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
+                    <Shirt size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                </div>
+
+                <button 
+                    disabled={isSubmitting}
+                    onClick={handleRegistrationSubmit} 
+                    style={{ ...styles.buttonPrimary, width: '100%', justifyContent: 'center', opacity: isSubmitting ? 0.7 : 1 }}
+                >
+                    {isSubmitting ? 'Inatuma...' : 'WASILISHA MAOMBI'}
+                </button>
               </div>
             )}
+
+            {/* STEP 2: PAYMENT POPUP (Mixx By Yas Style) */}
             {modalStep === 2 && (
                  <div style={{ textAlign: 'center' }}>
-                    <h2 style={{ fontSize: '20px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '8px' }}>Thibitisha Maombi</h2>
-                    <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '24px' }}>Tafadhali lipia ada ili kukamilisha usajili.</p>
-                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '16px', marginBottom: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '14px' }}><span style={{ color: '#94a3b8' }}>Ada ya Usajili:</span><span style={{ fontWeight: 'bold' }}>{FEES.amount}</span></div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}><span style={{ color: '#94a3b8' }}>Lipa Namba:</span><span style={{ color: '#a3e635', fontWeight: 'bold' }}>{FEES.number}</span></div>
-                        <div style={{ fontSize: '11px', color: '#f87171', marginTop: '12px', fontStyle: 'italic' }}>*Ada hii hairudishwi (Non-refundable)</div>
+                    <div style={{ backgroundColor: '#16a34a', padding: '16px', borderRadius: '16px', marginBottom: '24px', color: 'white' }}>
+                        <div style={{ width: '50px', height: '50px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px auto' }}>
+                             <CheckCircle size={28} />
+                        </div>
+                        <h2 style={{ fontSize: '18px', fontWeight: '900', margin: 0 }}>HONGERA!</h2>
+                        <p style={{ margin: '4px 0 0', fontSize: '12px' }}>Taarifa za <strong>{teamData.name}</strong> zimepokelewa.</p>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', justifyContent: 'center' }}>
-                      <input type="checkbox" checked={teamData.termsAccepted} onChange={(e) => setTeamData({...teamData, termsAccepted: e.target.checked})} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                      <span style={{ fontSize: '12px', color: '#cbd5e1' }}>Nakubaliana na Sheria na Masharti</span>
+                    <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>Kukamilisha usajili, tafadhali lipia ada:</p>
+                    
+                    <div style={{ backgroundColor: 'rgba(255, 255, 0, 0.05)', border: '1px solid #a3e635', borderRadius: '16px', padding: '16px', position: 'relative', marginBottom: '24px' }}>
+                        <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Lipa Namba (Mitandao Yote)</p>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '8px 0' }}>
+                             <span style={{ fontSize: '24px', fontFamily: 'monospace', fontWeight: 'bold', color: 'white' }}>43852599</span>
+                             <button onClick={copyNumber} style={{ border: 'none', background: 'none', color: '#a3e635', cursor: 'pointer' }}><Copy size={18} /></button>
+                        </div>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#94a3b8', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px', marginTop: '8px' }}>
+                             Jina: FESTO HENRY MSANGAWALE
+                        </div>
+                        <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#a3e635', color: 'black', fontSize: '11px', fontWeight: 'bold', padding: '4px 8px', borderRadius: '0 15px 0 8px' }}>
+                            50,000/=
+                        </div>
                     </div>
 
-                    <button disabled={!teamData.termsAccepted} onClick={handleFinalSubmit} style={{ ...styles.buttonPrimary, width: '100%', justifyContent: 'center', backgroundColor: teamData.termsAccepted ? 'white' : '#475569', color: teamData.termsAccepted ? 'black' : '#94a3b8', cursor: teamData.termsAccepted ? 'pointer' : 'not-allowed' }}>WASILISHA MAOMBI</button>
-                 </div>
-            )}
-            {modalStep === 3 && (
-                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ width: '60px', height: '60px', background: 'rgba(34,197,94,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}><Check color="#22c55e" /></div>
-                    <h2 style={{ fontSize: '20px', fontWeight: '900', textTransform: 'uppercase' }}>Hongera!</h2>
-                    <p style={{ color: '#94a3b8', fontSize: '14px' }}>Maombi yamepokelewa. Tutawasiliana nawe.</p>
-                    <button onClick={closeModal} style={{ marginTop: '24px', background: 'none', border: 'none', color: '#a3e635', fontWeight: 'bold', cursor: 'pointer' }}>FUNGA</button>
+                    <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '12px', marginBottom: '20px', textAlign: 'left', fontSize: '12px', color: '#cbd5e1' }}>
+                        <p style={{ fontWeight: 'bold', marginBottom: '4px', color: '#fff' }}>Jinsi ya Kulipa:</p>
+                        <ol style={{ paddingLeft: '16px', margin: 0, lineHeight: '1.6' }}>
+                             <li>Piga <strong>*150*...#</strong> (Menu ya mtandao wako)</li>
+                             <li>Chagua <strong>Lipa kwa Simu</strong> &gt; <strong>Lipa Namba</strong></li>
+                             <li>Ingiza: <strong>43852599</strong></li>
+                             <li>Kiasi: <strong>50,000</strong></li>
+                        </ol>
+                    </div>
+
+                    <a 
+                         href={`https://wa.me/255653292935?text=Habari, nimelipia fomu ya timu ${teamData.name}. Kiasi 50,000. Jina la Mlipaji: ${teamData.coachName}. Namba: ${teamData.phone}`}
+                         target="_blank" rel="noreferrer"
+                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '14px', backgroundColor: '#25D366', color: 'white', borderRadius: '12px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}
+                    >
+                         <div style={{display:'flex', alignItems:'center'}}><Phone size={18} style={{marginRight:6}} /> TUMA UTHIBITISHO</div>
+                    </a>
                  </div>
             )}
           </div>
@@ -838,7 +935,6 @@ const App = () => {
       {selectedGroup && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 120, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(8px)' }}>
           <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            {/* Modal Header */}
             <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(163, 230, 53, 0.05)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Shield size={28} color="#a3e635" />
@@ -852,7 +948,6 @@ const App = () => {
                 </button>
             </div>
             
-            {/* Modal Content (Table) */}
             <div className="custom-scroll" style={{ padding: '0', overflowY: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
                     <thead style={{ position: 'sticky', top: 0, backgroundColor: '#0f172a', zIndex: 10 }}>
@@ -881,7 +976,6 @@ const App = () => {
                 </table>
             </div>
             
-            {/* Modal Footer */}
             <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', fontSize: '11px', color: '#64748b' }}>
                 <p style={{ margin: 0 }}>*Nafasi mbili za juu zinafuzu hatua inayofuata.</p>
             </div>
@@ -895,4 +989,3 @@ const App = () => {
 };
 
 export default App;
-// MWISHO WA CODE
