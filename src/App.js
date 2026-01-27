@@ -8,7 +8,7 @@ import {
 // --- USANIDI WA CMS ---
 const SPACE_ID = 'ax6wvfd84net'; 
 const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
-const LOGO_PATH = "/logo.png";
+const LOGO_PATH = const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 const USE_IMAGE_LOGO = true;
 
 // --- LINKS ZA SOCIAL MEDIA ---
