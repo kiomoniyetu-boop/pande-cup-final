@@ -12,38 +12,31 @@ module.exports = async (req, res) => {
   const { teamName, coachName, phoneNumber, location, jerseyColor } = req.body;
 
   try {
+    // Sasa tunatumia majina ya siri (Environment Variables)
     const client = createClient({
-      accessToken: 'CFPAT-Thhq98H2yEpRpYg8Pcyg8_cMv977e8nu4dJnfw6fRZU' 
+      accessToken: process.env.CONTENTFUL_MANAGEMENT_TOKEN 
     });
 
-    const space = await client.getSpace('ax6wvfd84net'); 
+    const space = await client.getSpace(process.env.REACT_APP_SPACE_ID); 
     const environment = await space.getEnvironment('master');
 
-    // TUMEWEKA KILA KITU HERUFI NDOGO ILI KULINGANA NA ID ZA CONTENTFUL
     await environment.createEntry('registration', { 
       fields: {
         teamName: { 'en-US': teamName || 'Haikuwekwa' },
         coachName: { 'en-US': coachName || 'Haikuwekwa' },
         phoneNumber: { 'en-US': phoneNumber || 'Haikuwekwa' },
-        location: { 'en-US': location || 'Haikuwekwa' }, // 'l' ndogo hapa
+        location: { 'en-US': location || 'Haikuwekwa' },
         jerseyColor: { 'en-US': jerseyColor || 'Haikuwekwa' },
-        paymentStatus: { 'en-US': false } 
+        paymentStatus: { 'en-US': false }
       }
     });
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error('FULL ERROR:', error);
-    
-    // HAPA: Tunachimba kosa halisi ili lijionyeshe kwenye simu yako
-    let detailMsg = error.message;
-    if (error.details && error.details.errors) {
-      detailMsg += " - " + JSON.stringify(error.details.errors);
-    }
-
+    console.error('ERROR:', error);
     return res.status(500).json({ 
       success: false, 
-      message: `VALIDATION ERROR (422): ${detailMsg}`
+      message: `SYSTEM ERROR: ${error.message}`
     });
   }
 };
