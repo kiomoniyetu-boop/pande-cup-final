@@ -19,11 +19,11 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- ORODHA YA MITAA (SMART LIST) ---
+// --- ORODHA YA MITAA (SMART LIST - UPDATED) ---
 const LOCATIONS_LIST = [
   { 
     group: 'KIOMONI (Nyumbani - The Root)', 
-    areas: ['Kiomoni', 'Mpirani', 'Mabayani', 'Ndumi', 'Mapande "A"', 'Kivulini', 'Cross Z', 'Mbogo', 'Kilimanjaro', 'Mowe', 'Masaini', 'Muheza', 'Kikuluni', 'Chote', 'Lwande', 'Magubeni', 'Marembwe', 'Mavumbi', 'Mijohoroni', 'Mjesani', 'Mnyenzani'] 
+    areas: ['Kiomoni', 'Mpirani', 'Mabayani', 'Ndumi', 'Magubeni', 'Kivuleni', 'Cross Z', 'Mbogo', 'Kilimanjaro', 'Mowe', 'Masaini', 'Muheza', 'Kikuluni', 'Chote', 'Lwande', 'Marembwe', 'Mavumbi', 'Mijohoroni', 'Mjesani', 'Mnyenzani'] 
   },
   { 
     group: 'TANGA MJINI (Kata & Mitaa)', 
@@ -145,8 +145,8 @@ const App = () => {
   // Registration State
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // API Loading state
-  const [submitError, setSubmitError] = useState(''); // API Error state
+  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [submitError, setSubmitError] = useState(''); 
   const [teamData, setTeamData] = useState({ 
     name: '', 
     location: '', 
@@ -171,7 +171,7 @@ const App = () => {
   const closeModal = () => { setIsModalOpen(false); document.body.style.overflow = 'auto'; };
   const toggleMobileMenu = () => { setIsMobileMenuOpen(!isMobileMenuOpen); };
   
-  // NEW: HANDLE REGISTRATION SUBMIT (API CONNECTED)
+  // HANDLE REGISTRATION SUBMIT (API CONNECTED)
   const handleRegistrationSubmit = async () => {
     setSubmitError('');
     
