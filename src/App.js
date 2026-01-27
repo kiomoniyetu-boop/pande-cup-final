@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from "react-helmet"; 
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
-  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp, CheckCircle, Copy, Shirt 
+  ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp, CheckCircle, Copy, Shirt, Tag 
 } from 'lucide-react';
-// Note: Added 'CheckCircle', 'Copy', 'Shirt' (Aliased as FaTshirt logic) to imports
 
 // --- USANIDI WA CMS ---
 const SPACE_ID = 'ax6wvfd84net'; 
@@ -152,9 +151,9 @@ const App = () => {
     name: '', 
     location: '', 
     coachName: '', 
-    nidaNumber: '', // Optional now based on request, kept in state just in case
+    nidaNumber: '',
     phone: '', 
-    jerseyColor: '' // Added Jersey Color
+    jerseyColor: ''
   });
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -861,7 +860,7 @@ const App = () => {
               </div>
             )}
 
-            {/* STEP 2: PAYMENT POPUP (Mixx By Yas Style) */}
+            {/* STEP 2: PAYMENT POPUP (DISCOUNT APPLIED) */}
             {modalStep === 2 && (
                  <div style={{ textAlign: 'center' }}>
                     <div style={{ backgroundColor: '#16a34a', padding: '16px', borderRadius: '16px', marginBottom: '24px', color: 'white' }}>
@@ -872,7 +871,19 @@ const App = () => {
                         <p style={{ margin: '4px 0 0', fontSize: '12px' }}>Taarifa za <strong>{teamData.name}</strong> zimepokelewa.</p>
                     </div>
 
-                    <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>Kukamilisha usajili, tafadhali lipia ada:</p>
+                    {/* DISCOUNT BANNER */}
+                    <div style={{ backgroundColor: 'rgba(163, 230, 53, 0.1)', border: '1px solid #a3e635', borderRadius: '12px', padding: '12px', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <span style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'line-through' }}>Ada ya Kawaida:</span>
+                            <span style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'line-through' }}>100,000/=</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>Offer ya Mtandaoni:</span>
+                            <span style={{ color: '#a3e635', fontWeight: '900', fontSize: '18px' }}>70,000/=</span>
+                        </div>
+                    </div>
+
+                    <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>Kukamilisha usajili, tafadhali lipia:</p>
                     
                     <div style={{ backgroundColor: 'rgba(255, 255, 0, 0.05)', border: '1px solid #a3e635', borderRadius: '16px', padding: '16px', position: 'relative', marginBottom: '24px' }}>
                         <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Lipa Namba (Mitandao Yote)</p>
@@ -884,7 +895,7 @@ const App = () => {
                              Jina: FESTO HENRY MSANGAWALE
                         </div>
                         <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#a3e635', color: 'black', fontSize: '11px', fontWeight: 'bold', padding: '4px 8px', borderRadius: '0 15px 0 8px' }}>
-                            50,000/=
+                            70,000/=
                         </div>
                     </div>
 
@@ -894,12 +905,12 @@ const App = () => {
                              <li>Piga <strong>*150*...#</strong> (Menu ya mtandao wako)</li>
                              <li>Chagua <strong>Lipa kwa Simu</strong> &gt; <strong>Lipa Namba</strong></li>
                              <li>Ingiza: <strong>43852599</strong></li>
-                             <li>Kiasi: <strong>50,000</strong></li>
+                             <li>Kiasi: <strong>70,000</strong></li>
                         </ol>
                     </div>
 
                     <a 
-                         href={`https://wa.me/255653292935?text=Habari, nimelipia fomu ya timu ${teamData.name}. Kiasi 50,000. Jina la Mlipaji: ${teamData.coachName}. Namba: ${teamData.phone}`}
+                         href={`https://wa.me/255653292935?text=Habari, nimelipia fomu ya timu ${teamData.name}. Kiasi 70,000 (Offer ya Website). Jina la Mlipaji: ${teamData.coachName}. Namba: ${teamData.phone}`}
                          target="_blank" rel="noreferrer"
                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '14px', backgroundColor: '#25D366', color: 'white', borderRadius: '12px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}
                     >
