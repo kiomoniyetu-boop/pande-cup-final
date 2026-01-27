@@ -19,15 +19,15 @@ module.exports = async (req, res) => {
     const space = await client.getSpace('ax6wvfd84net'); 
     const environment = await space.getEnvironment('master');
 
-    // HAPA: Imerudi kuwa herufi ndogo kufuata maelekezo yako
+    // TUMEHAKIKISHA MAJINA YA FIELDS YANAENDANA NA SCREENSHOT YAKO YA CONTENTFUL
     await environment.createEntry('registration', { 
       fields: {
         teamName: { 'en-US': teamName || 'Haikuwekwa' },
         coachName: { 'en-US': coachName || 'Haikuwekwa' },
         phoneNumber: { 'en-US': phoneNumber || 'Haikuwekwa' },
-        Location: { 'en-US': location || 'Haikuwekwa' },
+        Location: { 'en-US': location || 'Haikuwekwa' }, // 'Location' kulingana na screenshot
         jerseyColor: { 'en-US': jerseyColor || 'Haikuwekwa' },
-        paymentStatus: { 'en-US': false }
+        paymentStatus: { 'en-US': false } // 'paymentStatus' kulingana na screenshot
       }
     });
 
@@ -36,8 +36,7 @@ module.exports = async (req, res) => {
     console.error('ERROR:', error);
     return res.status(500).json({ 
       success: false, 
-      message: `SYSTEM ERROR: ${error.message}`,
-      hint: "Hakikisha Content Model ID kule Contentful imeshakuwa Published kama 'registration'"
+      message: `SYSTEM ERROR: ${error.message}`
     });
   }
 };
