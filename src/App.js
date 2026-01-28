@@ -8,7 +8,8 @@ import {
 // --- USANIDI WA CMS ---
 const SPACE_ID = 'ax6wvfd84net'; 
 const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
-// SENSEI FIX: Nimetumia link ya mtandaoni moja kwa moja ili isizingue
+
+// SENSEI NOTE: Hii link ni ya Contentful moja kwa moja. Ni salama na ina load haraka.
 const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 const USE_IMAGE_LOGO = true;
 
@@ -84,7 +85,8 @@ const FALLBACK_DATA = {
 
 // --- COMPONENTS ---
 const PandeLogo = ({ size = 'normal' }) => {
-  const height = size === 'large' ? '120px' : '56px';
+  // SENSEI FIX: Adjusted height for better mobile visibility
+  const height = size === 'large' ? '120px' : '50px'; 
   const [imgError, setImgError] = useState(false);
 
   if (USE_IMAGE_LOGO && !imgError) {
@@ -93,12 +95,13 @@ const PandeLogo = ({ size = 'normal' }) => {
           <img 
             src={LOGO_PATH} 
             alt="Pande Cup Logo" 
-            style={{ height: height, objectFit: 'contain' }} 
+            style={{ height: height, objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(163, 230, 53, 0.3))' }} 
             onError={() => setImgError(true)} 
           />
       </div>
     );
   }
+  // Fallback kama picha ikigoma (Safety Net)
   return (
     <div style={{ fontSize: size === 'large' ? '32px' : '24px', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', letterSpacing: '-1px', color: 'white' }}>
       PANDE<span style={{ color: '#a3e635' }}>CUP</span>
@@ -123,8 +126,8 @@ const formatMatchTime = (dateString) => {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return { date: '', time: '' };
     return {
-        date: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
-        time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+      date: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
     };
 };
 
@@ -431,8 +434,8 @@ const App = () => {
      displayTitle = "HII GAME NI YETU."; 
      displaySubtitle = (
        <span>
-           Ilianzia Kiomoni Pande, Tanga kwenye vumbi la asili ambapo ndoto ilizaliwa. Sasa tumebeba moto huo na kuuwasha Goba, Dar es Salaam.<br/><br/>
-           <span style={{ color: '#a3e635', fontWeight: 'bold', fontStyle: 'italic' }}>Ligi Moja. Upendo Mmoja. Vumbi Moja.</span>
+            Ilianzia Kiomoni Pande, Tanga kwenye vumbi la asili ambapo ndoto ilizaliwa. Sasa tumebeba moto huo na kuuwasha Goba, Dar es Salaam.<br/><br/>
+            <span style={{ color: '#a3e635', fontWeight: 'bold', fontStyle: 'italic' }}>Ligi Moja. Upendo Mmoja. Vumbi Moja.</span>
        </span>
      );
   }
@@ -499,7 +502,7 @@ const App = () => {
         <meta property="og:url" content="https://pandecup.co.tz/" />
         <meta property="og:title" content={selectedNews ? selectedNews.title : "Pande Cup - Hii Game Ni Yetu"} />
         <meta property="og:description" content={selectedNews ? selectedNews.excerpt : seoDescription} />
-        <meta property="og:image" content={selectedNews ? selectedNews.image : "https://pandecup.co.tz/logo.png"} />
+        <meta property="og:image" content={selectedNews ? selectedNews.image : LOGO_PATH} />
       </Helmet>
 
       <div style={styles.container}>
@@ -570,7 +573,7 @@ const App = () => {
               <>
                 <h1 style={styles.mainTitle}>{displayTitle}</h1>
                 <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: '0 auto 16px', lineHeight: '1.6' }}>
-                   {displaySubtitle}
+                    {displaySubtitle}
                 </p>
               </>
             )}
