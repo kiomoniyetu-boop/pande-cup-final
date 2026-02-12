@@ -9,14 +9,24 @@ import AdminConsole from '../components/AdminConsole';
 // Responsive helpers for mobile
 const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
 const mobileCardStyle = {
-  padding: '16px',
-  borderRadius: '14px',
+  padding: '12px',
+  borderRadius: '12px',
 };
 const mobileHeaderStyle = {
-  fontSize: '20px',
+  fontSize: '1.25rem', // text-xl
   textAlign: 'center',
   fontWeight: '900',
-  margin: '0 0 16px',
+  margin: '0 0 12px',
+  lineHeight: 1.1,
+};
+const desktopHeaderStyle = {
+  fontSize: '3rem', // text-5xl
+  fontWeight: '900',
+  margin: 0,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  lineHeight: 1.1,
 };
 
 // --- USANIDI WA CMS ---
@@ -603,7 +613,7 @@ export const HomePage = () => {
             <a href="/pctv" style={styles.navLink}>PC TV</a>
             <a href="https://wa.me/255746510805?text=Habari, nahitaji kuwa mdhamini wa Pande Cup." style={{...styles.navLink, color: '#cbd5e1'}}>Wadhamini</a>
             <a href="/about" style={{...styles.navLink, color: '#cbd5e1'}}>Kutuhusu</a>
-            <button onClick={openModal} style={{ ...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px' }}>SAJILI TIMU</button>
+            {/* <button onClick={openModal} style={{ ...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px' }}>SAJILI TIMU</button> */}
             {process.env.NODE_ENV === 'development' && <a href="/admin" style={{...styles.navLink, color: '#a3e635', fontWeight: '800'}}>ADMIN</a>}
           </div>
           <div style={{ display: 'block' }}>
@@ -622,7 +632,7 @@ export const HomePage = () => {
             <a href="/pctv" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>PC TV</a>
             <a href="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Kutuhusu</a>
             {process.env.NODE_ENV === 'development' && <a href="/admin" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>ADMIN</a>}
-            <button onClick={openModal} style={{ ...styles.buttonPrimary, marginTop: '20px', width: '100%', justifyContent: 'center' }}>SAJILI TIMU</button>
+            {/* <button onClick={openModal} style={{ ...styles.buttonPrimary, marginTop: '20px', width: '100%', justifyContent: 'center' }}>SAJILI TIMU</button> */}
         </div>
       </div>
       {isMobileMenuOpen && <div onClick={() => setIsMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 55, backdropFilter: 'blur(4px)' }}></div>}
@@ -873,21 +883,21 @@ export const HomePage = () => {
 
         {/* 6. TOURNAMENT INSIGHTS - BOT POWERED STATS CENTER */}
         <section style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={isMobile ? { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '32px' } : { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
-            <Bot style={{ color: '#a3e635' }} size={isMobile ? 22 : 28} />
+          <div style={isMobile ? { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '24px' } : { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
+            <Bot style={{ color: '#a3e635' }} size={isMobile ? 22 : 40} />
             <div>
-              <h2 style={isMobile ? mobileHeaderStyle : { fontSize: '32px', fontWeight: '900', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <h2 style={isMobile ? mobileHeaderStyle : desktopHeaderStyle}>
                 Uchambuzi wa <span style={{ color: '#a3e635' }}>Pande Cup Bot</span>
-                <span style={{ fontSize: isMobile ? '9px' : '10px', fontWeight: '900', color: '#a3e635', backgroundColor: 'rgba(163, 230, 53, 0.15)', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: isMobile ? 0 : '8px', display: isMobile ? 'block' : 'inline' }}>UCHAMBUZI WA BOT</span>
+                <span style={{ fontSize: isMobile ? '0.7rem' : '1rem', fontWeight: '900', color: '#a3e635', backgroundColor: 'rgba(163, 230, 53, 0.15)', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: isMobile ? 0 : '8px', display: isMobile ? 'block' : 'inline' }}>UCHAMBUZI WA BOT</span>
               </h2>
             </div>
           </div>
 
           {filteredStandings.length > 0 && filteredMatches.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
+            <div style={isMobile ? { display: 'flex', flexDirection: 'column', gap: '18px' } : { display: 'flex', flexDirection: 'row', gap: '28px' }}>
               
               {/* CARD 1: GOLDEN BOOT - TOP TEAMS BY GOALS */}
-              <div style={isMobile ? { ...mobileCardStyle, background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', border: '1px solid rgba(163, 230, 53, 0.2)', position: 'relative', overflow: 'hidden' } : { background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(163, 230, 53, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={isMobile ? { ...mobileCardStyle, background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', border: '1px solid rgba(163, 230, 53, 0.2)', position: 'relative', overflow: 'hidden', fontSize: '0.95rem' } : { background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(163, 230, 53, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', backgroundColor: '#a3e635', borderRadius: '50%', opacity: 0.05 }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
@@ -916,7 +926,7 @@ export const HomePage = () => {
               </div>
 
               {/* CARD 2: MATCH PERFORMANCE METRICS */}
-              <div style={isMobile ? { ...mobileCardStyle, background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', border: '1px solid rgba(59, 130, 246, 0.2)', position: 'relative', overflow: 'hidden' } : { background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={isMobile ? { ...mobileCardStyle, background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', border: '1px solid rgba(59, 130, 246, 0.2)', position: 'relative', overflow: 'hidden', fontSize: '0.95rem' } : { background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', backgroundColor: '#3b82f6', borderRadius: '50%', opacity: 0.05 }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
