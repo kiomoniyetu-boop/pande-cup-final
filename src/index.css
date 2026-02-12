@@ -24,6 +24,7 @@
     padding: 0;
     background-color: var(--pande-bg);
     color: var(--pande-text);
+    font-size: 16px;
     font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

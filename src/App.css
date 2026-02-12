@@ -1,3 +1,4 @@
+/* --- OG REACT STYLES (Zile zako za mwanzo nimeziacha) --- */
 .App {
   text-align: center;
 }
@@ -13,26 +14,101 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* --- PANDE CUP 2026 UDAMBWI (Injini Mpya) --- */
+
+:root {
+  --pande-lime: #a3e635;
+  --pande-dark: #020617;
+  --pande-slate: #64748b;
+}
+
+/* 1. Animation ya kuzungusha Logo za Wadhamini */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.scroll-track {
   display: flex;
-  flex-direction: column;
+  width: max-content;
+  animation: scroll 35s linear infinite; /* Mwendo wa kishua, usiochosha */
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.scroll-track:hover {
+  animation-play-state: paused; /* Inasimama mtu akitaka kuangalia logo */
 }
 
+/* 2. Style ya Logo za Wadhamini */
+.sponsor-logo-img {
+  height: 42px;
+  width: auto;
+  margin: 0 50px;
+  filter: grayscale(100%) brightness(200%); /* Inazifanya ziwe Silver/White */
+  opacity: 0.6;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sponsor-logo-img:hover {
+  filter: grayscale(0%) brightness(100%); /* Inarudisha rangi asili ya mdhamini */
+  opacity: 1;
+  transform: scale(1.15); /* Inajisogeza mbele kidogo */
+}
+
+/* 3. Glassmorphism Card (Muonekano wa Kioo) */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  transition: 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--pande-lime);
+  box-shadow: 0 0 30px rgba(163, 230, 53, 0.1);
+}
+
+/* 4. Custom Scrollbar (Kwa ajili ya browser nzima) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--pande-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pande-lime);
+}
+
+/* 5. Typography & Utility */
+.text-lime {
+  color: var(--pande-lime);
+}
+
+.nav-glass {
+  background: rgba(2, 6, 23, 0.8) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* --- OG KEYFRAMES (Zile zako za mwanzo) --- */
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .sponsor-logo-img {
+    height: 30px;
+    margin: 0 30px;
   }
 }
