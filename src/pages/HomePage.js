@@ -6,6 +6,18 @@ import {
   ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp, CheckCircle, Copy, Shirt, Tag, Share2, Target, Bot
 } from 'lucide-react';
 import AdminConsole from '../components/AdminConsole';
+// Responsive helpers for mobile
+const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
+const mobileCardStyle = {
+  padding: '16px',
+  borderRadius: '14px',
+};
+const mobileHeaderStyle = {
+  fontSize: '20px',
+  textAlign: 'center',
+  fontWeight: '900',
+  margin: '0 0 16px',
+};
 
 // --- USANIDI WA CMS ---
 const SPACE_ID = 'ax6wvfd84net'; 
@@ -589,7 +601,7 @@ export const HomePage = () => {
             <a onClick={() => window.location.href='#news'} style={styles.navLink}>Habari</a>
             <a onClick={() => window.location.href='#ratiba'} style={styles.navLink}>Ratiba</a>
             <a href="/pctv" style={styles.navLink}>PC TV</a>
-            <a href="/sponsors" style={{...styles.navLink, color: '#cbd5e1'}}>Wadhamini</a>
+            <a href="https://wa.me/255746510805?text=Habari, nahitaji kuwa mdhamini wa Pande Cup." style={{...styles.navLink, color: '#cbd5e1'}}>Wadhamini</a>
             <a href="/about" style={{...styles.navLink, color: '#cbd5e1'}}>Kutuhusu</a>
             <button onClick={openModal} style={{ ...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px' }}>SAJILI TIMU</button>
             {process.env.NODE_ENV === 'development' && <a href="/admin" style={{...styles.navLink, color: '#a3e635', fontWeight: '800'}}>ADMIN</a>}
@@ -606,7 +618,7 @@ export const HomePage = () => {
             <a href="#hero" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Nyumbani</a>
             <a href="#news" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Habari & Updates</a>
             <a href="#ratiba" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Ratiba & Matokeo</a>
-            <a href="/sponsors" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Wadhamini</a>
+            <a href="https://wa.me/255746510805?text=Habari, nahitaji kuwa mdhamini wa Pande Cup." onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Wadhamini</a>
             <a href="/pctv" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>PC TV</a>
             <a href="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Kutuhusu</a>
             {process.env.NODE_ENV === 'development' && <a href="/admin" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>ADMIN</a>}
@@ -861,12 +873,12 @@ export const HomePage = () => {
 
         {/* 6. TOURNAMENT INSIGHTS - BOT POWERED STATS CENTER */}
         <section style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
-            <Bot style={{ color: '#a3e635' }} size={28} />
+          <div style={isMobile ? { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '32px' } : { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
+            <Bot style={{ color: '#a3e635' }} size={isMobile ? 22 : 28} />
             <div>
-              <h2 style={{ fontSize: '32px', fontWeight: '900', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <h2 style={isMobile ? mobileHeaderStyle : { fontSize: '32px', fontWeight: '900', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
                 Uchambuzi wa <span style={{ color: '#a3e635' }}>Pande Cup Bot</span>
-                <span style={{ fontSize: '10px', fontWeight: '900', color: '#a3e635', backgroundColor: 'rgba(163, 230, 53, 0.15)', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase', letterSpacing: '1px' }}>UCHAMBUZI WA BOT</span>
+                <span style={{ fontSize: isMobile ? '9px' : '10px', fontWeight: '900', color: '#a3e635', backgroundColor: 'rgba(163, 230, 53, 0.15)', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: isMobile ? 0 : '8px', display: isMobile ? 'block' : 'inline' }}>UCHAMBUZI WA BOT</span>
               </h2>
             </div>
           </div>
@@ -875,7 +887,7 @@ export const HomePage = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
               
               {/* CARD 1: GOLDEN BOOT - TOP TEAMS BY GOALS */}
-              <div style={{ background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(163, 230, 53, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={isMobile ? { ...mobileCardStyle, background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', border: '1px solid rgba(163, 230, 53, 0.2)', position: 'relative', overflow: 'hidden' } : { background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(163, 230, 53, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', backgroundColor: '#a3e635', borderRadius: '50%', opacity: 0.05 }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
@@ -904,7 +916,7 @@ export const HomePage = () => {
               </div>
 
               {/* CARD 2: MATCH PERFORMANCE METRICS */}
-              <div style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={isMobile ? { ...mobileCardStyle, background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', border: '1px solid rgba(59, 130, 246, 0.2)', position: 'relative', overflow: 'hidden' } : { background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', backgroundColor: '#3b82f6', borderRadius: '50%', opacity: 0.05 }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
@@ -1004,134 +1016,7 @@ export const HomePage = () => {
         </div>
       </footer>
 
-      {/* --- MODAL YA USAJILI (REAL API + PAYMENT POPUP) --- */}
-      {isModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(5px)' }}>
-          <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '450px', borderRadius: '24px', padding: '32px', position: 'relative' }}>
-            <button onClick={closeModal} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={24} /></button>
-            
-            {/* STEP 1: JAZA FOMU */}
-            {modalStep === 1 && (
-              <div>
-                <h2 style={{ fontSize: '20px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '8px' }}>Fomu ya <span style={{ color: '#a3e635' }}>Maombi</span></h2>
-                <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>Jaza taarifa sahihi ili kusajili timu yako.</p>
-                
-                {submitError && (
-                    <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#fca5a5', padding: '12px', borderRadius: '8px', fontSize: '12px', marginBottom: '16px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                        {submitError}
-                    </div>
-                )}
-
-                {/* JINA LA TIMU */}
-                <div style={{ position: 'relative', marginBottom: '12px' }}>
-                    <input type="text" placeholder="Jina la Timu" value={teamData.name} onChange={(e) => setTeamData({...teamData, name: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
-                    <Trophy size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                </div>
-
-                {/* JINA LA KOCHA */}
-                <div style={{ position: 'relative', marginBottom: '12px' }}>
-                    <input type="text" placeholder="Jina la Kocha/Nahodha" value={teamData.coachName} onChange={(e) => setTeamData({...teamData, coachName: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
-                    <User size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                </div>
-
-                {/* NAMBA YA SIMU */}
-                <div style={{ position: 'relative', marginBottom: '12px' }}>
-                    <input type="tel" placeholder="Namba ya Simu (WhatsApp)" value={teamData.phone} onChange={(e) => setTeamData({...teamData, phone: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
-                    <Phone size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                </div>
-
-                {/* LOCATIONS (DROPDOWN) */}
-                <div style={{ position: 'relative', marginBottom: '12px' }}>
-                    <select value={teamData.location} onChange={(e) => setTeamData({...teamData, location: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white', appearance: 'none' }}>
-                        <option value="">Chagua Eneo / Kata</option>
-                        {LOCATIONS_LIST.map((group, idx) => (
-                            <optgroup key={idx} label={group.group}>
-                                {group.areas.map((area, aIdx) => (
-                                    <option key={aIdx} value={area}>{area}</option>
-                                ))}
-                            </optgroup>
-                        ))}
-                    </select>
-                    <MapPin size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                </div>
-
-                {/* RANGI ZA JEZI */}
-                <div style={{ position: 'relative', marginBottom: '24px' }}>
-                    <input type="text" placeholder="Rangi za Jezi (Mfano: Njano/Nyeusi)" value={teamData.jerseyColor} onChange={(e) => setTeamData({...teamData, jerseyColor: e.target.value})} style={{ width: '100%', padding: '14px 14px 14px 44px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#020617', color: 'white' }} />
-                    <Shirt size={18} color="#64748b" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                </div>
-
-                <button 
-                    disabled={isSubmitting}
-                    onClick={handleRegistrationSubmit} 
-                    style={{ ...styles.buttonPrimary, width: '100%', justifyContent: 'center', opacity: isSubmitting ? 0.7 : 1 }}
-                >
-                    {isSubmitting ? 'Inatuma...' : 'WASILISHA MAOMBI'}
-                </button>
-              </div>
-            )}
-
-            {/* STEP 2: PAYMENT POPUP (DISCOUNT APPLIED) */}
-            {modalStep === 2 && (
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ backgroundColor: '#16a34a', padding: '16px', borderRadius: '16px', marginBottom: '24px', color: 'white' }}>
-                        <div style={{ width: '50px', height: '50px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px auto' }}>
-                             <CheckCircle size={28} />
-                        </div>
-                        <h2 style={{ fontSize: '18px', fontWeight: '900', margin: 0 }}>HONGERA!</h2>
-                        <p style={{ margin: '4px 0 0', fontSize: '12px' }}>Taarifa za <strong>{teamData.name}</strong> zimepokelewa.</p>
-                    </div>
-
-                    {/* DISCOUNT BANNER */}
-                    <div style={{ backgroundColor: 'rgba(163, 230, 53, 0.1)', border: '1px solid #a3e635', borderRadius: '12px', padding: '12px', marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                            <span style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'line-through' }}>Ada ya Kawaida:</span>
-                            <span style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'line-through' }}>100,000/=</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>Offer ya Mtandaoni:</span>
-                            <span style={{ color: '#a3e635', fontWeight: '900', fontSize: '18px' }}>70,000/=</span>
-                        </div>
-                    </div>
-
-                    <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>Kukamilisha usajili, tafadhali lipia:</p>
-                    
-                    <div style={{ backgroundColor: 'rgba(255, 255, 0, 0.05)', border: '1px solid #a3e635', borderRadius: '16px', padding: '16px', position: 'relative', marginBottom: '24px' }}>
-                        <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Lipa Namba (Mitandao Yote)</p>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '8px 0' }}>
-                             <span style={{ fontSize: '24px', fontFamily: 'monospace', fontWeight: 'bold', color: 'white' }}>43852599</span>
-                             <button onClick={copyNumber} style={{ border: 'none', background: 'none', color: '#a3e635', cursor: 'pointer' }}><Copy size={18} /></button>
-                        </div>
-                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#94a3b8', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px', marginTop: '8px' }}>
-                             Jina: FESTO HENRY MSANGAWALE
-                        </div>
-                        <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#a3e635', color: 'black', fontSize: '11px', fontWeight: 'bold', padding: '4px 8px', borderRadius: '0 15px 0 8px' }}>
-                            70,000/=
-                        </div>
-                    </div>
-
-                    <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '12px', marginBottom: '20px', textAlign: 'left', fontSize: '12px', color: '#cbd5e1' }}>
-                        <p style={{ fontWeight: 'bold', marginBottom: '4px', color: '#fff' }}>Jinsi ya Kulipa:</p>
-                        <ol style={{ paddingLeft: '16px', margin: 0, lineHeight: '1.6' }}>
-                             <li>Piga <strong>*150*...#</strong> (Menu ya mtandao wako)</li>
-                             <li>Chagua <strong>Lipa kwa Simu</strong> &gt; <strong>Lipa Namba</strong></li>
-                             <li>Ingiza: <strong>43852599</strong></li>
-                             <li>Kiasi: <strong>70,000</strong></li>
-                        </ol>
-                    </div>
-
-                    <a 
-                         href={`https://wa.me/255653292935?text=Habari, nimelipia fomu ya timu ${teamData.name}. Kiasi 70,000 (Offer ya Website). Jina la Mlipaji: ${teamData.coachName}. Namba: ${teamData.phone}`}
-                         target="_blank" rel="noreferrer"
-                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '14px', backgroundColor: '#25D366', color: 'white', borderRadius: '12px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}
-                    >
-                         <div style={{display:'flex', alignItems:'center'}}><Phone size={18} style={{marginRight:6}} /> TUMA UTHIBITISHO</div>
-                    </a>
-                 </div>
-            )}
-          </div>
-        </div>
-      )}
+        {/* Registration/Team Setup forms and modal moved to /admin only. Not accessible on public homepage. */}
 
       {/* MODAL - NEWS READ MORE */}
       {selectedNews && (
