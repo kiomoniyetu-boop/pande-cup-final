@@ -861,9 +861,35 @@ export const HomePage = () => {
             ) : (
               <>
                 <h1 style={styles.mainTitle}>{displayTitle}</h1>
-                <p style={{ color: '#cbd5e1', fontSize: '18px', maxWidth: '600px', margin: '0 auto 16px', lineHeight: '1.6' }}>
-                    {displaySubtitle}
-                </p>
+                <p style={{ color: '#cbd5e1', fontSize: '1rem', maxWidth: '480px', margin: '0 auto 12px', lineHeight: '1.4' }}>{displaySubtitle}</p>
+                {/* Animated Slogan Marquee */}
+                <div style={{ width: '100%', overflow: 'hidden', margin: '16px 0 0', height: 32 }}>
+                  <div style={{
+                    display: 'inline-block',
+                    whiteSpace: 'nowrap',
+                    animation: 'slogan-scroll 18s linear infinite',
+                    fontSize: '1rem',
+                    color: '#a3e635',
+                    fontWeight: 700,
+                    letterSpacing: '1px',
+                    textShadow: '0 2px 8px #000',
+                  }}>
+                    Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; #1 grassroots football league &nbsp;|&nbsp; Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; #1 grassroots football league
+                  </div>
+                  <style>{`
+                    @keyframes slogan-scroll {
+                      0% { transform: translateX(0); }
+                      100% { transform: translateX(-50%); }
+                    }
+                  `}</style>
+                </div>
+                {/* Social Media Icons */}
+                <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', margin: '18px 0 0' }}>
+                  <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" title="Instagram" style={{ color: '#fff' }}><Instagram size={28} /></a>
+                  <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" title="Facebook" style={{ color: '#fff' }}><Facebook size={28} /></a>
+                  <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" title="YouTube" style={{ color: '#fff' }}><Youtube size={28} /></a>
+                  <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noopener noreferrer" title="TikTok" style={{ color: '#fff' }}><TikTokIcon size={28} /></a>
+                </div>
               </>
             )}
         </section>
@@ -873,19 +899,38 @@ export const HomePage = () => {
       <section id="wadhamini" style={{ padding: '60px 24px', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <p style={{ fontSize: '10px', letterSpacing: '2px', fontWeight: '800', textTransform: 'uppercase', color: '#a3e635', marginBottom: '32px', textAlign: 'center' }}>WANAOTUPA NGUVU MSIMU HUU</p>
-          <div style={{ display: 'flex', overflow: 'hidden' }}>
-            <div className="sponsor-marquee">
-              {[...cmsData.sponsors, ...cmsData.sponsors].map((sponsor, idx) => (
-                <div key={idx} className="sponsor-marquee-item">
-                  <a href={sponsor.websiteUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none' }}>
+          {/* Responsive sponsor display: grid for mobile, marquee for desktop */}
+          <div>
+            <div className="desktop-only" style={{ display: 'flex', overflow: 'hidden' }}>
+              <div className="sponsor-marquee">
+                {[...cmsData.sponsors, ...cmsData.sponsors].map((sponsor, idx) => (
+                  <div key={idx} className="sponsor-marquee-item">
+                    <a href={sponsor.websiteUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none' }}>
+                      <img 
+                        src={sponsor.logo} 
+                        alt={sponsor.name} 
+                        style={{ height: '50px', objectFit: 'contain', filter: 'grayscale(100%)', opacity: 0.7, transition: '0.3s' }} 
+                        onMouseOver={e => { e.currentTarget.style.filter = 'grayscale(0%)'; e.currentTarget.style.opacity = 1; }}
+                        onMouseOut={e => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = 0.7; }}
+                      />
+                      <span style={{ fontSize: '10px', color: '#a3e635', fontWeight: 'bold', marginTop: '8px' }}>{sponsor.name}</span>
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mobile-center" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginTop: 12 }}>
+              {cmsData.sponsors.map((sponsor, idx) => (
+                <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px', boxShadow: '0 2px 8px rgba(163,230,53,0.08)' }}>
+                  <a href={sponsor.websiteUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', width: '100%' }}>
                     <img 
                       src={sponsor.logo} 
                       alt={sponsor.name} 
-                      style={{ height: '50px', objectFit: 'contain', filter: 'grayscale(100%)', opacity: 0.7, transition: '0.3s' }} 
+                      style={{ height: '40px', objectFit: 'contain', filter: 'grayscale(100%)', opacity: 0.7, transition: '0.3s' }} 
                       onMouseOver={e => { e.currentTarget.style.filter = 'grayscale(0%)'; e.currentTarget.style.opacity = 1; }}
                       onMouseOut={e => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = 0.7; }}
                     />
-                    <span style={{ fontSize: '10px', color: '#a3e635', fontWeight: 'bold', marginTop: '8px' }}>{sponsor.name}</span>
+                    <span style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', marginTop: '8px', textAlign: 'center' }}>{sponsor.name}</span>
                   </a>
                 </div>
               ))}
