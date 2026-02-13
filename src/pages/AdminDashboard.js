@@ -1,9 +1,18 @@
+
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, Plus, Edit, Trash2, BarChart3, Download, AlertCircle, CheckCircle, Users, Trophy, Zap, Target, Activity } from 'lucide-react';
+import { Lock, Trash2, Download } from 'lucide-react';
 import { AdminService } from '../services/AdminService';
-import { StatsEngine } from '../services/StatsEngine';
+
+const fontStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@700&display=swap');
+  body, input, button, select, textarea { font-family: 'Inter', Arial, sans-serif; }
+  .admin-heading { font-family: 'Oswald', Arial, sans-serif; letter-spacing: 1px; }
+`;
+
+const ADMIN_PASSWORD = 'pandecup2024';
 
 const AdminDashboard = () => {
+  // State
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('teams');
@@ -13,13 +22,11 @@ const AdminDashboard = () => {
   const [events, setEvents] = useState([]);
   const [newTeam, setNewTeam] = useState({ name: '', coachName: '', phone: '' });
   const [newPlayer, setNewPlayer] = useState({ name: '', position: '', number: '' });
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState('');
+  const [selectedMatch, setSelectedMatch] = useState('');
+  const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectedAction, setSelectedAction] = useState('goal');
   const [message, setMessage] = useState('');
-
-  const ADMIN_PASSWORD = 'pandecup2024'; // Change this to your actual password
 
   useEffect(() => {
     if (authenticated) {
@@ -32,6 +39,7 @@ const AdminDashboard = () => {
     }
   }, [authenticated]);
 
+  // Logic Handlers (NO JSX)
   const handleLogin = (e) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
@@ -62,7 +70,7 @@ const AdminDashboard = () => {
       const data = AdminService.getData();
       setPlayers(data.players);
       setNewPlayer({ name: '', position: '', number: '' });
-      setMessage('✅ Mchezaji imeongezwa');
+      setMessage('✅ Mchezaji ameongezwa');
       setTimeout(() => setMessage(''), 3000);
     }
   };
@@ -81,36 +89,27 @@ const AdminDashboard = () => {
       AdminService.deletePlayer(playerId);
       const data = AdminService.getData();
       setPlayers(data.players);
-      setMessage('🗑️ Mchezaji imeondolewa');
+      setMessage('🗑️ Mchezaji ameondolewa');
     }
   };
 
   const handleRecordEvent = (e) => {
     e.preventDefault();
-    if (selectedMatch && selectedPlayer && selectedAction) {
-      const eventData = {
-        matchId: selectedMatch,
-        playerId: selectedPlayer,
-        action: selectedAction,
-        timestamp: new Date()
-      };
-
-      if (selectedAction === 'goal') {
-        AdminService.recordGoal(selectedMatch, { playerId: selectedPlayer });
-      } else if (selectedAction === 'yellow') {
-        AdminService.recordCard(selectedMatch, { playerId: selectedPlayer, cardType: 'yellow' });
-      } else if (selectedAction === 'red') {
-        AdminService.recordCard(selectedMatch, { playerId: selectedPlayer, cardType: 'red' });
-      }
-
-      const data = AdminService.getData();
-      setEvents(data.events || []);
-      setSelectedMatch(null);
-      setSelectedPlayer(null);
-      setSelectedAction('goal');
-      setMessage(`✅ Tukio limerekodi: ${selectedAction.toUpperCase()}`);
-      setTimeout(() => setMessage(''), 3000);
+    if (!selectedMatch || !selectedPlayer) return;
+    if (selectedAction === 'goal') {
+      AdminService.recordGoal(selectedMatch, { playerId: selectedPlayer });
+    } else if (selectedAction === 'yellow') {
+      AdminService.recordCard(selectedMatch, { playerId: selectedPlayer, cardType: 'yellow' });
+    } else if (selectedAction === 'red') {
+      AdminService.recordCard(selectedMatch, { playerId: selectedPlayer, cardType: 'red' });
     }
+    const data = AdminService.getData();
+    setEvents(data.events || []);
+    setSelectedMatch('');
+    setSelectedPlayer('');
+    setSelectedAction('goal');
+    setMessage(`✅ Tukio limerekodi: ${selectedAction.toUpperCase()}`);
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const generateReport = () => {
@@ -125,415 +124,302 @@ const AdminDashboard = () => {
     setMessage('📊 Ripoti imetengenezwa');
   };
 
-  // Login UI
+  // UI
   if (!authenticated) {
     return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-        <div style={{ background: 'white', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <Lock size={48} style={{ color: '#667eea', marginBottom: '16px' }} />
-            <h1 style={{ fontSize: '24px', fontWeight: '900', margin: '0 0 8px' }}>PANDE CUP ADMIN</h1>
-            <p style={{ color: '#666', margin: 0 }}>Kiungo cha Kufanya Kazi</p>
-          </div>
-
-          <form onSubmit={handleLogin}>
-            <input
-              type="password"
-              placeholder="Ingiza Neno la Siri"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '8px',
-                border: '2px solid #e0e0e0',
-                fontSize: '16px',
-                marginBottom: '16px',
-                boxSizing: 'border-box'
-              }}
-              autoFocus
-            />
-            <button
-              type="submit"
-              style={{
-                width: '100%',
-                padding: '14px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 'bold',
-                fontSize: '16px',
-                cursor: 'pointer'
-              }}
-            >
-              INGIA
-            </button>
-          </form>
-
-          {message && (
-            <div style={{ marginTop: '16px', padding: '12px', background: '#fff3cd', borderRadius: '8px', color: '#856404', textAlign: 'center' }}>
-              {message}
+      <>
+        <style>{fontStyles}</style>
+        <div style={{ minHeight: '100vh', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{
+            background: 'rgba(30,41,59,0.7)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '20px',
+            padding: '40px',
+            width: '100%',
+            maxWidth: '400px',
+            boxShadow: '0 8px 32px 0 rgba(163,230,53,0.10)'
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+              <Lock size={48} style={{ color: '#a3e635', marginBottom: '16px' }} />
+              <h1 className="admin-heading" style={{ fontSize: '24px', fontWeight: '900', margin: '0 0 8px', color: 'white', letterSpacing: '1px' }}>PANDE CUP ADMIN</h1>
+              <p style={{ color: '#a3e635', margin: 0, fontWeight: 600 }}>Kiungo cha Kufanya Kazi</p>
             </div>
-          )}
+            <form onSubmit={handleLogin}>
+              <input
+                type="password"
+                placeholder="Ingiza Neno la Siri"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '8px',
+                  border: '1.5px solid #a3e635',
+                  background: 'rgba(30,41,59,0.9)',
+                  color: 'white',
+                  fontSize: '16px',
+                  marginBottom: '16px',
+                  fontFamily: 'Inter, Arial, sans-serif',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                }}
+                autoFocus
+              />
+              <button
+                type="submit"
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: '#a3e635',
+                  color: 'black',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 'bold',
+                  fontFamily: 'Oswald, Arial, sans-serif',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  letterSpacing: '1px',
+                  marginTop: '4px',
+                  boxShadow: '0 0 0 0 transparent',
+                  transition: 'box-shadow 0.2s',
+                }}
+              >
+                INGIA
+              </button>
+            </form>
+            {message && (
+              <div style={{ marginTop: '16px', padding: '12px', background: '#fff3cd', borderRadius: '8px', color: '#856404', textAlign: 'center', fontFamily: 'Inter, Arial, sans-serif' }}>
+                {message}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
-  // Dashboard UI
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f7fa', padding: '20px' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: '900', margin: 0 }}>📊 PANDE CUP ADMIN</h1>
-          <button
-            onClick={() => setAuthenticated(false)}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            <LogOut size={16} /> TOKA
-          </button>
-        </div>
-
-        {message && (
-          <div style={{ marginBottom: '20px', padding: '16px', background: message.includes('✅') ? '#d1fae5' : '#fee2e2', borderLeft: '4px solid ' + (message.includes('✅') ? '#10b981' : '#ef4444'), borderRadius: '8px', color: message.includes('✅') ? '#047857' : '#7f1d1d' }}>
-            {message}
-          </div>
-        )}
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', background: 'white', padding: '10px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-          {['teams', 'players', 'events', 'reports'].map(tab => (
+    <div style={{ minHeight: '100vh', background: '#0f172a', color: 'white', padding: '0 0 40px 0' }}>
+      <style>{fontStyles}</style>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 0' }}>
+        <h1 className="admin-heading" style={{ fontSize: 36, color: '#a3e635', marginBottom: 8 }}>Pande Cup Admin Console</h1>
+        <div style={{
+          marginBottom: 32,
+          display: 'flex',
+          gap: 16,
+        }}>
+          {[
+            { key: 'teams', label: 'Timu' },
+            { key: 'players', label: 'Wachezaji' },
+            { key: 'events', label: 'Matukio' },
+            { key: 'reports', label: 'Ripoti' },
+          ].map(tab => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
               style={{
-                padding: '10px 20px',
-                background: activeTab === tab ? '#667eea' : '#f3f4f6',
-                color: activeTab === tab ? 'white' : '#374151',
-                border: 'none',
-                borderRadius: '8px',
+                background: activeTab === tab.key ? 'rgba(30,41,59,0.85)' : 'rgba(30,41,59,0.7)',
+                color: activeTab === tab.key ? '#a3e635' : '#fff',
+                border: activeTab === tab.key ? '2px solid #a3e635' : '1.5px solid rgba(255,255,255,0.13)',
+                borderRadius: 12,
+                padding: '12px 28px',
+                fontWeight: 700,
+                fontSize: 18,
+                fontFamily: 'Oswald, Arial, sans-serif',
+                letterSpacing: '1px',
+                boxShadow: activeTab === tab.key ? '0 2px 16px 0 rgba(163,230,53,0.10)' : '0 1px 4px 0 rgba(0,0,0,0.10)',
                 cursor: 'pointer',
-                fontWeight: 'bold',
-                textTransform: 'capitalize'
+                outline: 'none',
+                transition: 'all 0.2s',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
               }}
             >
-              {tab === 'teams' && <Users size={16} style={{ display: 'inline', marginRight: '6px' }} />}
-              {tab === 'players' && <Trophy size={16} style={{ display: 'inline', marginRight: '6px' }} />}
-              {tab === 'events' && <Activity size={16} style={{ display: 'inline', marginRight: '6px' }} />}
-              {tab === 'reports' && <BarChart3 size={16} style={{ display: 'inline', marginRight: '6px' }} />}
-              {tab === 'events' ? 'Matokeo & Matukio' : tab}
+              {tab.label}
             </button>
           ))}
         </div>
 
-        {/* TEAMS TAB */}
+        {/* Teams Tab */}
         {activeTab === 'teams' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
-            {/* Add Team Form */}
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ marginTop: 0 }}>➕ ONGEZA TIMU</h3>
-              <form onSubmit={handleAddTeam}>
-                <input
-                  type="text"
-                  placeholder="Jina la Timu"
-                  value={newTeam.name}
-                  onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
-                />
-                <input
-                  type="text"
-                  placeholder="Jina la Kocha"
-                  value={newTeam.coachName}
-                  onChange={(e) => setNewTeam({ ...newTeam, coachName: e.target.value })}
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
-                />
-                <input
-                  type="tel"
-                  placeholder="Namba ya Simu"
-                  value={newTeam.phone}
-                  onChange={(e) => setNewTeam({ ...newTeam, phone: e.target.value })}
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
-                />
-                <button type="submit" style={{ width: '100%', padding: '10px', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
-                  ONGEZA TIMU
-                </button>
-              </form>
-            </div>
-
-            {/* Teams List */}
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ marginTop: 0 }}>📋 TIMU ZOTE</h3>
-              {teams.length === 0 ? (
-                <p style={{ color: '#999' }}>Hakuna timu bado</p>
-              ) : (
-                teams.map(team => (
-                  <div key={team.id} style={{ padding: '12px', background: '#f9fafb', borderRadius: '8px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <strong>{team.name}</strong>
-                      <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#666' }}>Kocha: {team.coachName}</p>
-                    </div>
-                    <button onClick={() => handleDeleteTeam(team.id)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))
+          <div style={{
+            background: 'rgba(30,41,59,0.7)',
+            borderRadius: 16,
+            padding: 24,
+            marginBottom: 32,
+            boxShadow: '0 4px 32px 0 rgba(163,230,53,0.10)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            display: 'grid',
+            gridTemplateColumns: '1fr 2fr',
+            gap: 32,
+          }}>
+            <form onSubmit={handleAddTeam} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h2 style={{ color: '#a3e635', fontSize: 22, marginBottom: 8 }}>Ongeza Timu</h2>
+              <input type="text" placeholder="Jina la Timu" value={newTeam.name} onChange={e => setNewTeam({ ...newTeam, name: e.target.value })} required
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16 }} />
+              <input type="text" placeholder="Jina la Kocha" value={newTeam.coachName} onChange={e => setNewTeam({ ...newTeam, coachName: e.target.value })} required
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16 }} />
+              <input type="text" placeholder="Namba ya Simu" value={newTeam.phone} onChange={e => setNewTeam({ ...newTeam, phone: e.target.value })}
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16 }} />
+              <button type="submit" style={{ background: '#a3e635', color: '#0f172a', border: 'none', borderRadius: 8, padding: '12px 20px', fontWeight: 'bold', fontSize: 16, cursor: 'pointer', marginTop: 8 }}>Ongeza Timu</button>
+              {message && <div style={{ marginTop: 8, color: '#a3e635', fontWeight: 600 }}>{message}</div>}
+            </form>
+            <div>
+              <h2 style={{ color: '#a3e635', fontSize: 22, marginBottom: 16 }}>Timu Zote</h2>
+              {teams.length === 0 ? <p style={{ color: '#fff' }}>Hakuna timu bado</p> : (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {teams.map(team => (
+                    <li key={team.id} style={{ background: 'rgba(255,255,255,0.04)', color: '#fff', borderRadius: 8, padding: 16, marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <b style={{ color: '#a3e635', fontSize: 18 }}>{team.name}</b>
+                        <div style={{ fontSize: 14, color: '#fff', opacity: 0.8 }}>Kocha: {team.coachName} | Simu: {team.phone}</div>
+                      </div>
+                      <button onClick={() => handleDeleteTeam(team.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Futa Timu"><Trash2 size={20} /></button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>
         )}
 
-        {/* PLAYERS TAB */}
+        {/* Players Tab */}
         {activeTab === 'players' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
-            {/* Add Player Form */}
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ marginTop: 0 }}>➕ ONGEZA MCHEZAJI</h3>
-              <select
-                value={selectedTeam || ''}
-                onChange={(e) => setSelectedTeam(e.target.value)}
-                style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
-              >
-                <option value="">Chagua Timu</option>
-                {teams.map(team => (
-                  <option key={team.id} value={team.id}>{team.name}</option>
-                ))}
+          <div style={{
+            background: 'rgba(30,41,59,0.7)',
+            borderRadius: 16,
+            padding: 24,
+            marginBottom: 32,
+            boxShadow: '0 4px 32px 0 rgba(163,230,53,0.10)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            display: 'grid',
+            gridTemplateColumns: '1fr 2fr',
+            gap: 32,
+          }}>
+            <form onSubmit={handleAddPlayer} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h2 style={{ color: '#a3e635', fontSize: 22, marginBottom: 8 }}>Ongeza Mchezaji</h2>
+              <select value={selectedTeam} onChange={e => setSelectedTeam(e.target.value)} required
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16 }}>
+                <option value="">Chagua Timu...</option>
+                {teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
               </select>
-              <form onSubmit={handleAddPlayer}>
-                <input
-                  type="text"
-                  placeholder="Jina la Mchezaji"
-                  value={newPlayer.name}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
-                />
-                <input
-                  type="text"
-                  placeholder="Nafasi (mfano: Mlinzi)"
-                  value={newPlayer.position}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
-                />
-                <input
-                  type="number"
-                  placeholder="Namba ya Jezi"
-                  value={newPlayer.number}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, number: e.target.value })}
-                  style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
-                />
-                <button type="submit" disabled={!selectedTeam} style={{ width: '100%', padding: '10px', background: selectedTeam ? '#10b981' : '#ccc', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: selectedTeam ? 'pointer' : 'not-allowed' }}>
-                  ONGEZA MCHEZAJI
-                </button>
-              </form>
-            </div>
-
-            {/* Players List */}
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ marginTop: 0 }}>👥 WACHEZAJI WOTE</h3>
-              {players.length === 0 ? (
-                <p style={{ color: '#999' }}>Hakuna wachezaji bado</p>
-              ) : (
-                players.map(player => (
-                  <div key={player.id} style={{ padding: '12px', background: '#f9fafb', borderRadius: '8px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <strong>{player.number} - {player.name}</strong>
-                      <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#666' }}>{player.position}</p>
-                    </div>
-                    <button onClick={() => handleDeletePlayer(player.id)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))
+              <input type="text" placeholder="Jina la Mchezaji" value={newPlayer.name} onChange={e => setNewPlayer({ ...newPlayer, name: e.target.value })} required
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16 }} />
+              <input type="text" placeholder="Nafasi" value={newPlayer.position} onChange={e => setNewPlayer({ ...newPlayer, position: e.target.value })}
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16 }} />
+              <input type="number" placeholder="Namba" value={newPlayer.number} onChange={e => setNewPlayer({ ...newPlayer, number: e.target.value })}
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16 }} />
+              <button type="submit" style={{ background: '#a3e635', color: '#0f172a', border: 'none', borderRadius: 8, padding: '12px 20px', fontWeight: 'bold', fontSize: 16, cursor: 'pointer', marginTop: 8 }}>Ongeza Mchezaji</button>
+              {message && <div style={{ marginTop: 8, color: '#a3e635', fontWeight: 600 }}>{message}</div>}
+            </form>
+            <div>
+              <h2 style={{ color: '#a3e635', fontSize: 22, marginBottom: 16 }}>Wachezaji Wote</h2>
+              {players.length === 0 ? <p style={{ color: '#fff' }}>Hakuna wachezaji bado</p> : (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {players.map(player => (
+                    <li key={player.id} style={{ background: 'rgba(255,255,255,0.04)', color: '#fff', borderRadius: 8, padding: 16, marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <b style={{ color: '#a3e635', fontSize: 18 }}>{player.name}</b>
+                        <div style={{ fontSize: 14, color: '#fff', opacity: 0.8 }}>#{player.number} | Nafasi: {player.position}</div>
+                      </div>
+                      <button onClick={() => handleDeletePlayer(player.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Futa Mchezaji"><Trash2 size={20} /></button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>
         )}
 
-        {/* EVENTS TAB - MATOKEO & MATUKIO */}
+        {/* Events Tab */}
         {activeTab === 'events' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
-            {/* Event Logger Form */}
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ marginTop: 0 }}>⚡ HIFADHI TUKIO</h3>
-              <form onSubmit={handleRecordEvent}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '12px', color: '#666' }}>Chagua Mechi</label>
-                <select
-                  value={selectedMatch || ''}
-                  onChange={(e) => setSelectedMatch(e.target.value)}
-                  style={{ width: '100%', padding: '10px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
-                >
-                  <option value="">Chagua Mechi...</option>
-                  {matches.map(match => (
-                    <option key={match.id} value={match.id}>
-                      {match.homeTeam || 'Team A'} vs {match.awayTeam || 'Team B'}
-                    </option>
-                  ))}
-                </select>
-
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '12px', color: '#666' }}>Chagua Mchezaji</label>
-                <select
-                  value={selectedPlayer || ''}
-                  onChange={(e) => setSelectedPlayer(e.target.value)}
-                  disabled={!selectedMatch}
-                  style={{ width: '100%', padding: '10px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box', opacity: selectedMatch ? 1 : 0.5 }}
-                >
-                  <option value="">Chagua Mchezaji...</option>
-                  {selectedMatch && players.map(player => (
-                    <option key={player.id} value={player.id}>
-                      {player.number} - {player.name}
-                    </option>
-                  ))}
-                </select>
-
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '12px', color: '#666' }}>Aina ya Tukio</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedAction('goal')}
-                    style={{
-                      padding: '10px',
-                      background: selectedAction === 'goal' ? '#10b981' : '#f3f4f6',
-                      color: selectedAction === 'goal' ? 'white' : '#374151',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}
-                  >
-                    ⚽ GOAL
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedAction('yellow')}
-                    style={{
-                      padding: '10px',
-                      background: selectedAction === 'yellow' ? '#f59e0b' : '#f3f4f6',
-                      color: selectedAction === 'yellow' ? 'white' : '#374151',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}
-                  >
-                    🟨 YELLOW
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedAction('red')}
-                    style={{
-                      padding: '10px',
-                      background: selectedAction === 'red' ? '#ef4444' : '#f3f4f6',
-                      color: selectedAction === 'red' ? 'white' : '#374151',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}
-                  >
-                    🟥 RED
-                  </button>
-                </div>
-
-                <button 
-                  type="submit" 
-                  disabled={!selectedMatch || !selectedPlayer}
-                  style={{ 
-                    width: '100%', 
-                    padding: '12px', 
-                    background: (selectedMatch && selectedPlayer) ? '#667eea' : '#ccc', 
-                    color: 'white', 
-                    border: 'none', 
-                    borderRadius: '6px', 
-                    fontWeight: 'bold', 
-                    cursor: (selectedMatch && selectedPlayer) ? 'pointer' : 'not-allowed',
-                    fontSize: '14px'
-                  }}
-                >
-                  HIFADHI TUKIO
-                </button>
-              </form>
-            </div>
-
-            {/* Events Log */}
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ marginTop: 0 }}>📝 TUKIO ZOTE</h3>
-              {/* Goals Section */}
-              <div style={{ marginBottom: '24px' }}>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>⚽ MAGOLI</h4>
-                {Array.isArray(matches) && matches.length > 0 && matches.some(m => m.goals && m.goals.length > 0) ? (
-                  matches.map(match => 
-                    match.goals && match.goals.length > 0 ? (
-                      <div key={match.id}>
-                        {match.goals.map(goal => {
-                          const player = players.find(p => p.id === goal.playerId);
-                          return (
-                            <div key={goal.id} style={{ padding: '10px', background: '#f0fdf4', border: '1px solid #dbeafe', borderRadius: '6px', marginBottom: '8px', fontSize: '13px' }}>
-                              <strong>⚽ {player?.name || 'Unknown'}</strong>
-                              <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#666' }}>#{player?.number || 'N/A'} - {new Date(goal.timestamp).toLocaleString()}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : null
-                  )
-                ) : (
-                  <p style={{ color: '#999', fontSize: '12px' }}>Hakuna magoli bado</p>
-                )}
-              </div>
-
-              {/* Cards Section */}
-              <div>
-                <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>📋 KADI</h4>
-                {Array.isArray(matches) && matches.length > 0 && matches.some(m => m.cards && m.cards.length > 0) ? (
-                  matches.map(match =>
-                    match.cards && match.cards.length > 0 ? (
-                      <div key={match.id}>
-                        {match.cards.map(card => {
-                          const player = players.find(p => p.id === card.playerId);
-                          const cardColor = card.cardType === 'yellow' ? '#fef3c7' : '#fee2e2';
-                          const cardEmoji = card.cardType === 'yellow' ? '🟨' : '🟥';
-                          return (
-                            <div key={card.id} style={{ padding: '10px', background: cardColor, border: '1px solid #dbeafe', borderRadius: '6px', marginBottom: '8px', fontSize: '13px' }}>
-                              <strong>{cardEmoji} {player?.name || 'Unknown'}</strong>
-                              <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#666' }}>#{player?.number || 'N/A'} - {new Date(card.timestamp).toLocaleString()}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : null
-                  )
-                ) : (
-                  <p style={{ color: '#999', fontSize: '12px' }}>Hakuna kadi bado</p>
-                )}
-              </div>
+          <div style={{ background: 'rgba(30,41,59,0.7)', borderRadius: 16, padding: 24, marginBottom: 32, boxShadow: '0 4px 32px 0 rgba(163,230,53,0.10)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <h2 style={{ color: '#a3e635', fontSize: 22, marginBottom: 16 }}>Matukio</h2>
+            <form onSubmit={handleRecordEvent} style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+              <select value={selectedMatch} onChange={e => setSelectedMatch(e.target.value)} required
+                style={{ background: 'rgba(30,41,59,0.9)', color: '#a3e635', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16, flex: 1, minWidth: 180 }}>
+                <option value="">Chagua Mechi...</option>
+                {matches.map(match => <option key={match.id} value={match.id}>{match.homeTeam || 'Team A'} vs {match.awayTeam || 'Team B'}</option>)}
+              </select>
+              <select value={selectedPlayer} onChange={e => setSelectedPlayer(e.target.value)} required disabled={!selectedMatch}
+                style={{ background: 'rgba(30,41,59,0.9)', color: '#a3e635', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16, flex: 1, minWidth: 180, opacity: selectedMatch ? 1 : 0.5 }}>
+                <option value="">Chagua Mchezaji...</option>
+                {selectedMatch && players.map(player => <option key={player.id} value={player.id}>{player.number} - {player.name}</option>)}
+              </select>
+              <select value={selectedAction} onChange={e => setSelectedAction(e.target.value)} required
+                style={{ background: 'rgba(30,41,59,0.9)', color: '#a3e635', border: '1.5px solid #a3e635', borderRadius: 8, padding: 12, fontSize: 16, flex: 1, minWidth: 120 }}>
+                <option value="goal">⚽ Goal</option>
+                <option value="yellow">🟨 Yellow</option>
+                <option value="red">🟥 Red</option>
+              </select>
+              <button type="submit" style={{ background: '#a3e635', color: '#0f172a', border: 'none', borderRadius: 8, padding: '12px 20px', fontWeight: 'bold', fontSize: 16, cursor: 'pointer', minWidth: 120 }}>Hifadhi Tukio</button>
+            </form>
+            <div style={{ color: '#a3e635', fontWeight: 600, marginBottom: 16 }}>{message}</div>
+            <div style={{ marginTop: 24 }}>
+              <h3 style={{ color: '#a3e635', fontSize: 18, marginBottom: 8 }}>Magoli</h3>
+              {Array.isArray(matches) && matches.length > 0 && matches.some(m => m.goals && m.goals.length > 0) ? (
+                matches.map(match =>
+                  match.goals && match.goals.length > 0 ? (
+                    <div key={match.id} style={{ marginBottom: 12 }}>
+                      {match.goals.map(goal => {
+                        const player = players.find(p => p.id === goal.playerId);
+                        return (
+                          <div key={goal.id} style={{ background: 'rgba(163,230,53,0.08)', border: '1px solid #a3e635', borderRadius: 8, padding: 10, marginBottom: 6, color: '#fff' }}>
+                            <b style={{ color: '#a3e635' }}>⚽ {player?.name || 'Unknown'}</b>
+                            <span style={{ marginLeft: 8, fontSize: 13, color: '#fff', opacity: 0.7 }}>#{player?.number || 'N/A'} - {new Date(goal.timestamp).toLocaleString()}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null
+                )
+              ) : <p style={{ color: '#fff' }}>Hakuna magoli bado</p>}
+              <h3 style={{ color: '#a3e635', fontSize: 18, margin: '24px 0 8px' }}>Kadi</h3>
+              {Array.isArray(matches) && matches.length > 0 && matches.some(m => m.cards && m.cards.length > 0) ? (
+                matches.map(match =>
+                  match.cards && match.cards.length > 0 ? (
+                    <div key={match.id} style={{ marginBottom: 12 }}>
+                      {match.cards.map(card => {
+                        const player = players.find(p => p.id === card.playerId);
+                        const cardColor = card.cardType === 'yellow' ? '#facc15' : '#ef4444';
+                        return (
+                          <div key={card.id} style={{ background: 'rgba(255,255,255,0.08)', border: `1.5px solid ${cardColor}`, borderRadius: 8, padding: 10, marginBottom: 6, color: cardColor }}>
+                            <b>{card.cardType === 'yellow' ? '🟨' : '🟥'} {player?.name || 'Unknown'}</b>
+                            <span style={{ marginLeft: 8, fontSize: 13, color: '#fff', opacity: 0.7 }}>#{player?.number || 'N/A'} - {new Date(card.timestamp).toLocaleString()}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null
+                )
+              ) : <p style={{ color: '#fff' }}>Hakuna kadi bado</p>}
             </div>
           </div>
         )}
 
-        {/* REPORTS TAB */}
+        {/* Reports Tab */}
         {activeTab === 'reports' && (
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-            <h3 style={{ marginTop: 0 }}>📊 RIPOTI NA TAKWIMU</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
-              <div style={{ background: '#f0f9ff', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #3b82f6' }}>
-                <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>TIMU JUMLA</p>
-                <h2 style={{ margin: '8px 0 0', fontSize: '32px', fontWeight: 'bold' }}>{teams.length}</h2>
+          <div style={{ background: 'rgba(30,41,59,0.7)', borderRadius: 16, padding: 24, marginBottom: 32, boxShadow: '0 4px 32px 0 rgba(163,230,53,0.10)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <h2 style={{ color: '#a3e635', fontSize: 22, marginBottom: 16 }}>Ripoti na Takwimu</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 15, marginBottom: 20 }}>
+              <div style={{ background: 'rgba(59,130,246,0.13)', padding: 20, borderRadius: 12, borderLeft: '4px solid #3b82f6', color: 'white' }}>
+                <p style={{ margin: 0, fontSize: 12, color: '#a3e635' }}>Timu Jumla</p>
+                <h2 style={{ margin: '8px 0 0', fontSize: 32, fontWeight: 'bold', color: '#a3e635' }}>{teams.length}</h2>
               </div>
-              <div style={{ background: '#f0fdf4', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #10b981' }}>
-                <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>WACHEZAJI JUMLA</p>
-                <h2 style={{ margin: '8px 0 0', fontSize: '32px', fontWeight: 'bold' }}>{players.length}</h2>
+              <div style={{ background: 'rgba(16,185,129,0.13)', padding: 20, borderRadius: 12, borderLeft: '4px solid #10b981', color: 'white' }}>
+                <p style={{ margin: 0, fontSize: 12, color: '#a3e635' }}>Wachezaji Jumla</p>
+                <h2 style={{ margin: '8px 0 0', fontSize: 32, fontWeight: 'bold', color: '#a3e635' }}>{players.length}</h2>
               </div>
-              <div style={{ background: '#fef3c7', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #f59e0b' }}>
-                <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>MECHI JUMLA</p>
-                <h2 style={{ margin: '8px 0 0', fontSize: '32px', fontWeight: 'bold' }}>{matches.length}</h2>
+              <div style={{ background: '#fef3c7', padding: 20, borderRadius: 8, borderLeft: '4px solid #f59e0b' }}>
+                <p style={{ margin: 0, fontSize: 12, color: '#666' }}>Mechi Jumla</p>
+                <h2 style={{ margin: '8px 0 0', fontSize: 32, fontWeight: 'bold' }}>{matches.length}</h2>
               </div>
             </div>
-            <button onClick={generateReport} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: '#667eea', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-              <Download size={16} /> PAKUA RIPOTI
+            <button onClick={generateReport} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', background: '#667eea', color: 'white', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer' }}>
+              <Download size={16} /> Pakua Ripoti
             </button>
           </div>
         )}

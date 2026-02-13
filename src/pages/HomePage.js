@@ -1,11 +1,21 @@
-// This is your original App.js content - kept as HomePage component
 import React, { useState, useEffect } from 'react';
 import { Helmet } from "react-helmet"; 
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
   ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp, CheckCircle, Copy, Shirt, Tag, Share2, Target, Bot
 } from 'lucide-react';
-import AdminConsole from '../components/AdminConsole';
+// ...existing code...
+      <style>{`
+        @keyframes pulse-glow {
+          0% { box-shadow: 0 0 0 0 rgba(163,230,53,0); }
+          40% { box-shadow: 0 0 12px 4px rgba(163,230,53,0.18); }
+          60% { box-shadow: 0 0 12px 4px rgba(163,230,53,0.18); }
+          100% { box-shadow: 0 0 0 0 rgba(163,230,53,0); }
+        }
+        .pande-modal-glass .pulse-glow-btn {
+          animation: pulse-glow 3s infinite;
+        }
+      `}</style>
 // Responsive helpers for mobile
 const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
 const mobileCardStyle = {
@@ -184,8 +194,17 @@ export const HomePage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // --- HANDLERS ---
-  const openModal = () => { setIsModalOpen(true); setModalStep(1); setIsMobileMenuOpen(false); document.body.style.overflow = 'hidden'; setSubmitError(''); };
-  const closeModal = () => { setIsModalOpen(false); document.body.style.overflow = 'auto'; };
+  const openModal = () => {
+    setIsModalOpen(true);
+    setModalStep(1);
+    setIsMobileMenuOpen(false);
+    document.body.style.overflow = 'hidden';
+    setSubmitError('');
+  };
+  const closeModal = () => {
+    setIsModalOpen(false);
+    document.body.style.overflow = 'auto';
+  };
   const toggleMobileMenu = () => { setIsMobileMenuOpen(!isMobileMenuOpen); };
   
   // HANDLE REGISTRATION SUBMIT (DEBUGGING VERSION)
@@ -472,11 +491,14 @@ export const HomePage = () => {
   let displaySubtitle = currentHero.subtitle;
 
   if (activeSeason === '2025' && !isGoba2025) {
-     displayTitle = "HII GAME NI YETU."; 
+     displayTitle = (
+       <span style={{ color: '#fff', fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', fontWeight: 900, fontStyle: 'italic', textTransform: 'uppercase', lineHeight: '0.9', letterSpacing: '-0.03em', textAlign: 'center', display: 'block', marginBottom: '12px' }}>
+         PANDE CUP
+       </span>
+     );
      displaySubtitle = (
-       <span>
-            Ilianzia Kiomoni Pande, Tanga kwenye vumbi la asili ambapo ndoto ilizaliwa. Sasa tumebeba moto huo na kuuwasha Goba, Dar es Salaam.<br/><br/>
-            <span style={{ color: '#a3e635', fontWeight: 'bold', fontStyle: 'italic' }}>Ligi Moja. Upendo Mmoja. Vumbi Moja.</span>
+       <span style={{ color: '#fff', fontSize: 'clamp(18px, 2vw, 24px)', lineHeight: '1.2', letterSpacing: '1px', textAlign: 'center', display: 'block' }}>
+         Ligi Moja. Upendo Mmoja. Vumbi Moja.
        </span>
      );
   }
@@ -487,9 +509,34 @@ export const HomePage = () => {
   const styles = {
     container: { backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: '"Inter", sans-serif', scrollBehavior: 'smooth', position: 'relative', overflowX: 'hidden' },
     topBar: { backgroundColor: '#1e293b', padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
-    nav: { borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '16px 0', position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)' },
+    nav: {
+      background: 'rgba(15, 23, 42, 0.8)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      borderBottom: '1px solid rgba(255,255,255,0.05)',
+      padding: '10px 0',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
+      transition: 'box-shadow 0.2s',
+      boxShadow: '0 0 0 0 transparent',
+    },
     navContent: { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' },
-    navLink: { color: '#94a3b8', textDecoration: 'none', fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', transition: 'color 0.2s', cursor: 'pointer', padding: '8px' },
+    navLink: {
+      color: '#94a3b8',
+      textDecoration: 'none',
+      fontSize: '13px',
+      fontWeight: 600,
+      textTransform: 'uppercase',
+      transition: 'color 0.2s',
+      cursor: 'pointer',
+      padding: '8px',
+      background: 'none',
+      border: 'none',
+      outline: 'none',
+      position: 'relative',
+      display: 'inline-block',
+    },
     heroWrapper: { position: 'relative', overflow: 'hidden', minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(163, 230, 53, 0.1)' },
     heroMedia: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, objectFit: 'cover' },
     heroOverlay: { position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.9))' },
@@ -604,16 +651,84 @@ export const HomePage = () => {
       </div>
 
       {/* 2. MAIN NAVIGATION */}
-      <nav style={styles.nav} className="nav-glass nav-mobile">
+      <nav style={styles.nav} className="nav-glass nav-mobile pande-nav-glass">
+              <style>{`
+                .pande-nav-glass {
+                  box-shadow: 0 0 0 0 transparent;
+                  transition: box-shadow 0.2s;
+                }
+                .pande-nav-glass.sticky-shadow {
+                  box-shadow: 0 4px 24px 0 rgba(163,230,53,0.10);
+                }
+                .desktop-only a, .desktop-only button {
+                  position: relative;
+                  overflow: visible;
+                }
+                .desktop-only a:hover, .desktop-only button:hover {
+                  color: #a3e635 !important;
+                }
+                .desktop-only a::after, .desktop-only button::after {
+                  content: '';
+                  display: block;
+                  position: absolute;
+                  left: 50%;
+                  bottom: 2px;
+                  width: 0;
+                  height: 2px;
+                  background: #a3e635;
+                  border-radius: 2px;
+                  transition: width 0.25s cubic-bezier(.4,0,.2,1), left 0.25s cubic-bezier(.4,0,.2,1);
+                }
+                .desktop-only a:hover::after, .desktop-only button:hover::after {
+                  width: 70%;
+                  left: 15%;
+                }
+              `}</style>
+              <script>
+                {`
+                  window.addEventListener('scroll', function() {
+                    const nav = document.querySelector('.pande-nav-glass');
+                    if (!nav) return;
+                    if (window.scrollY > 8) {
+                      nav.classList.add('sticky-shadow');
+                    } else {
+                      nav.classList.remove('sticky-shadow');
+                    }
+                  });
+                `}
+              </script>
         <div style={styles.navContent}>
           <a href="#hero" style={{ textDecoration: 'none', cursor: 'pointer' }}><PandeLogo /></a>
           <div className="desktop-only" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
             <a onClick={() => window.location.href='#news'} style={styles.navLink}>Habari</a>
             <a onClick={() => window.location.href='#ratiba'} style={styles.navLink}>Ratiba</a>
             <a href="/pctv" style={styles.navLink}>PC TV</a>
-            <a href="https://wa.me/255746510805?text=Habari, nahitaji kuwa mdhamini wa Pande Cup." style={{...styles.navLink, color: '#cbd5e1'}}>Wadhamini</a>
+            <a href="/sponsors" style={{...styles.navLink, color: '#cbd5e1'}}>Wadhamini</a>
             <a href="/about" style={{...styles.navLink, color: '#cbd5e1'}}>Kutuhusu</a>
-            {/* <button onClick={openModal} style={{ ...styles.buttonPrimary, padding: '10px 24px', fontSize: '12px' }}>SAJILI TIMU</button> */}
+            <button
+              onClick={openModal}
+              style={{
+                ...styles.navLink,
+                color: '#94a3b8',
+                background: 'transparent',
+                border: '1px solid #a3e635',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: 600,
+                padding: '6px 18px',
+                height: 'auto',
+                boxShadow: 'none',
+                marginLeft: 0,
+                marginRight: 0,
+                display: 'flex',
+                alignItems: 'center',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'border-color 0.2s',
+              }}
+            >
+              SAJILI TIMU
+            </button>
             {process.env.NODE_ENV === 'development' && <a href="/admin" style={{...styles.navLink, color: '#a3e635', fontWeight: '800'}}>ADMIN</a>}
           </div>
           <div style={{ display: 'block' }}>
@@ -628,11 +743,11 @@ export const HomePage = () => {
             <a href="#hero" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Nyumbani</a>
             <a href="#news" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Habari & Updates</a>
             <a href="#ratiba" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Ratiba & Matokeo</a>
-            <a href="https://wa.me/255746510805?text=Habari, nahitaji kuwa mdhamini wa Pande Cup." onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Wadhamini</a>
+            <a href="/sponsors" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Wadhamini</a>
             <a href="/pctv" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>PC TV</a>
             <a href="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Kutuhusu</a>
             {process.env.NODE_ENV === 'development' && <a href="/admin" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>ADMIN</a>}
-            {/* <button onClick={openModal} style={{ ...styles.buttonPrimary, marginTop: '20px', width: '100%', justifyContent: 'center' }}>SAJILI TIMU</button> */}
+            <button onClick={openModal} style={{ ...styles.buttonPrimary, marginTop: '20px', width: '100%', justifyContent: 'center', background: '#a3e635', color: 'black', borderRadius: '8px', fontWeight: 'bold', border: 'none', fontSize: '18px', padding: '16px 0' }}>SAJILI TIMU</button>
         </div>
       </div>
       {isMobileMenuOpen && <div onClick={() => setIsMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 55, backdropFilter: 'blur(4px)' }}></div>}
@@ -647,9 +762,85 @@ export const HomePage = () => {
         />
         <div style={styles.heroOverlay}></div>
         <section style={styles.heroContent}>
-           <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '40px', flexWrap: 'wrap' }}>
-                <button onClick={() => setActiveLocation('kiomoni')} style={{ ...styles.locationButton, borderColor: activeLocation === 'kiomoni' ? '#a3e635' : 'rgba(255,255,255,0.2)', backgroundColor: activeLocation === 'kiomoni' ? '#a3e635' : 'transparent', color: activeLocation === 'kiomoni' ? 'black' : 'white' }}>KIOMONI</button>
-                <button onClick={() => setActiveLocation('goba')} style={{ ...styles.locationButton, borderColor: activeLocation === 'goba' ? '#a3e635' : 'rgba(255,255,255,0.2)', backgroundColor: activeLocation === 'goba' ? '#a3e635' : 'transparent', color: activeLocation === 'goba' ? 'black' : 'white', opacity: activeSeason === '2025' ? 0.5 : 1 }}>GOBA</button>
+           <div 
+             style={{
+               display: 'flex',
+               justifyContent: 'center',
+               gap: '16px',
+               marginBottom: '40px',
+               flexWrap: 'wrap',
+               padding: '12px 24px',
+               borderRadius: '24px',
+               background: 'rgba(0,0,0,0.4)',
+               backdropFilter: 'blur(10px)',
+               WebkitBackdropFilter: 'blur(10px)',
+               boxShadow: '0 4px 32px 0 rgba(0,0,0,0.18)',
+               border: '1.5px solid rgba(255,255,255,0.10)',
+               alignItems: 'center',
+               minWidth: 0,
+               transition: 'background 0.3s, box-shadow 0.3s',
+             }}
+           >
+             <button
+               onClick={() => setActiveLocation('kiomoni')}
+               style={{
+                 ...styles.locationButton,
+                 borderColor: activeLocation === 'kiomoni' ? '#a3e635' : 'rgba(255,255,255,0.2)',
+                 backgroundColor: activeLocation === 'kiomoni' ? '#a3e635' : 'rgba(255,255,255,0.08)',
+                 color: activeLocation === 'kiomoni' ? 'black' : 'rgba(255,255,255,0.85)',
+                 opacity: 1,
+                 fontWeight: 700,
+                 fontSize: '15px',
+                 minWidth: 70,
+                 minHeight: 36,
+                 borderRadius: 12,
+                 boxShadow: activeLocation === 'kiomoni' ? '0 0 8px 1px rgba(163,230,53,0.13)' : 'none',
+                 transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
+                 outline: 'none',
+                 cursor: 'pointer',
+                 touchAction: 'manipulation',
+                 transform: 'scale(1)',
+                 letterSpacing: '1px',
+               }}
+               onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+               onMouseUp={e => e.currentTarget.style.transform = 'scale(1.03)'}
+               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+               onTouchStart={e => e.currentTarget.style.transform = 'scale(0.97)'}
+               onTouchEnd={e => e.currentTarget.style.transform = 'scale(1.03)'}
+               onTouchCancel={e => e.currentTarget.style.transform = 'scale(1)'}
+             >
+               TANGA
+             </button>
+             <button
+               onClick={() => setActiveLocation('goba')}
+               style={{
+                 ...styles.locationButton,
+                 borderColor: activeLocation === 'goba' ? '#a3e635' : 'rgba(255,255,255,0.2)',
+                 backgroundColor: activeLocation === 'goba' ? '#a3e635' : 'rgba(255,255,255,0.08)',
+                 color: activeLocation === 'goba' ? 'black' : 'rgba(255,255,255,0.85)',
+                 opacity: activeSeason === '2025' ? 0.5 : 1,
+                 fontWeight: 700,
+                 fontSize: '15px',
+                 minWidth: 70,
+                 minHeight: 36,
+                 borderRadius: 12,
+                 boxShadow: activeLocation === 'goba' ? '0 0 8px 1px rgba(163,230,53,0.13)' : 'none',
+                 transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
+                 outline: 'none',
+                 cursor: 'pointer',
+                 touchAction: 'manipulation',
+                 transform: 'scale(1)',
+                 letterSpacing: '1px',
+               }}
+               onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+               onMouseUp={e => e.currentTarget.style.transform = 'scale(1.03)'}
+               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+               onTouchStart={e => e.currentTarget.style.transform = 'scale(0.97)'}
+               onTouchEnd={e => e.currentTarget.style.transform = 'scale(1.03)'}
+               onTouchCancel={e => e.currentTarget.style.transform = 'scale(1)'}
+             >
+               DAR
+             </button>
            </div>
            
            {isGoba2025 ? (
@@ -676,32 +867,43 @@ export const HomePage = () => {
           <div style={{ display: 'flex', overflow: 'hidden', position: 'relative' }}>
             <div className="sponsor-marquee">
               {(() => {
-                const sponsors = (cmsData.sponsors && cmsData.sponsors.length > 0) ? cmsData.sponsors : FALLBACK_DATA.sponsors;
+                const sponsors = (cmsData.sponsors && cmsData.sponsors.length > 0)
+                  ? [...cmsData.sponsors].sort((a, b) => ((b.fields?.weight || 0) - (a.fields?.weight || 0)))
+                  : FALLBACK_DATA.sponsors;
                 const doubled = [...sponsors, ...sponsors];
+                const sponsorPlaceholder = 'https://via.placeholder.com/120x50?text=LOGO';
                 return doubled.map((sponsor, idx) => {
-                  const sponsorUrl = sponsor.websiteUrl || sponsor.link || SOCIAL_LINKS.instagram;
-                  const handlClickSponsor = (e) => {
-                    e.currentTarget.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                      e.currentTarget.style.transform = '';
-                    }, 150);
-                  };
+                  const fields = sponsor.fields || {};
+                  const isClickable = !!fields.link;
+                  const logoImg = (
+                    <img
+                      src={fields.logo || sponsor.logo || sponsorPlaceholder}
+                      alt={fields.name || sponsor.name || 'Sponsor'}
+                      style={{ height: '50px', objectFit: 'contain', maxWidth: '120px', filter: 'grayscale(100%)', opacity: 0.7, borderRadius: 10, transition: 'transform 0.2s', cursor: isClickable ? 'pointer' : 'default' }}
+                      onError={e => { e.target.onerror = null; e.target.src = sponsorPlaceholder; }}
+                      onMouseOver={e => e.currentTarget.style.transform = 'scale(1.10)'}
+                      onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                      className="sponsor-logo"
+                    />
+                  );
                   return (
                     <div key={idx} className="sponsor-marquee-item">
-                      <a 
-                        href={sponsorUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title={`Tembelea ${sponsor.name}`}
-                        onMouseDown={handlClickSponsor}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                      >
-                        {sponsor.logo ? (
-                          <img src={sponsor.logo} alt={sponsor.name} style={{ height: '50px', objectFit: 'contain', maxWidth: '120px' }} />
-                        ) : (
-                          <span style={{ fontSize: '14px', fontWeight: '900', color: '#fff', fontStyle: 'italic', textAlign: 'center', wordBreak: 'break-word', maxWidth: '120px' }}>{sponsor.name}</span>
-                        )}
-                      </a>
+                      {isClickable ? (
+                        <a
+                          href={fields.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`Tembelea ${fields.name || sponsor.name}`}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }}
+                          className="hover:scale-110 transition-transform cursor-pointer"
+                        >
+                          {logoImg}
+                        </a>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }} className="hover:scale-110 transition-transform">
+                          {logoImg}
+                        </div>
+                      )}
                     </div>
                   );
                 });
@@ -722,7 +924,12 @@ export const HomePage = () => {
                     {filteredNews.slice(0, visibleNewsCount).map((item, idx) => (
                         <div key={idx} className="hover-card" style={styles.newsCard}>
                             <div style={{ height: '200px', overflow: 'hidden' }}>
-                            <img src={item.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="News" onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&q=80&w=500"; }} />
+                            <img 
+                              src={item.image} 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                              alt="News" 
+                              onError={e => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/400x250?text=NEWS'; }} 
+                            />
                             </div>
                             <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                 <span style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', marginBottom: '8px' }}>{formatDate(item.date)}</span>
@@ -882,9 +1089,9 @@ export const HomePage = () => {
         </section>
 
         {/* 6. TOURNAMENT INSIGHTS - BOT POWERED STATS CENTER */}
-        <section style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={isMobile ? { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '24px' } : { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
-            <Bot style={{ color: '#a3e635' }} size={isMobile ? 22 : 40} />
+        <section style={{ padding: isMobile ? '36px 8px' : '80px 24px', maxWidth: '1200px', margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={isMobile ? { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '18px' } : { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
+            <Bot style={{ color: '#a3e635', background: 'rgba(163,230,53,0.12)', borderRadius: '50%', padding: isMobile ? 6 : 10, boxShadow: isMobile ? '0 2px 8px 0 rgba(163,230,53,0.08)' : '0 4px 16px 0 rgba(163,230,53,0.10)' }} size={isMobile ? 28 : 40} />
             <div>
               <h2 style={isMobile ? mobileHeaderStyle : desktopHeaderStyle}>
                 Uchambuzi wa <span style={{ color: '#a3e635' }}>Pande Cup Bot</span>
@@ -894,10 +1101,33 @@ export const HomePage = () => {
           </div>
 
           {filteredStandings.length > 0 && filteredMatches.length > 0 ? (
-            <div style={isMobile ? { display: 'flex', flexDirection: 'column', gap: '18px' } : { display: 'flex', flexDirection: 'row', gap: '28px' }}>
+            <div style={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: isMobile ? '14px' : '28px',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              maxWidth: 1100,
+              margin: '0 auto',
+              flexWrap: isMobile ? 'nowrap' : 'wrap',
+            }}>
               
               {/* CARD 1: GOLDEN BOOT - TOP TEAMS BY GOALS */}
-              <div style={isMobile ? { ...mobileCardStyle, background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', border: '1px solid rgba(163, 230, 53, 0.2)', position: 'relative', overflow: 'hidden', fontSize: '0.95rem' } : { background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(163, 230, 53, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{
+                ...(isMobile ? mobileCardStyle : {}),
+                background: 'linear-gradient(135deg, rgba(163, 230, 53, 0.08), rgba(163, 230, 53, 0.02))',
+                border: '1px solid rgba(163, 230, 53, 0.2)',
+                position: 'relative',
+                overflow: 'hidden',
+                fontSize: isMobile ? '0.95rem' : '1rem',
+                width: '100%',
+                maxWidth: 340,
+                minWidth: 0,
+                margin: '0 auto',
+                boxSizing: 'border-box',
+                flex: '1 1 320px',
+              }}>
                 <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', backgroundColor: '#a3e635', borderRadius: '50%', opacity: 0.05 }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
@@ -926,7 +1156,20 @@ export const HomePage = () => {
               </div>
 
               {/* CARD 2: MATCH PERFORMANCE METRICS */}
-              <div style={isMobile ? { ...mobileCardStyle, background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', border: '1px solid rgba(59, 130, 246, 0.2)', position: 'relative', overflow: 'hidden', fontSize: '0.95rem' } : { background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{
+                ...(isMobile ? mobileCardStyle : {}),
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                position: 'relative',
+                overflow: 'hidden',
+                fontSize: isMobile ? '0.95rem' : '1rem',
+                width: '100%',
+                maxWidth: 340,
+                minWidth: 0,
+                margin: '0 auto',
+                boxSizing: 'border-box',
+                flex: '1 1 320px',
+              }}>
                 <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', backgroundColor: '#3b82f6', borderRadius: '50%', opacity: 0.05 }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
@@ -950,7 +1193,20 @@ export const HomePage = () => {
               </div>
 
               {/* CARD 3: LEADERBOARD HIGHLIGHT */}
-              <div style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.02))', backdropFilter: 'blur(12px)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '20px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{
+                ...(isMobile ? mobileCardStyle : {}),
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.02))',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                position: 'relative',
+                overflow: 'hidden',
+                fontSize: isMobile ? '0.95rem' : '1rem',
+                width: '100%',
+                maxWidth: 340,
+                minWidth: 0,
+                margin: '0 auto',
+                boxSizing: 'border-box',
+                flex: '1 1 320px',
+              }}>
                 <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', backgroundColor: '#22c55e', borderRadius: '50%', opacity: 0.05 }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
@@ -1011,7 +1267,11 @@ export const HomePage = () => {
           </div>
           <div>
             <h4 style={{ color: 'white', fontSize: '14px', fontWeight: 'bold', marginBottom: '24px' }}>VIUNGO VYA HARAKA</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}><a href="#news" style={{ color: '#64748b', textDecoration: 'none', fontSize: '14px' }}>Habari</a><a href="#ratiba" style={{ color: '#64748b', textDecoration: 'none', fontSize: '14px' }}>Ratiba</a><a href="#" onClick={openModal} style={{ color: '#a3e635', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}>Sajili Timu</a></div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <a href="#news" style={{ color: '#64748b', textDecoration: 'none', fontSize: '14px' }}>Habari</a>
+              <a href="#ratiba" style={{ color: '#64748b', textDecoration: 'none', fontSize: '14px' }}>Ratiba</a>
+              {/* Admin links/forms removed: Sajili Mchezaji, Matukio, Mechi */}
+            </div>
           </div>
           <div>
             <h4 style={{ color: 'white', fontSize: '14px', fontWeight: 'bold', marginBottom: '24px' }}>TUWASILIANE</h4>
@@ -1027,6 +1287,116 @@ export const HomePage = () => {
       </footer>
 
         {/* Registration/Team Setup forms and modal moved to /admin only. Not accessible on public homepage. */}
+
+      {/* MODAL - TEAM REGISTRATION (PUBLIC) */}
+      {isModalOpen && (
+        <>
+          <style>{`
+            .pande-modal-overlay {
+              position: fixed;
+              inset: 0;
+              z-index: 100;
+              background: rgba(0,0,0,0.7);
+              backdrop-filter: blur(8px);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 16px;
+              animation: fadeInModal 0.3s cubic-bezier(.4,0,.2,1);
+            }
+            .pande-modal-glass {
+              background: rgba(30,41,59,0.7);
+              border-radius: 24px;
+              border: 1.5px solid rgba(163,230,53,0.13);
+              box-shadow: 0 8px 32px 0 rgba(163,230,53,0.13), 0 1.5px 0 0 #a3e63533;
+              max-width: 420px;
+              width: 100%;
+              position: relative;
+              max-height: 95vh;
+              overflow-y: auto;
+              display: flex;
+              flex-direction: column;
+              animation: scaleInModal 0.3s cubic-bezier(.4,0,.2,1);
+            }
+            @keyframes fadeInModal {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes scaleInModal {
+              from { transform: scale(0.95); }
+              to { transform: scale(1); }
+            }
+            .pande-modal-glass input, .pande-modal-glass select {
+              background: rgba(30,41,59,0.6);
+              border: 1.5px solid #333;
+              color: #fff;
+              border-radius: 8px;
+              padding: 12px;
+              font-size: 16px;
+              margin-bottom: 0;
+              outline: none;
+              transition: border-color 0.2s, box-shadow 0.2s;
+            }
+            .pande-modal-glass input:focus, .pande-modal-glass select:focus {
+              border-color: #a3e635;
+              box-shadow: 0 0 0 2px #a3e63533;
+            }
+          `}</style>
+          <div className="pande-modal-overlay">
+            <div className="sponsor-marquee">
+              {(() => {
+                const sponsors = (cmsData.sponsors && cmsData.sponsors.length > 0)
+                  ? [...cmsData.sponsors].sort((a, b) => ((b.fields?.weight || 0) - (a.fields?.weight || 0)))
+                  : FALLBACK_DATA.sponsors;
+                const doubled = [...sponsors, ...sponsors];
+                const sponsorPlaceholder = 'https://via.placeholder.com/120x50?text=LOGO';
+                return doubled.map((sponsor, idx) => {
+                  const fields = sponsor.fields || {};
+                  const isClickable = !!fields.link;
+                  const logoImg = (
+                    <img
+                      src={fields.logo || sponsor.logo || sponsorPlaceholder}
+                      alt={fields.name || sponsor.name || 'Sponsor'}
+                      style={{ height: '50px', objectFit: 'contain', maxWidth: '120px', filter: 'grayscale(100%)', opacity: 0.7, borderRadius: 10, transition: 'transform 0.2s', cursor: isClickable ? 'pointer' : 'default' }}
+                      onError={e => { e.target.onerror = null; e.target.src = sponsorPlaceholder; }}
+                      onMouseOver={e => e.currentTarget.style.transform = 'scale(1.10)'}
+                      onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                      className="sponsor-logo"
+                    />
+                  );
+                  return (
+                    <div key={idx} className="sponsor-marquee-item">
+                      {isClickable ? (
+                        <a
+                          href={fields.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`Tembelea ${fields.name || sponsor.name}`}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }}
+                          className="hover:scale-110 transition-transform cursor-pointer"
+                        >
+                          {logoImg}
+                        </a>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }} className="hover:scale-110 transition-transform">
+                          {logoImg}
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+                <div style={{ padding: '40px 28px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '18px' }}>
+                  <CheckCircle size={48} color="#a3e635" />
+                  <h2 style={{ color: '#a3e635', fontWeight: '900', fontSize: '22px', margin: 0 }}>Ombi Limeshawasilishwa!</h2>
+                  <p style={{ color: '#cbd5e1', fontSize: '16px', margin: 0 }}>Tutawasiliana nawe kupitia WhatsApp kwa maelezo zaidi ya usajili na malipo. Asante kwa kujiunga na Pande Cup!</p>
+                  <button onClick={closeModal} style={{ marginTop: '18px', width: '100%', padding: '14px', background: '#23272f', color: '#a3e635', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}>Funga</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* MODAL - NEWS READ MORE */}
       {selectedNews && (
@@ -1102,8 +1472,7 @@ export const HomePage = () => {
 
       </div>
 
-      {/* DEVELOPMENT-ONLY ADMIN CONSOLE */}
-      <AdminConsole />
+      {/* DEVELOPMENT-ONLY ADMIN CONSOLE removed. Accessible only via /admin route. */}
     </>
   );
 };
