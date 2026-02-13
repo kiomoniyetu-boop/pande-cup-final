@@ -80,7 +80,7 @@ const PandeLogo = ({ size = 'normal', isMobile }) => {
 
   if (USE_IMAGE_LOGO && !imgError) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
           <img 
             src={LOGO_PATH} 
             alt="Pande Cup Logo" 
@@ -161,7 +161,7 @@ export const HomePage = () => {
   const [selectedNews, setSelectedNews] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   
-  const [visibleNewsCount, setVisibleNewsCount] = useState(3);
+  // NOTE: visibleNewsCount removed because we now use scroll
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -260,8 +260,6 @@ export const HomePage = () => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  useEffect(() => { setVisibleNewsCount(3); }, [activeLocation, activeSeason]);
 
   useEffect(() => {
     const fetchContentfulData = async () => {
@@ -806,13 +804,18 @@ export const HomePage = () => {
 
       {!isGoba2025 && (
       <>
-        {/* 4. NEWS */}
+        {/* 4. NEWS - NOW SCROLLABLE LIKE RATIBA */}
         <section id="news" style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={styles.sectionHeader}><Newspaper style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Habari <span style={styles.limeText}>{activeSeason}</span></h2></div>
           {filteredNews.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+            <div className="custom-scroll" style={{ 
+                maxHeight: '800px', 
+                overflowY: 'auto', 
+                paddingRight: '8px', 
+                paddingBottom: '20px' 
+            }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
-                    {filteredNews.slice(0, visibleNewsCount).map((item, idx) => (
+                    {filteredNews.map((item, idx) => (
                         <div key={idx} className="hover-card" style={styles.newsCard}>
                             <div style={{ height: '200px', overflow: 'hidden' }}>
                             <img 
@@ -836,33 +839,6 @@ export const HomePage = () => {
                         </div>
                     ))}
                 </div>
-                {filteredNews.length > 3 && (
-                    <div style={{ textAlign: 'center' }}>
-                        <button 
-                            onClick={() => setVisibleNewsCount(prev => prev === 3 ? filteredNews.length : 3)} 
-                            style={{ 
-                              padding: '12px 32px', 
-                              backgroundColor: 'white', 
-                              color: 'black', 
-                              borderRadius: '50px', 
-                              border: 'none', 
-                              fontWeight: 'bold', 
-                              cursor: 'pointer',
-                              fontSize: '13px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              boxShadow: '0 4px 15px rgba(255,255,255,0.1)'
-                            }}
-                          >
-                            {visibleNewsCount === 3 ? (
-                              <React.Fragment>ONYESHA HABARI ZAIDI <ChevronDown size={16} /></React.Fragment>
-                            ) : (
-                              <React.Fragment>PUNGUZA HABARI <ChevronUp size={16} /></React.Fragment>
-                            )}
-                          </button>
-                    </div>
-                )}
             </div>
           ) : ( <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}><p>Hakuna habari zilizopakiwa kwa msimu huu bado.</p></div> )}
         </section>
@@ -981,7 +957,7 @@ export const HomePage = () => {
 </>
       )}
 
-      {/* 7. PROFESSIONAL FOOTER - COMPACT & MODERN */}
+      {/* 7. PROFESSIONAL FOOTER - STRICT ALIGNMENT */}
       <footer id="about" style={{ backgroundColor: '#020617', borderTop: '1px solid rgba(163, 230, 53, 0.1)', position: 'relative', overflow: 'hidden' }}>
         
         {/* Decorative Glow */}
@@ -991,13 +967,13 @@ export const HomePage = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px' }}>
             
             {/* COL 1: BRAND & NARRATIVE */}
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
               <div style={{ marginBottom: '16px' }}><PandeLogo size="large" isMobile={isMobile} /></div>
               <div style={{ maxWidth: '300px' }}>
-                  <h4 style={{ color: '#a3e635', fontSize: '16px', fontWeight: '900', fontStyle: 'italic', marginBottom: '8px', textTransform: 'uppercase' }}>
+                  <h4 style={{ color: '#a3e635', fontSize: '16px', fontWeight: '900', fontStyle: 'italic', marginBottom: '8px', textTransform: 'uppercase', textAlign: 'left' }}>
                     NIPE PANDE. NIKUPE BURUDANI.
                   </h4>
-                  <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '13px', margin: 0 }}>
+                  <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '13px', margin: 0, textAlign: 'left' }}>
                     Zaidi ya soka, hii ni harakati. Tunatoa "Pande" kwa vipaji vya mtaani kuonekana, kung'ara, na kutimiza ndoto zao. Ligi Moja, Upendo Mmoja.
                   </p>
               </div>
@@ -1010,39 +986,39 @@ export const HomePage = () => {
             </div>
 
             {/* COL 2: QUICK LINKS */}
-            <div>
-              <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>Viungo vya Haraka</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <a href="#hero" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Nyumbani</a>
-                <a href="#news" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Habari & Matukio</a>
-                <a href="#ratiba" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Ratiba & Matokeo</a>
-                <a href="/sponsors" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Wadhamini Wetu</a>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase', textAlign: 'left' }}>Viungo vya Haraka</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+                <a href="#hero" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s', padding: 0 }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Nyumbani</a>
+                <a href="#news" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s', padding: 0 }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Habari & Matukio</a>
+                <a href="#ratiba" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s', padding: 0 }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Ratiba & Matokeo</a>
+                <a href="/sponsors" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s', padding: 0 }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Wadhamini Wetu</a>
               </div>
             </div>
 
             {/* COL 3: CONTACTS */}
-            <div>
-              <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>Mawasiliano</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase', textAlign: 'left' }}>Mawasiliano</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div style={{ marginTop: '2px' }}><MapPin size={18} color="#a3e635" /></div>
                   <div>
-                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px' }}>Makao Makuu</span>
-                    <span style={{ color: '#94a3b8', fontSize: '12px' }}>The Root, Kiomoni, Tanga<br/>& Goba Center, Dar es Salaam</span>
+                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px', textAlign: 'left' }}>Makao Makuu</span>
+                    <span style={{ color: '#94a3b8', fontSize: '12px', textAlign: 'left', display: 'block' }}>The Root, Kiomoni, Tanga<br/>& Goba Center, Dar es Salaam</span>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div style={{ marginTop: '2px' }}><Phone size={18} color="#a3e635" /></div>
                   <div>
-                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px' }}>Tupigie</span>
-                    <a href="tel:+255653292935" style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'none' }}>+255 653 292 935</a>
+                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px', textAlign: 'left' }}>Tupigie</span>
+                    <a href="tel:+255653292935" style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'none', textAlign: 'left', display: 'block' }}>+255 653 292 935</a>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div style={{ marginTop: '2px' }}><Mail size={18} color="#a3e635" /></div>
                   <div>
-                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px' }}>Barua Pepe</span>
-                    <a href="mailto:pandecup2023@gmail.com" style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'none' }}>pandecup2023@gmail.com</a>
+                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px', textAlign: 'left' }}>Barua Pepe</span>
+                    <a href="mailto:pandecup2023@gmail.com" style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'none', textAlign: 'left', display: 'block' }}>pandecup2023@gmail.com</a>
                   </div>
                 </div>
               </div>
