@@ -793,6 +793,17 @@ export const HomePage = () => {
         />
         <div style={styles.heroOverlay}></div>
         <section style={styles.heroContent}>
+                     {/* SEASON SWITCHER - Always visible, inside hero */}
+                     <div style={{ display: 'flex', justifyContent: 'center', gap: '18px', marginBottom: '24px', marginTop: '12px' }}>
+                       <button
+                         style={{ background: activeSeason === '2025' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2025' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
+                         onClick={() => { setActiveSeason('2025'); setActiveLocation('kiomoni'); }}
+                       >2025</button>
+                       <button
+                         style={{ background: activeSeason === '2026' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2026' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
+                         onClick={() => setActiveSeason('2026')}
+                       >2026</button>
+                     </div>
            <div 
              style={{
                display: 'flex',
