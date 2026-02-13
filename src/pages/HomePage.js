@@ -761,7 +761,7 @@ export const HomePage = () => {
                     letterSpacing: '1px',
                     textShadow: '0 2px 8px #000',
                   }}>
-                    Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; grassroots football league in Tanzania &nbsp;|&nbsp; Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; grassroots football league in Tanzania
+                    Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; #1 Grassroots Football League in Tanzania &nbsp;|&nbsp; Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; #1 Grassroots Football League in Tanzania
                   </div>
                   <style>{`
                     @keyframes slogan-scroll {
@@ -781,25 +781,21 @@ export const HomePage = () => {
             )}
         </section>
       </div>
-
-      {/* REST OF THE CONTENT (SPONSORS, NEWS, MATCHES) - KEPT SAME BUT CLEANED */}
       
-      {/* SPONSOR LOGOS INFINITE MARQUEE */}
+      {/* SPONSOR LOGOS INFINITE MARQUEE - FIXED FOR MOBILE */}
       <section id="wadhamini" style={{ padding: '60px 24px', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
         <style>{`
-          @media (max-width: 768px) {
-            .desktop-only { display: none !important; }
-            .mobile-center { display: grid !important; }
-          }
-          @media (min-width: 769px) {
-            .desktop-only { display: flex !important; }
-            .mobile-center { display: none !important; }
+          /* Removed the hiding logic so Marquee shows on both mobile and desktop */
+          .sponsor-marquee-container {
+             display: flex;
+             overflow: hidden;
+             width: 100%;
           }
         `}</style>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <p style={{ fontSize: '10px', letterSpacing: '2px', fontWeight: '800', textTransform: 'uppercase', color: '#a3e635', marginBottom: '32px', textAlign: 'center' }}>WANAOTUPA NGUVU MSIMU HUU</p>
           <div>
-            <div className="desktop-only" style={{ display: 'flex', overflow: 'hidden' }}>
+            <div className="sponsor-marquee-container">
               <div className="sponsor-marquee">
                 {[...cmsData.sponsors, ...cmsData.sponsors].map((sponsor, idx) => (
                   <div key={idx} className="sponsor-marquee-item">
@@ -807,7 +803,7 @@ export const HomePage = () => {
                       <img 
                         src={sponsor.logo} 
                         alt={sponsor.name} 
-                        style={{ height: '50px', objectFit: 'contain', filter: 'grayscale(100%)', opacity: 0.7, transition: '0.3s' }} 
+                        style={{ height: isMobile ? '40px' : '50px', objectFit: 'contain', filter: 'grayscale(100%)', opacity: 0.7, transition: '0.3s' }} 
                         onMouseOver={e => { e.currentTarget.style.filter = 'grayscale(0%)'; e.currentTarget.style.opacity = 1; }}
                         onMouseOut={e => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = 0.7; }}
                       />
@@ -816,22 +812,6 @@ export const HomePage = () => {
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="mobile-center" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginTop: 12 }}>
-              {cmsData.sponsors.map((sponsor, idx) => (
-                <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px', boxShadow: '0 2px 8px rgba(163,230,53,0.08)' }}>
-                  <a href={sponsor.websiteUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', width: '100%' }}>
-                    <img 
-                      src={sponsor.logo} 
-                      alt={sponsor.name} 
-                      style={{ height: '40px', objectFit: 'contain', filter: 'grayscale(100%)', opacity: 0.7, transition: '0.3s' }} 
-                      onMouseOver={e => { e.currentTarget.style.filter = 'grayscale(0%)'; e.currentTarget.style.opacity = 1; }}
-                      onMouseOut={e => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = 0.7; }}
-                    />
-                    <span style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', marginTop: '8px', textAlign: 'center' }}>{sponsor.name}</span>
-                  </a>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -1011,9 +991,6 @@ export const HomePage = () => {
           </div>
         </section>
 
-        {/* 6. TOURNAMENT INSIGHTS */}
-        {/* ... (Code here remains similar, just ensure styles match modern look) ... */}
-        {/* I'll omit the INSIGHTS section for brevity since you only asked for layout fixes, but if needed, paste the previous insights code here. It won't break anything. */}
 </>
       )}
 
