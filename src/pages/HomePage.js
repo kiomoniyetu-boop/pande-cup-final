@@ -874,7 +874,7 @@ export const HomePage = () => {
                     letterSpacing: '1px',
                     textShadow: '0 2px 8px #000',
                   }}>
-                    Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; #1 grassroots football league &nbsp;|&nbsp; Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; #1 grassroots football league
+                    Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; grassroots football league in Tanzania &nbsp;|&nbsp; Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; grassroots football league in Tanzania
                   </div>
                   <style>{`
                     @keyframes slogan-scroll {
@@ -897,6 +897,16 @@ export const HomePage = () => {
 
       {/* SPONSOR LOGOS INFINITE MARQUEE */}
       <section id="wadhamini" style={{ padding: '60px 24px', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                <style>{`
+                  @media (max-width: 768px) {
+                    .desktop-only { display: none !important; }
+                    .mobile-center { display: grid !important; }
+                  }
+                  @media (min-width: 769px) {
+                    .desktop-only { display: flex !important; }
+                    .mobile-center { display: none !important; }
+                  }
+                `}</style>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <p style={{ fontSize: '10px', letterSpacing: '2px', fontWeight: '800', textTransform: 'uppercase', color: '#a3e635', marginBottom: '32px', textAlign: 'center' }}>WANAOTUPA NGUVU MSIMU HUU</p>
           {/* Responsive sponsor display: grid for mobile, marquee for desktop */}
