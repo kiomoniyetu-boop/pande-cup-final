@@ -1,9 +1,16 @@
-jest.mock('uuid');
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+jest.mock('uuid', () => ({
+  v4: () => 'test-uuid'
+}));
+
+test('renders Pande Cup navigation', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  
+  // Tunatumia getAllByText kwa sababu neno linaonekana mara mbili (Desktop & Mobile)
+  const linkElements = screen.getAllByText(/Wadhamini/i);
+  
+  // Tunahakikisha kuwa tumepata angalau element moja
+  expect(linkElements.length).toBeGreaterThan(0);
 });

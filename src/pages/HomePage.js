@@ -1,9 +1,11 @@
+import SeasonSwitcher from '../components/SeasonSwitcher';
 import React, { useState, useEffect } from 'react';
 import { Helmet } from "react-helmet"; 
 import { 
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
   ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp, CheckCircle, Copy, Shirt, Tag, Share2, Target, Bot
 } from 'lucide-react';
+
 // Logic ya kupanga rangi kulingana na picha zako
 const getTierStyle = (tier) => {
   switch(tier) {
@@ -17,18 +19,7 @@ const getTierStyle = (tier) => {
       return { border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none' };
   }
 };
-// ...existing code...
-      <style>{`
-        @keyframes pulse-glow {
-          0% { box-shadow: 0 0 0 0 rgba(163,230,53,0); }
-          40% { box-shadow: 0 0 12px 4px rgba(163,230,53,0.18); }
-          60% { box-shadow: 0 0 12px 4px rgba(163,230,53,0.18); }
-          100% { box-shadow: 0 0 0 0 rgba(163,230,53,0); }
-        }
-        .pande-modal-glass .pulse-glow-btn {
-          animation: pulse-glow 3s infinite;
-        }
-      `}</style>
+
 // Responsive helpers for mobile
 const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
 const mobileCardStyle = {
@@ -55,8 +46,6 @@ const desktopHeaderStyle = {
 // --- USANIDI WA CMS ---
 const SPACE_ID = 'ax6wvfd84net'; 
 const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
-
-// SENSEI NOTE: Hii link ni ya Contentful moja kwa moja. Ni salama na ina load haraka.
 const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 const USE_IMAGE_LOGO = true;
 
@@ -68,7 +57,7 @@ const SOCIAL_LINKS = {
   tiktok: "https://www.tiktok.com/@pande.cup"
 };
 
-// --- ORODHA YA MITAA (SMART LIST - UPDATED) ---
+// --- ORODHA YA MITAA ---
 const LOCATIONS_LIST = [
   { 
     group: 'KIOMONI (Nyumbani - The Root)', 
@@ -87,8 +76,6 @@ const LOCATIONS_LIST = [
     areas: ['Nje ya Tanga/Dar'] 
   }
 ];
-
-// ABOUT_TEXT moved to AboutPage (single source of truth for About content)
 
 // --- DATA ZA KUAZIMIA (FALLBACK) ---
 const FALLBACK_DATA = {
@@ -121,7 +108,6 @@ const FALLBACK_DATA = {
 
 // --- COMPONENTS ---
 const PandeLogo = ({ size = 'normal' }) => {
-  // SENSEI FIX: Adjusted height for better mobile visibility
   const height = size === 'large' ? '120px' : '50px'; 
   const [imgError, setImgError] = useState(false);
 
@@ -137,7 +123,6 @@ const PandeLogo = ({ size = 'normal' }) => {
       </div>
     );
   }
-  // Fallback kama picha ikigoma (Safety Net)
   return (
     <div style={{ fontSize: size === 'large' ? '32px' : '24px', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', letterSpacing: '-1px', color: 'white' }}>
       PANDE<span style={{ color: '#a3e635' }}>CUP</span>
@@ -156,7 +141,6 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-// Helper for Match Time/Date (24H FORMAT)
 const formatMatchTime = (dateString) => {
     if (!dateString) return { date: '', time: '' };
     const date = new Date(dateString);
@@ -200,9 +184,7 @@ export const HomePage = () => {
   const [selectedNews, setSelectedNews] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   
-  // News Pagination State
   const [visibleNewsCount, setVisibleNewsCount] = useState(3);
-
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -220,24 +202,18 @@ export const HomePage = () => {
   };
   const toggleMobileMenu = () => { setIsMobileMenuOpen(!isMobileMenuOpen); };
   
-  // HANDLE REGISTRATION SUBMIT (DEBUGGING VERSION)
   const handleRegistrationSubmit = async () => {
     setSubmitError('');
-    
-    // Validation
     if (!teamData.name || !teamData.coachName || !teamData.phone || !teamData.location) {
         setSubmitError('Tafadhali jaza taarifa zote muhimu.');
         return;
     }
-
     const phoneRegex = /^(06|07)\d{8}$/;
     if (!phoneRegex.test(teamData.phone)) {
         setSubmitError('Weka namba sahihi ya simu (mfano: 0712345678).');
         return;
     }
-
     setIsSubmitting(true);
-
     try {
         const response = await fetch('/api/register', {
             method: 'POST',
@@ -250,32 +226,22 @@ export const HomePage = () => {
                 jerseyColor: teamData.jerseyColor || 'Haikuwekwa'
             })
         });
-
-        // HAPA: Tunakamata error halisi ya Server
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Server Error (${response.status}): ${errorText.substring(0, 100)}...`); 
         }
-
         const result = await response.json();
-
         if (result.success) {
-            setModalStep(2); // Go to Payment Popup
+            setModalStep(2); 
         } else {
             throw new Error(result.message || 'Tatizo la mtandao.');
         }
     } catch (error) {
         console.error("Submission Error:", error);
-        // Hii itakuonesha kosa halisi kwenye simu
         setSubmitError(`SYSTEM ERROR: ${error.message}`);
     } finally {
         setIsSubmitting(false);
     }
-  };
-
-  const copyNumber = () => {
-    navigator.clipboard.writeText('43852599');
-    alert('Namba imekopiwa!');
   };
 
   const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
@@ -283,28 +249,15 @@ export const HomePage = () => {
   const openGroupModal = (groupName, teams) => { setSelectedGroup({ name: groupName, teams: teams }); document.body.style.overflow = 'hidden'; };
   const closeGroupModal = () => { setSelectedGroup(null); document.body.style.overflow = 'auto'; };
   
-  // HANDLE NEWS SHARE
   const handleNewsShare = async (newsItem) => {
     const shareText = `${newsItem.title} - Pande Cup`;
     const shareUrl = window.location.href;
-    
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: 'Pande Cup',
-          text: shareText,
-          url: shareUrl
-        });
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('Web Share error:', err);
-        }
-      }
+        await navigator.share({ title: 'Pande Cup', text: shareText, url: shareUrl });
+      } catch (err) { console.error('Web Share error:', err); }
     } else {
-      // Fallback: Copy to clipboard
-      navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
-        alert('Link copied to clipboard!');
-      }).catch(err => console.error('Copy failed:', err));
+      navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => alert('Link copied!')).catch(err => console.error('Copy failed:', err));
     }
   };
 
@@ -315,7 +268,6 @@ export const HomePage = () => {
         const itemLoc = item.location ? String(item.location).trim().toLowerCase() : 'kiomoni';
         const isLocationMatch = itemLoc.includes(activeLocation);
         const itemSeasonRaw = item.season ? String(item.season) : '2026';
-        // Extract 4-digit year if present (handles formats like "June 2025")
         const itemYearMatch = itemSeasonRaw.match(/(\d{4})/);
         const itemYear = itemYearMatch ? itemYearMatch[1] : itemSeasonRaw.trim();
         const activeYearMatch = String(activeSeason).match(/(\d{4})/);
@@ -325,9 +277,7 @@ export const HomePage = () => {
   };
 
   // --- EFFECTS ---
-  useEffect(() => {
-    setVisibleNewsCount(3);
-  }, [activeLocation, activeSeason]);
+  useEffect(() => { setVisibleNewsCount(3); }, [activeLocation, activeSeason]);
 
   useEffect(() => {
     const fetchContentfulData = async () => {
@@ -347,7 +297,6 @@ export const HomePage = () => {
             fetchData('heroSection'), fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video'), fetchData('sponsor')
         ]);
 
-        // Process Hero
         const fetchedHero = heroData.items ? heroData.items.map(item => ({
             title: item.fields.title || "HII GAME NI YETU.",
             subtitle: item.fields.subtitle || "",
@@ -355,7 +304,6 @@ export const HomePage = () => {
             bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
         })) : [];
 
-        // Process Matches
         const fetchedMatches = matchesData.items ? matchesData.items.map(item => ({
             home: String(item.fields.homeTeam || "Home"),
             away: String(item.fields.awayTeam || "Away"),
@@ -367,7 +315,6 @@ export const HomePage = () => {
             stadium: item.fields.stadium || ""
         })) : [];
 
-        // Process News
         const fetchedNews = newsData.items ? newsData.items.map(item => {
              const getNewsImage = (id) => {
                 if (!id || !newsData.includes || !newsData.includes.Asset) return null;
@@ -385,7 +332,6 @@ export const HomePage = () => {
              };
         }) : [];
 
-        // Process Standings
         const fetchedStandings = standingsData.items ? standingsData.items.map(item => ({
             pos: item.fields.position || 0,
             team: String(item.fields.teamName || "Team"),
@@ -397,7 +343,6 @@ export const HomePage = () => {
             season: item.fields.season || "2026"
         })) : [];
 
-        // Process Videos
         const fetchedVideos = videosData.items ? videosData.items.map(item => {
              const getThumb = (id) => {
                 if (!id || !videosData.includes || !videosData.includes.Asset) return null;
@@ -414,7 +359,6 @@ export const HomePage = () => {
              };
         }) : [];
 
-        // Process Sponsors
         const fetchedSponsors = sponsorsData.items ? sponsorsData.items.map(item => ({
             name: item.fields.name || '',
             logo: getAssetUrl(item.fields.logo?.sys?.id, sponsorsData.includes) || '/images/placeholder.png',
@@ -430,11 +374,7 @@ export const HomePage = () => {
             videos: fetchedVideos,
             sponsors: fetchedSponsors.length > 0 ? fetchedSponsors : prev.sponsors
         }));
-      } catch (error) {
-        console.error("CMS Error:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      } catch (error) { console.error("CMS Error:", error); } finally { setIsLoading(false); }
     };
     fetchContentfulData();
   }, []);
@@ -450,28 +390,16 @@ export const HomePage = () => {
 
   const upcomingMatches = filteredMatches
     .filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'))
-    .sort((a, b) => {
-        const dateA = new Date(a.matchDate || '9999-12-31');
-        const dateB = new Date(b.matchDate || '9999-12-31');
-        return dateA - dateB;
-    });
+    .sort((a, b) => new Date(a.matchDate || '9999-12-31') - new Date(b.matchDate || '9999-12-31'));
 
   const pastMatches = filteredMatches
     .filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'))
-    .sort((a, b) => {
-        const dateA = new Date(a.matchDate || '1970-01-01');
-        const dateB = new Date(b.matchDate || '1970-01-01');
-        return dateB - dateA;
-    });
+    .sort((a, b) => new Date(b.matchDate || '1970-01-01') - new Date(a.matchDate || '1970-01-01'));
 
   const filteredNews = getFilteredData(cmsData.news).sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
-      const isAValid = !isNaN(dateA.getTime());
-      const isBValid = !isNaN(dateB.getTime());
-      if (isAValid && isBValid) return dateB - dateA; 
-      if (!isAValid && isBValid) return 1; 
-      if (isAValid && !isBValid) return -1; 
+      if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) return dateB - dateA; 
       return 0; 
   });
 
@@ -485,9 +413,7 @@ export const HomePage = () => {
 
   const groupedStandings = sortedTeams.reduce((groups, team) => {
       const groupName = team.group ? `GROUP ${team.group}` : 'LIGI KUU'; 
-      if (!groups[groupName]) {
-          groups[groupName] = [];
-      }
+      if (!groups[groupName]) groups[groupName] = [];
       groups[groupName].push(team);
       return groups;
   }, {});
@@ -646,16 +572,9 @@ export const HomePage = () => {
       <div style={styles.container}>
       {/* 1. TOP BAR */}
       <div style={styles.topBar} className="top-bar-mobile">
-        <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
-            <History size={14} /><span style={{ fontWeight: 'bold' }}>SEASON:</span>
-            {isLoading ? 
-                <span style={{ fontSize: '10px', color: '#94a3b8', marginLeft: 8 }}>Loading...</span> : 
-                <span style={{ fontSize: '10px', color: '#22c55e', marginLeft: 8, fontWeight: 'bold' }}>{activeSeason}</span>
-            }
-        </div>
+        <SeasonSwitcher activeSeason={activeSeason} setActiveSeason={setActiveSeason} />
         <div className="mobile-center" style={{ display: 'flex', gap: '16px' }}>
-            <button style={{ background: 'none', border: 'none', color: activeSeason === '2025' ? '#a3e635' : '#64748b', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => { setActiveSeason('2025'); setActiveLocation('kiomoni'); }}>2025</button>
-            <button style={{ background: 'none', border: 'none', color: activeSeason === '2026' ? '#a3e635' : '#64748b', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setActiveSeason('2026')}>2026</button>
+            {/* Cleaned: Removed duplicate switchers */}
         </div>
       </div>
 
@@ -761,30 +680,8 @@ export const HomePage = () => {
       </div>
       {isMobileMenuOpen && <div onClick={() => setIsMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 55, backdropFilter: 'blur(4px)' }}></div>}
 
-      {/* 3. HERO SECTION */}
+      {/* 3. HERO SECTION - CLEANED UP */}
       <div id="hero" style={styles.heroWrapper} className="hero-mobile-height">
-                    {/* SEASON SWITCHER - Centered */}
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '18px', marginBottom: '24px', marginTop: '12px' }}>
-                      <button
-                        style={{ background: activeSeason === '2025' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2025' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
-                        onClick={() => { setActiveSeason('2025'); setActiveLocation('kiomoni'); }}
-                      >2025</button>
-                      <button
-                        style={{ background: activeSeason === '2026' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2026' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
-                        onClick={() => setActiveSeason('2026')}
-                      >2026</button>
-                    </div>
-              {/* SEASON SWITCHER */}
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '24px', marginTop: '12px' }}>
-                <button
-                  style={{ background: activeSeason === '2025' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2025' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
-                  onClick={() => { setActiveSeason('2025'); setActiveLocation('kiomoni'); }}
-                >2025</button>
-                <button
-                  style={{ background: activeSeason === '2026' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2026' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
-                  onClick={() => setActiveSeason('2026')}
-                >2026</button>
-              </div>
         <img 
             src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : (currentHero.bgImage || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600")}
             style={{...styles.heroMedia, filter: isGoba2025 ? 'grayscale(100%) brightness(0.4)' : 'none'}}
@@ -792,18 +689,10 @@ export const HomePage = () => {
             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600"; }}
         />
         <div style={styles.heroOverlay}></div>
+        
+        {/* HERO CONTENT: Location Switcher + Titles ONLY */}
         <section style={styles.heroContent}>
-                     {/* SEASON SWITCHER - Always visible, inside hero */}
-                     <div style={{ display: 'flex', justifyContent: 'center', gap: '18px', marginBottom: '24px', marginTop: '12px' }}>
-                       <button
-                         style={{ background: activeSeason === '2025' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2025' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
-                         onClick={() => { setActiveSeason('2025'); setActiveLocation('kiomoni'); }}
-                       >2025</button>
-                       <button
-                         style={{ background: activeSeason === '2026' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2026' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
-                         onClick={() => setActiveSeason('2026')}
-                       >2026</button>
-                     </div>
+           {/* MIDDLE LOCATION SWITCHER (KEPT) */}
            <div 
              style={{
                display: 'flex',
@@ -1014,26 +903,26 @@ export const HomePage = () => {
                         <button 
                             onClick={() => setVisibleNewsCount(prev => prev === 3 ? filteredNews.length : 3)} 
                             style={{ 
-                                padding: '12px 32px', 
-                                backgroundColor: 'white', 
-                                color: 'black', 
-                                borderRadius: '50px', 
-                                border: 'none', 
-                                fontWeight: 'bold', 
-                                cursor: 'pointer',
-                                fontSize: '13px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                boxShadow: '0 4px 15px rgba(255,255,255,0.1)'
+                              padding: '12px 32px', 
+                              backgroundColor: 'white', 
+                              color: 'black', 
+                              borderRadius: '50px', 
+                              border: 'none', 
+                              fontWeight: 'bold', 
+                              cursor: 'pointer',
+                              fontSize: '13px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              boxShadow: '0 4px 15px rgba(255,255,255,0.1)'
                             }}
-                        >
+                          >
                             {visibleNewsCount === 3 ? (
-                                <>ONYESHA HABARI ZAIDI <ChevronDown size={16} /></>
+                              <React.Fragment>ONYESHA HABARI ZAIDI <ChevronDown size={16} /></React.Fragment>
                             ) : (
-                                <>PUNGUZA HABARI <ChevronUp size={16} /></>
+                              <React.Fragment>PUNGUZA HABARI <ChevronUp size={16} /></React.Fragment>
                             )}
-                        </button>
+                          </button>
                     </div>
                 )}
             </div>
@@ -1333,7 +1222,6 @@ export const HomePage = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <a href="#news" style={{ color: '#64748b', textDecoration: 'none', fontSize: '14px' }}>Habari</a>
               <a href="#ratiba" style={{ color: '#64748b', textDecoration: 'none', fontSize: '14px' }}>Ratiba</a>
-              {/* Admin links/forms removed: Sajili Mchezaji, Matukio, Mechi */}
             </div>
           </div>
           <div>
@@ -1348,8 +1236,6 @@ export const HomePage = () => {
           <a href="https://app.contentful.com/spaces/ax6wvfd84net" target="_blank" rel="noreferrer" style={{ fontSize: '8px', color: 'rgba(255,255,255,0.02)', textDecoration: 'none', cursor: 'pointer' }}>CMS</a>
         </div>
       </footer>
-
-        {/* Registration/Team Setup forms and modal moved to /admin only. Not accessible on public homepage. */}
 
       {/* MODAL - TEAM REGISTRATION (PUBLIC) */}
       {isModalOpen && (
@@ -1535,8 +1421,6 @@ export const HomePage = () => {
       )}
 
       </div>
-
-      {/* DEVELOPMENT-ONLY ADMIN CONSOLE removed. Accessible only via /admin route. */}
     </>
   );
 };

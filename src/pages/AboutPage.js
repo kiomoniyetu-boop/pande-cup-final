@@ -41,47 +41,25 @@ const AboutPage = () => {
         </div>
       </div>
 
-      {/* 3. LOGO SECTION - THE HOVER FIX (Individual State) */}
-      <section style={{ padding: '40px 0', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.01)' }}>
-        <div style={{ textAlign: 'center', marginBottom: 28, marginTop: -18 }}>
-          <span style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 600, letterSpacing: 2, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase' }}>
-            WANAOTUPA PANDE MSIMU HUU
-          </span>
+      {/* 2. HERO SECTION - REFINED "NIPE PANDE" */}
+      <section style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(163,230,53,0.08)', padding: '8px 16px', borderRadius: '40px', marginBottom: '24px', border: '1px solid rgba(163,230,53,0.2)' }}>
+          <ShieldCheck size={14} color="#a3e635" />
+          <span style={{ fontSize: '10px', fontWeight: '800', color: '#a3e635', letterSpacing: '2px', textTransform: 'uppercase' }}>Established 2023 • Tanga to Dar</span>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '40px', maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
-          {sponsors.map((s, idx) => (
-            <a
-              key={idx}
-              href={s.link || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', minWidth: 100, textDecoration: 'none' }}
-            >
-              <img
-                src={s.logo}
-                alt={s.name}
-                style={{
-                  height: '32px',
-                  width: 'auto',
-                  filter: 'grayscale(100%)',
-                  opacity: 0.7,
-                  transition: 'all 0.4s ease',
-                  borderRadius: 8,
-                  background: 'white',
-                  padding: 0,
-                  marginBottom: 4,
-                  boxShadow: 'none',
-                  border: 'none',
-                }}
-                onMouseOver={e => { e.currentTarget.style.filter = 'grayscale(0%)'; e.currentTarget.style.opacity = '1'; }}
-                onMouseOut={e => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = '0.7'; }}
-                onError={e => { e.target.onerror = null; e.target.src = '/images/placeholder.png'; }}
-              />
-              <span style={{ fontSize: '10px', fontWeight: '900', color: '#a3e635', opacity: 1, transition: '0.3s', textAlign: 'center' }}>{s.name}</span>
-            </a>
-          ))}
-        </div>
+        
+        <h1 style={{ fontSize: 'clamp(2rem, 8vw, 3.8rem)', fontWeight: '900', fontStyle: 'italic', lineHeight: '0.9', letterSpacing: '-2px', textTransform: 'uppercase', marginBottom: '20px' }}>
+          NIPE <span style={{ color: '#a3e635' }}>PANDE.</span>
+        </h1>
+          <div style={{ display: 'inline-block', background: 'rgba(2,6,23,0.92)', color: 'white', padding: '12px 32px', borderRadius: '30px', marginTop: '10px', boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}>
+            <span style={{ fontSize: '18px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '5px', fontStyle: 'italic' }}>
+              The Dust. The Stage. The Future.
+            </span>
+          </div>
       </section>
+
+      {/* 3. LOGO SECTION - THE HOVER FIX (Individual State) */}
+      {/* Logo section removed */}
 
       {/* 4. THE GROK STORY - REAL DEPTH */}
       <section style={{ padding: '80px 20px', maxWidth: '1100px', margin: '0 auto' }}>
