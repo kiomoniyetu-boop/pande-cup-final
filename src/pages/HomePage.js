@@ -405,21 +405,8 @@ export const HomePage = () => {
   const sortedGroupKeys = Object.keys(groupedStandings).sort();
   const isGoba2025 = activeLocation === 'goba' && activeSeason === '2025';
 
-  let displayTitle = currentHero.title;
-  let displaySubtitle = currentHero.subtitle;
-
-  if (activeSeason === '2025' && !isGoba2025) {
-     displayTitle = (
-       <span style={{ color: '#fff', fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', fontWeight: 900, fontStyle: 'italic', textTransform: 'uppercase', lineHeight: '0.9', letterSpacing: '-0.03em', textAlign: 'center', display: 'block', marginBottom: '12px' }}>
-         PANDE CUP
-       </span>
-     );
-     displaySubtitle = (
-       <span style={{ color: '#fff', fontSize: 'clamp(18px, 2vw, 24px)', lineHeight: '1.2', letterSpacing: '1px', textAlign: 'center', display: 'block' }}>
-         Ligi Moja. Upendo Mmoja. Vumbi Moja.
-       </span>
-     );
-  }
+  const displayTitle = currentHero.title;
+  const displaySubtitle = currentHero.subtitle;
 
   const seoTitle = activeLocation === 'goba' ? 'Pande Cup Goba - Soka la Mtaani' : 'Pande Cup Kiomoni - Tanga';
   const seoDescription = "Ratiba, Matokeo na Habari za Pande Cup. Soka la mtaani lenye hadhi ya kimataifa.";
