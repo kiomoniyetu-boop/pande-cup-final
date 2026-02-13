@@ -981,39 +981,81 @@ export const HomePage = () => {
 </>
       )}
 
-      {/* 7. FOOTER */}
-      <footer id="about" style={{ padding: '80px 24px 40px', backgroundColor: '#000' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '60px' }}>
-          <div>
-            <div style={{ marginBottom: '24px' }}><PandeLogo size="large" isMobile={isMobile} /></div>
-            <div style={{ marginBottom: '20px' }}>
-                <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '14px', margin: '0 0 16px' }}>Burudani ya soka la mtaani, sasa iko kiganjani mwako. Shuhudia vipaji, msisimko, na historia ya Pande Cup popote ulipo.</p>
-                <div style={{ color: '#a3e635', fontWeight: '900', fontSize: '16px', fontStyle: 'italic', marginTop: '12px' }}>HII GAME NI YETU</div>
+      {/* 7. PROFESSIONAL FOOTER - COMPACT & MODERN */}
+      <footer id="about" style={{ backgroundColor: '#020617', borderTop: '1px solid rgba(163, 230, 53, 0.1)', position: 'relative', overflow: 'hidden' }}>
+        
+        {/* Decorative Glow */}
+        <div style={{ position: 'absolute', top: 0, left: '20%', width: '300px', height: '1px', background: 'linear-gradient(90deg, transparent, #a3e635, transparent)', opacity: 0.5 }}></div>
+
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '50px 24px 30px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px' }}>
+            
+            {/* COL 1: BRAND & NARRATIVE */}
+            <div>
+              <div style={{ marginBottom: '16px' }}><PandeLogo size="large" isMobile={isMobile} /></div>
+              <div style={{ maxWidth: '300px' }}>
+                  <h4 style={{ color: '#a3e635', fontSize: '16px', fontWeight: '900', fontStyle: 'italic', marginBottom: '8px', textTransform: 'uppercase' }}>
+                    NIPE PANDE. NIKUPE BURUDANI.
+                  </h4>
+                  <p style={{ color: '#94a3b8', lineHeight: '1.6', fontSize: '13px', margin: 0 }}>
+                    Zaidi ya soka, hii ni harakati. Tunatoa "Pande" kwa vipaji vya mtaani kuonekana, kung'ara, na kutimiza ndoto zao. Ligi Moja, Upendo Mmoja.
+                  </p>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '20px', alignItems: 'center' }}>
+                <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" className="hover-icon" style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0.05)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'all 0.3s' }}><Instagram size={16} /></a>
+                <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" className="hover-icon" style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0.05)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'all 0.3s' }}><Facebook size={16} /></a>
+                <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" className="hover-icon" style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0.05)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'all 0.3s' }}><TikTokIcon size={16} /></a>
+                <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noreferrer" className="hover-icon" style={{ color: 'white', backgroundColor: 'rgba(255,255,255,0.05)', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', transition: 'all 0.3s' }}><Youtube size={16} /></a>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: '16px', marginTop: '16px', alignItems: 'center' }}>
-              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" style={{ color: 'white', opacity: 0.7, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Instagram size={20} /></a>
-              <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noreferrer" style={{ color: 'white', opacity: 0.7, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Facebook size={20} /></a>
-              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" style={{ color: 'white', opacity: 0.7, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><TikTokIcon size={20} /></a>
-              <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noreferrer" style={{ color: 'white', opacity: 0.7, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Youtube size={20} /></a>
+
+            {/* COL 2: QUICK LINKS */}
+            <div>
+              <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>Viungo vya Haraka</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <a href="#hero" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Nyumbani</a>
+                <a href="#news" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Habari & Matukio</a>
+                <a href="#ratiba" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Ratiba & Matokeo</a>
+                <a href="/sponsors" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Wadhamini Wetu</a>
+              </div>
             </div>
-          </div>
-          <div>
-            <h4 style={{ color: 'white', fontSize: '14px', fontWeight: 'bold', marginBottom: '24px' }}>VIUNGO VYA HARAKA</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <a href="#news" style={{ color: '#64748b', textDecoration: 'none', fontSize: '14px' }}>Habari</a>
-              <a href="#ratiba" style={{ color: '#64748b', textDecoration: 'none', fontSize: '14px' }}>Ratiba</a>
+
+            {/* COL 3: CONTACTS */}
+            <div>
+              <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>Mawasiliano</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ marginTop: '2px' }}><MapPin size={18} color="#a3e635" /></div>
+                  <div>
+                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px' }}>Makao Makuu</span>
+                    <span style={{ color: '#94a3b8', fontSize: '12px' }}>The Root, Kiomoni, Tanga<br/>& Goba Center, Dar es Salaam</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ marginTop: '2px' }}><Phone size={18} color="#a3e635" /></div>
+                  <div>
+                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px' }}>Tupigie</span>
+                    <a href="tel:+255653292935" style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'none' }}>+255 653 292 935</a>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ marginTop: '2px' }}><Mail size={18} color="#a3e635" /></div>
+                  <div>
+                    <span style={{ display: 'block', color: 'white', fontWeight: 'bold', fontSize: '13px' }}>Barua Pepe</span>
+                    <a href="mailto:pandecup2023@gmail.com" style={{ color: '#94a3b8', fontSize: '12px', textDecoration: 'none' }}>pandecup2023@gmail.com</a>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div>
-            <h4 style={{ color: 'white', fontSize: '14px', fontWeight: 'bold', marginBottom: '24px' }}>TUWASILIANE</h4>
-            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={16} /> +255 653 292 935</p>
-            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><Mail size={16} /> pandecup2023@gmail.com</p>
-            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={16} /> Goba Center & Kiomoni Tanga</p>
+
           </div>
         </div>
-        <div style={{ textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px', marginTop: '60px' }}>
-          <p style={{ fontSize: '11px', color: '#475569', textTransform: 'uppercase', letterSpacing: '1px' }}>© 2026 Pande Cup Events</p>
-          <a href="https://app.contentful.com/spaces/ax6wvfd84net" target="_blank" rel="noreferrer" style={{ fontSize: '8px', color: 'rgba(255,255,255,0.02)', textDecoration: 'none', cursor: 'pointer' }}>CMS</a>
+
+        {/* COPYRIGHT BAR */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '20px', textAlign: 'center', backgroundColor: '#000' }}>
+          <p style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', letterSpacing: '0.5px', margin: 0 }}>
+            © 2026 Pande Cup. All Rights Reserved.
+          </p>
         </div>
       </footer>
 
