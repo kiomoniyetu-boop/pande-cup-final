@@ -26,6 +26,26 @@
 				"$eslint-stylish"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Start React app",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"start"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Start React app",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"start"
+			],
+			"isBackground": false,
+			"group": "build"
 		}
 	]
 }

@@ -4,6 +4,19 @@ import {
   Menu, X, Check, MapPin, Clock, Instagram, Facebook, Youtube,
   ListOrdered, Video, Play, ChevronRight, Phone, Info, History, Newspaper, Trophy, FileText, User, Mail, Calendar, Grid, Shield, Maximize2, ChevronDown, ChevronUp, CheckCircle, Copy, Shirt, Tag, Share2, Target, Bot
 } from 'lucide-react';
+// Logic ya kupanga rangi kulingana na picha zako
+const getTierStyle = (tier) => {
+  switch(tier) {
+    case 'Gold Package': 
+    case 'Wewe ni Mdau Wetu': 
+      return { border: '2px solid #a3e635', boxShadow: '0 0 20px rgba(163,230,53,0.3)' };
+    case 'Silver':
+    case 'Mchongo wa Kati':
+      return { border: '1px solid #94a3b8', boxShadow: 'none' };
+    default:
+      return { border: '1px solid rgba(255,255,255,0.1)', boxShadow: 'none' };
+  }
+};
 // ...existing code...
       <style>{`
         @keyframes pulse-glow {
@@ -320,37 +333,27 @@ export const HomePage = () => {
     const fetchContentfulData = async () => {
       try {
         const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
-
-        // 1. HERO
-        const heroRes = await fetch(`${baseUrl}&content_type=heroSection&include=1`);
-        let fetchedHero = FALLBACK_DATA.hero;
-        if (heroRes.ok) {
-            const heroJson = await heroRes.json();
-            const getAssetUrl = (id, includes) => {
-                if (!id || !includes || !includes.Asset) return null;
-                const asset = includes.Asset.find(a => a.sys.id === id);
-                return asset && asset.fields.file ? `https:${asset.fields.file.url}` : null;
-            };
-            if (heroJson.items && heroJson.items.length > 0) {
-                fetchedHero = heroJson.items.map(item => ({
-                    title: item.fields.title || "HII GAME NI YETU.",
-                    subtitle: item.fields.subtitle || "",
-                    location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
-                    bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroJson.includes)
-                }));
-            }
-        }
-
-        // 2. DATA ZOTE
-        const fetchData = async (type) => {
+        const getAssetUrl = (id, includes ) => {
+            if (!id || !includes || !includes.Asset) return null;
+            const asset = includes.Asset.find(a => a.sys.id === id);
+            return asset && asset.fields.file ? `https:${asset.fields.file.url}` : null;
+        };
+        const fetchData = async (type ) => {
             const res = await fetch(`${baseUrl}&content_type=${type}&include=1`);
-            if (!res.ok) return [];
-            return await res.json();
+            return res.ok ? await res.json() : { items: [] };
         };
 
-        const [matchesData, newsData, standingsData, videosData] = await Promise.all([
-            fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video')
+        const [heroData, matchesData, newsData, standingsData, videosData, sponsorsData] = await Promise.all([
+            fetchData('heroSection'), fetchData('match'), fetchData('news'), fetchData('standing'), fetchData('video'), fetchData('sponsor')
         ]);
+
+        // Process Hero
+        const fetchedHero = heroData.items ? heroData.items.map(item => ({
+            title: item.fields.title || "HII GAME NI YETU.",
+            subtitle: item.fields.subtitle || "",
+            location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
+            bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
+        })) : [];
 
         // Process Matches
         const fetchedMatches = matchesData.items ? matchesData.items.map(item => ({
@@ -411,22 +414,28 @@ export const HomePage = () => {
              };
         }) : [];
 
-        setCmsData({
+        // Process Sponsors
+        const fetchedSponsors = sponsorsData.items ? sponsorsData.items.map(item => ({
+            name: item.fields.name || '',
+            logo: getAssetUrl(item.fields.logo?.sys?.id, sponsorsData.includes) || '/images/placeholder.png',
+            websiteUrl: item.fields.websiteUrl || item.fields.link || '#'
+        })) : [];
+
+        setCmsData(prev => ({
+            ...prev,
             hero: fetchedHero,
             matches: fetchedMatches,
             news: fetchedNews,
             standings: fetchedStandings, 
             videos: fetchedVideos,
-            sponsors: FALLBACK_DATA.sponsors
-        });
-
+            sponsors: fetchedSponsors.length > 0 ? fetchedSponsors : prev.sponsors
+        }));
       } catch (error) {
         console.error("CMS Error:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchContentfulData();
   }, []);
 
@@ -861,53 +870,25 @@ export const HomePage = () => {
       </div>
 
       {/* SPONSOR LOGOS INFINITE MARQUEE */}
-      <section style={{ padding: '60px 24px', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+      <section id="wadhamini" style={{ padding: '60px 24px', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <p style={{ fontSize: '10px', letterSpacing: '2px', fontWeight: '800', textTransform: 'uppercase', color: '#a3e635', marginBottom: '32px', textAlign: 'center' }}>WANAOTUPA NGUVU MSIMU HUU</p>
-          <div style={{ display: 'flex', overflow: 'hidden', position: 'relative' }}>
+          <div style={{ display: 'flex', overflow: 'hidden' }}>
             <div className="sponsor-marquee">
-              {(() => {
-                const sponsors = (cmsData.sponsors && cmsData.sponsors.length > 0)
-                  ? [...cmsData.sponsors].sort((a, b) => ((b.fields?.weight || 0) - (a.fields?.weight || 0)))
-                  : FALLBACK_DATA.sponsors;
-                const doubled = [...sponsors, ...sponsors];
-                const sponsorPlaceholder = 'https://via.placeholder.com/120x50?text=LOGO';
-                return doubled.map((sponsor, idx) => {
-                  const fields = sponsor.fields || {};
-                  const isClickable = !!fields.link;
-                  const logoImg = (
-                    <img
-                      src={fields.logo || sponsor.logo || sponsorPlaceholder}
-                      alt={fields.name || sponsor.name || 'Sponsor'}
-                      style={{ height: '50px', objectFit: 'contain', maxWidth: '120px', filter: 'grayscale(100%)', opacity: 0.7, borderRadius: 10, transition: 'transform 0.2s', cursor: isClickable ? 'pointer' : 'default' }}
-                      onError={e => { e.target.onerror = null; e.target.src = sponsorPlaceholder; }}
-                      onMouseOver={e => e.currentTarget.style.transform = 'scale(1.10)'}
-                      onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-                      className="sponsor-logo"
+              {[...cmsData.sponsors, ...cmsData.sponsors].map((sponsor, idx) => (
+                <div key={idx} className="sponsor-marquee-item">
+                  <a href={sponsor.websiteUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none' }}>
+                    <img 
+                      src={sponsor.logo} 
+                      alt={sponsor.name} 
+                      style={{ height: '50px', objectFit: 'contain', filter: 'grayscale(100%)', opacity: 0.7, transition: '0.3s' }} 
+                      onMouseOver={e => { e.currentTarget.style.filter = 'grayscale(0%)'; e.currentTarget.style.opacity = 1; }}
+                      onMouseOut={e => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = 0.7; }}
                     />
-                  );
-                  return (
-                    <div key={idx} className="sponsor-marquee-item">
-                      {isClickable ? (
-                        <a
-                          href={fields.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={`Tembelea ${fields.name || sponsor.name}`}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }}
-                          className="hover:scale-110 transition-transform cursor-pointer"
-                        >
-                          {logoImg}
-                        </a>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }} className="hover:scale-110 transition-transform">
-                          {logoImg}
-                        </div>
-                      )}
-                    </div>
-                  );
-                });
-              })()}
+                    <span style={{ fontSize: '10px', color: '#a3e635', fontWeight: 'bold', marginTop: '8px' }}>{sponsor.name}</span>
+                  </a>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -998,8 +979,8 @@ export const HomePage = () => {
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                                       <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
                                       <div style={{ textAlign: 'center' }}>
-                                          <div style={{ color: '#a3e635', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
-                                          <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', marginTop: '4px' }}>{m.status}</div>
+                                          <div style={{ color: 'white', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
+                                          <div style={{ fontSize: '10px', color: '#a3e635', fontWeight: 'bold', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{m.status}</div>
                                       </div>
                                       <div style={{ fontWeight: '900', fontSize: '15px', textAlign: 'right', width: '35%' }}>{m.away}</div>
                                   </div>
@@ -1343,49 +1324,50 @@ export const HomePage = () => {
             }
           `}</style>
           <div className="pande-modal-overlay">
-            <div className="sponsor-marquee">
-              {(() => {
-                const sponsors = (cmsData.sponsors && cmsData.sponsors.length > 0)
-                  ? [...cmsData.sponsors].sort((a, b) => ((b.fields?.weight || 0) - (a.fields?.weight || 0)))
-                  : FALLBACK_DATA.sponsors;
-                const doubled = [...sponsors, ...sponsors];
-                const sponsorPlaceholder = 'https://via.placeholder.com/120x50?text=LOGO';
-                return doubled.map((sponsor, idx) => {
-                  const fields = sponsor.fields || {};
-                  const isClickable = !!fields.link;
-                  const logoImg = (
-                    <img
-                      src={fields.logo || sponsor.logo || sponsorPlaceholder}
-                      alt={fields.name || sponsor.name || 'Sponsor'}
-                      style={{ height: '50px', objectFit: 'contain', maxWidth: '120px', filter: 'grayscale(100%)', opacity: 0.7, borderRadius: 10, transition: 'transform 0.2s', cursor: isClickable ? 'pointer' : 'default' }}
-                      onError={e => { e.target.onerror = null; e.target.src = sponsorPlaceholder; }}
-                      onMouseOver={e => e.currentTarget.style.transform = 'scale(1.10)'}
-                      onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-                      className="sponsor-logo"
-                    />
-                  );
-                  return (
-                    <div key={idx} className="sponsor-marquee-item">
-                      {isClickable ? (
-                        <a
-                          href={fields.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={`Tembelea ${fields.name || sponsor.name}`}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }}
-                          className="hover:scale-110 transition-transform cursor-pointer"
-                        >
-                          {logoImg}
-                        </a>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s' }} className="hover:scale-110 transition-transform">
-                          {logoImg}
-                        </div>
-                      )}
-                    </div>
-                  );
-                });
-              })()}
+            <div className="pande-modal-glass">
+              <button onClick={closeModal} style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '50%', padding: '8px' }}><X size={24} /></button>
+              {modalStep === 1 && (
+                <form onSubmit={e => { e.preventDefault(); handleRegistrationSubmit(); }} style={{ padding: '36px 28px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  <h2 style={{ color: '#a3e635', fontWeight: '900', fontSize: '22px', marginBottom: '8px', textAlign: 'center' }}>Sajili Timu</h2>
+                  <input type="text" placeholder="Jina la Timu" value={teamData.name} onChange={e => setTeamData({ ...teamData, name: e.target.value })} required />
+                  <input type="text" placeholder="Jina la Kocha" value={teamData.coachName} onChange={e => setTeamData({ ...teamData, coachName: e.target.value })} required />
+                  <select value={teamData.location} onChange={e => setTeamData({ ...teamData, location: e.target.value })} required>
+                    <option value="">Chagua Eneo...</option>
+                    {LOCATIONS_LIST.map((group, idx) => (
+                      <optgroup key={group.group} label={group.group}>
+                        {group.areas.map(area => (
+                          <option key={area} value={area}>{area}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  <input type="text" placeholder="Namba ya Simu ya Kocha (WhatsApp)" value={teamData.phone} onChange={e => setTeamData({ ...teamData, phone: e.target.value })} required />
+                  <input type="text" placeholder="Rangi ya Jezi (hiari)" value={teamData.jerseyColor} onChange={e => setTeamData({ ...teamData, jerseyColor: e.target.value })} />
+                  {submitError && <div style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '14px', marginTop: '4px', textAlign: 'center' }}>{submitError}</div>}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="pulse-glow-btn"
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      background: '#a3e635',
+                      color: '#181a1b',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: 'bold',
+                      fontSize: '18px',
+                      cursor: 'pointer',
+                      marginTop: '8px',
+                      opacity: isSubmitting ? 0.7 : 1,
+                      transition: 'box-shadow 0.2s',
+                    }}
+                  >
+                    {isSubmitting ? 'Inatuma...' : 'TUMA MAOMBI'}
+                  </button>
+                </form>
+              )}
+              {modalStep === 2 && (
                 <div style={{ padding: '40px 28px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '18px' }}>
                   <CheckCircle size={48} color="#a3e635" />
                   <h2 style={{ color: '#a3e635', fontWeight: '900', fontSize: '22px', margin: 0 }}>Ombi Limeshawasilishwa!</h2>
@@ -1421,7 +1403,7 @@ export const HomePage = () => {
       {/* MODAL - GROUP STANDINGS */}
       {selectedGroup && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 120, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(8px)' }}>
-          <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+          <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
             <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(163, 230, 53, 0.05)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Shield size={28} color="#a3e635" />

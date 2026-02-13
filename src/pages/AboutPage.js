@@ -14,35 +14,17 @@ const AboutPage = () => {
   const [sponsors, setSponsors] = useState(FALLBACK_SPONSORS);
 
   useEffect(() => {
-    try {
-      if (
-        window &&
-        window.cmsData &&
-        Array.isArray(window.cmsData.sponsors)
-      ) {
-        const arr = window.cmsData.sponsors;
-        if (!arr || arr.length === 0) {
-          setSponsors(FALLBACK_SPONSORS);
-          return;
-        }
-        const contentfulSponsors = arr.map(item => {
-          const fields = item.fields || {};
-          return {
-            name: fields.name || '',
-            logo: fields.logo?.fields?.file?.url
-              ? fields.logo.fields.file.url.startsWith('http')
-                ? fields.logo.fields.file.url
-                : `https:${fields.logo.fields.file.url}`
-              : '/images/placeholder.png',
-            link: fields.link || fields.websiteUrl || '#',
-          };
-        });
-        setSponsors(contentfulSponsors);
-      } else {
-        setSponsors(FALLBACK_SPONSORS);
-      }
-    } catch (e) {
-      setSponsors(FALLBACK_SPONSORS);
+    // Try to get sponsors from window.cmsData if available (as in HomePage.js)
+    if (window && window.cmsData && Array.isArray(window.cmsData.sponsors) && window.cmsData.sponsors.length > 0) {
+      const contentfulSponsors = window.cmsData.sponsors.map(s => {
+        const fields = s.fields || {};
+        return {
+          name: fields.name || s.name || '',
+          logo: fields.logo || s.logo || '',
+          link: fields.link || fields.websiteUrl || s.link || '',
+        };
+      });
+      setSponsors(contentfulSponsors);
     }
   }, []);
 
@@ -145,7 +127,7 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* 5. IMPACT SECTION (THE SOUL) */}
+      {/* 4. IMPACT SECTION (THE SOUL) */}
       <section style={{ padding: '40px 20px 100px', maxWidth: '1100px', margin: '0 auto' }}>
         <h2 style={{ fontSize: '24px', fontWeight: '900', textAlign: 'center', marginBottom: '50px', fontStyle: 'italic' }}>BEYOND THE <span style={{ color: '#a3e635' }}>90 MINUTES</span></h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>

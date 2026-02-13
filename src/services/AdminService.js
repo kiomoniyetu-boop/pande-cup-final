@@ -1,5 +1,9 @@
 // 🎮 ADMIN DATA SERVICE - Team & Match Management
-import { v4 as uuidv4 } from 'uuid';
+
+// Simple unique ID generator for testing
+function uuidv4() {
+  return 'id-' + Math.random().toString(36).substr(2, 16);
+}
 
 const STORAGE_KEY = 'pande_cup_admin_data';
 
