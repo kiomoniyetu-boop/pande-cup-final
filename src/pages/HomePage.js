@@ -546,10 +546,10 @@ export const HomePage = () => {
       position: 'relative',
       display: 'inline-block',
     },
-    heroWrapper: { position: 'relative', overflow: 'hidden', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(163, 230, 53, 0.1)' },
+    heroWrapper: { position: 'relative', overflow: 'hidden', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(163, 230, 53, 0.1)' },
     heroMedia: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, objectFit: 'cover' },
     heroOverlay: { position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.9))' },
-    heroContent: { position: 'relative', zIndex: 3, textAlign: 'center', padding: '0 24px', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+    heroContent: { position: 'relative', zIndex: 3, textAlign: 'center', padding: '0 24px', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' },
     mainTitle: { fontSize: 'clamp(1.5rem, 4vw, 2.8rem)', fontWeight: '900', fontStyle: 'italic', textTransform: 'uppercase', lineHeight: '1.1', letterSpacing: '-0.03em', margin: '0 0 16px', textShadow: '0 4px 16px rgba(0,0,0,0.6)' },
     limeText: { color: '#a3e635' },
     buttonPrimary: { backgroundColor: '#a3e635', color: '#020617', padding: '14px 28px', borderRadius: '8px', fontWeight: '800', textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontStyle: 'italic', fontSize: '14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(163, 230, 53, 0.2)' },
@@ -763,6 +763,28 @@ export const HomePage = () => {
 
       {/* 3. HERO SECTION */}
       <div id="hero" style={styles.heroWrapper} className="hero-mobile-height">
+                    {/* SEASON SWITCHER - Centered */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '18px', marginBottom: '24px', marginTop: '12px' }}>
+                      <button
+                        style={{ background: activeSeason === '2025' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2025' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
+                        onClick={() => { setActiveSeason('2025'); setActiveLocation('kiomoni'); }}
+                      >2025</button>
+                      <button
+                        style={{ background: activeSeason === '2026' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2026' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
+                        onClick={() => setActiveSeason('2026')}
+                      >2026</button>
+                    </div>
+              {/* SEASON SWITCHER */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '24px', marginTop: '12px' }}>
+                <button
+                  style={{ background: activeSeason === '2025' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2025' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
+                  onClick={() => { setActiveSeason('2025'); setActiveLocation('kiomoni'); }}
+                >2025</button>
+                <button
+                  style={{ background: activeSeason === '2026' ? '#a3e635' : 'rgba(255,255,255,0.08)', color: activeSeason === '2026' ? '#020617' : '#cbd5e1', fontWeight: 'bold', border: '1px solid #a3e635', borderRadius: '20px', padding: '8px 24px', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
+                  onClick={() => setActiveSeason('2026')}
+                >2026</button>
+              </div>
         <img 
             src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : (currentHero.bgImage || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600")}
             style={{...styles.heroMedia, filter: isGoba2025 ? 'grayscale(100%) brightness(0.4)' : 'none'}}
@@ -790,66 +812,60 @@ export const HomePage = () => {
                transition: 'background 0.3s, box-shadow 0.3s',
              }}
            >
-             <button
-               onClick={() => setActiveLocation('kiomoni')}
-               style={{
-                 ...styles.locationButton,
-                 borderColor: activeLocation === 'kiomoni' ? '#a3e635' : 'rgba(255,255,255,0.2)',
-                 backgroundColor: activeLocation === 'kiomoni' ? '#a3e635' : 'rgba(255,255,255,0.08)',
-                 color: activeLocation === 'kiomoni' ? 'black' : 'rgba(255,255,255,0.85)',
-                 opacity: 1,
-                 fontWeight: 700,
-                 fontSize: '15px',
-                 minWidth: 70,
-                 minHeight: 36,
-                 borderRadius: 12,
-                 boxShadow: activeLocation === 'kiomoni' ? '0 0 8px 1px rgba(163,230,53,0.13)' : 'none',
-                 transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
-                 outline: 'none',
-                 cursor: 'pointer',
-                 touchAction: 'manipulation',
-                 transform: 'scale(1)',
-                 letterSpacing: '1px',
-               }}
-               onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-               onMouseUp={e => e.currentTarget.style.transform = 'scale(1.03)'}
-               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-               onTouchStart={e => e.currentTarget.style.transform = 'scale(0.97)'}
-               onTouchEnd={e => e.currentTarget.style.transform = 'scale(1.03)'}
-               onTouchCancel={e => e.currentTarget.style.transform = 'scale(1)'}
-             >
-               TANGA
-             </button>
-             <button
-               onClick={() => setActiveLocation('goba')}
-               style={{
-                 ...styles.locationButton,
-                 borderColor: activeLocation === 'goba' ? '#a3e635' : 'rgba(255,255,255,0.2)',
-                 backgroundColor: activeLocation === 'goba' ? '#a3e635' : 'rgba(255,255,255,0.08)',
-                 color: activeLocation === 'goba' ? 'black' : 'rgba(255,255,255,0.85)',
-                 opacity: activeSeason === '2025' ? 0.5 : 1,
-                 fontWeight: 700,
-                 fontSize: '15px',
-                 minWidth: 70,
-                 minHeight: 36,
-                 borderRadius: 12,
-                 boxShadow: activeLocation === 'goba' ? '0 0 8px 1px rgba(163,230,53,0.13)' : 'none',
-                 transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
-                 outline: 'none',
-                 cursor: 'pointer',
-                 touchAction: 'manipulation',
-                 transform: 'scale(1)',
-                 letterSpacing: '1px',
-               }}
-               onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-               onMouseUp={e => e.currentTarget.style.transform = 'scale(1.03)'}
-               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-               onTouchStart={e => e.currentTarget.style.transform = 'scale(0.97)'}
-               onTouchEnd={e => e.currentTarget.style.transform = 'scale(1.03)'}
-               onTouchCancel={e => e.currentTarget.style.transform = 'scale(1)'}
-             >
-               DAR
-             </button>
+             <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', marginBottom: '8px' }}>
+               <button
+                 onClick={() => setActiveLocation('kiomoni')}
+                 style={{
+                   ...styles.locationButton,
+                   borderColor: activeLocation === 'kiomoni' ? '#a3e635' : 'rgba(255,255,255,0.2)',
+                   backgroundColor: activeLocation === 'kiomoni' ? '#a3e635' : 'rgba(255,255,255,0.08)',
+                   color: activeLocation === 'kiomoni' ? 'black' : 'rgba(255,255,255,0.85)',
+                   opacity: 1,
+                   fontWeight: 700,
+                   fontSize: '15px',
+                   minWidth: 90,
+                   minHeight: 36,
+                   borderRadius: 12,
+                   boxShadow: activeLocation === 'kiomoni' ? '0 0 8px 1px rgba(163,230,53,0.13)' : 'none',
+                   transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
+                   outline: 'none',
+                   cursor: 'pointer',
+                   letterSpacing: '1px',
+                 }}
+                 onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                 onMouseUp={e => e.currentTarget.style.transform = 'scale(1.03)'}
+                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                 onTouchStart={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                 onTouchEnd={e => e.currentTarget.style.transform = 'scale(1.03)'}
+                 onTouchCancel={e => e.currentTarget.style.transform = 'scale(1)'}
+               >TANGA</button>
+               <button
+                 onClick={() => setActiveLocation('goba')}
+                 style={{
+                   ...styles.locationButton,
+                   borderColor: activeLocation === 'goba' ? '#a3e635' : 'rgba(255,255,255,0.2)',
+                   backgroundColor: activeLocation === 'goba' ? '#a3e635' : 'rgba(255,255,255,0.08)',
+                   color: activeLocation === 'goba' ? 'black' : 'rgba(255,255,255,0.85)',
+                   opacity: activeSeason === '2025' ? 0.5 : 1,
+                   fontWeight: 700,
+                   fontSize: '15px',
+                   minWidth: 90,
+                   minHeight: 36,
+                   borderRadius: 12,
+                   boxShadow: activeLocation === 'goba' ? '0 0 8px 1px rgba(163,230,53,0.13)' : 'none',
+                   transition: 'all 0.2s cubic-bezier(.4,0,.2,1)',
+                   outline: 'none',
+                   cursor: 'pointer',
+                   letterSpacing: '1px',
+                 }}
+                 onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                 onMouseUp={e => e.currentTarget.style.transform = 'scale(1.03)'}
+                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                 onTouchStart={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                 onTouchEnd={e => e.currentTarget.style.transform = 'scale(1.03)'}
+                 onTouchCancel={e => e.currentTarget.style.transform = 'scale(1)'}
+               >DAR</button>
+             </div>
            </div>
            
            {isGoba2025 ? (
