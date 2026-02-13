@@ -13,8 +13,6 @@ const GorillaBot = ({ standings, matches }) => {
   useEffect(() => {
     const generatedThoughts = StatsEngine.getGorillaBanter(standings, matches);
     setThoughts(generatedThoughts);
-    // Hapa baadaye tutavuta data halisi za wafungaji kutoka Contentful JSON
-    // Kwa sasa tunatumia Dummy Data ili uone muonekano
     setTopScorers([
       { name: 'Juma Kaseja', team: 'Kiomoni', goals: 5 },
       { name: 'Mwakere Jr', team: 'Goba', goals: 4 },
@@ -31,7 +29,7 @@ const GorillaBot = ({ standings, matches }) => {
     return () => clearInterval(interval);
   }, [thoughts]);
 
-  // 1. MINI MODE (Floating Button) - Ikiwa imefungwa kabisa
+  // 1. MINI MODE (Floating Button)
   if (!isOpen && !isExpanded) {
     return (
       <button 
@@ -49,7 +47,7 @@ const GorillaBot = ({ standings, matches }) => {
     );
   }
 
-  // 2. FULL DASHBOARD MODE (Imetanuka Screen Nzima)
+  // 2. FULL DASHBOARD MODE
   if (isExpanded) {
     return (
       <div style={{
@@ -57,7 +55,7 @@ const GorillaBot = ({ standings, matches }) => {
         backdropFilter: 'blur(10px)', overflowY: 'auto', padding: '20px'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          {/* Header ya Dashboard */}
+          {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '1px solid #334155', paddingBottom: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <span style={{ fontSize: '40px' }}>🦍</span>
@@ -71,7 +69,7 @@ const GorillaBot = ({ standings, matches }) => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
             
-            {/* KADI 1: WAFUNGAJI BORA */}
+            {/* WAFUNGAJI BORA */}
             <div style={{ backgroundColor: '#1e293b', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
                 <Award color="#a3e635" size={20} />
@@ -88,7 +86,7 @@ const GorillaBot = ({ standings, matches }) => {
               ))}
             </div>
 
-            {/* KADI 2: FORM GUIDE (Moto wa Timu) */}
+            {/* FORM GUIDE */}
             <div style={{ backgroundColor: '#1e293b', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
                 <Activity color="#a3e635" size={20} />
@@ -109,16 +107,17 @@ const GorillaBot = ({ standings, matches }) => {
               ))}
             </div>
 
-            {/* KADI 3: CLEAN SHEETS */}
+            {/* UKUTA MGUMU (Clean Sheets) */}
             <div style={{ backgroundColor: '#1e293b', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
                 <Shield color="#a3e635" size={20} />
-                <h3 style={{ color: 'white', margin: 0, fontSize: '16px', fontWeight: 'bold' }}>UKUTA WA CHUMA</h3>
+                {/* HAPA NIMEREKEBISHA JINA: */}
+                <h3 style={{ color: 'white', margin: 0, fontSize: '16px', fontWeight: 'bold' }}>UKUTA MGUMU (BILA GOLI)</h3>
               </div>
               {standings.sort((a,b) => b.cleanSheets - a.cleanSheets).slice(0, 3).map((team, idx) => (
                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <span style={{ color: 'white' }}>{team.team}</span>
-                    <span style={{ color: '#a3e635', fontWeight: 'bold' }}>{team.cleanSheets} CS</span>
+                    <span style={{ color: '#a3e635', fontWeight: 'bold' }}>{team.cleanSheets} MECHI</span>
                  </div>
               ))}
             </div>
@@ -132,7 +131,7 @@ const GorillaBot = ({ standings, matches }) => {
     );
   }
 
-  // 3. DEFAULT MODE (The Banter Bar)
+  // 3. DEFAULT MODE
   return (
     <div style={{
       margin: '0 auto', maxWidth: '800px', padding: '0 24px', position: 'relative', zIndex: 50,

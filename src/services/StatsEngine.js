@@ -1,12 +1,12 @@
 // path: src/services/StatsEngine.js
 
-// 🧠 Pande Cup AI Stats Engine (v2.0)
+// 🧠 Pande Cup AI Stats Engine (v3.0 - Mwakere Edition)
 export const StatsEngine = {
   
   // 1. 📊 ADVANCED STANDINGS (Msimamo)
   calculateStandings: (matches) => {
     const standings = {};
-    // Panga mechi kuanzia ya zamani kwenda mpya kwa ajili ya Form Guide
+    // Panga mechi kuanzia ya zamani kwenda mpya
     const sortedMatches = [...matches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
 
     sortedMatches.forEach(match => {
@@ -20,7 +20,6 @@ export const StatsEngine = {
         }
       });
 
-      // Angalia kama mechi imeisha na ina matokeo sahihi
       const isFinal = match.score && (match.score.includes('-') || match.score.includes(':')) && !match.score.toUpperCase().includes('VS');
       
       if (isFinal) {
@@ -72,49 +71,77 @@ export const StatsEngine = {
       });
   },
 
-  // 2. 🦍 GORILLA MWAKERE PERSONALITY (Maneno ya Shombo)
+  // 2. 🦍 GORILLA MWAKERE PERSONALITY (Tanga Flavor)
   getGorillaBanter: (standings, matches) => {
-    // Kama hakuna data kabisa
+    // 1. KAMA HAKUNA DATA KABISA
     if (!standings || standings.length === 0) {
       return [
         "Oya wanangu! Mwakere nimerudi... Ligi bado mbichi, timu zinajipanga au ndio zinapigana vikumbo? Leteni mpira tuchambue!",
-        "Msimu mpya, mambo mapya. Nani atabeba ndoo? Nani atalia kama mtoto? Kaa hapa hapa nikupe umbea wa soka!"
+        "Usinene ukamara! Mpira bado haujaanza kudunda vizuri. Subiri nivae miwani yangu ya mbao."
       ];
     }
 
     const topTeam = standings[0];
     const bottomTeam = standings[standings.length - 1];
-    const comments = [];
-
-    // Banter kwa anayeongoza
-    if (topTeam && topTeam.pts > 0) {
-      comments.push(`Eeh bana wee! Hawa **${topTeam.team}** wamekamia kinoma. Wana pointi ${topTeam.pts} utafikiri wanakimbizwa na deni! 😂`);
-    }
-
-    // Banter kwa anayeshika mkia
-    if (bottomTeam && bottomTeam.p > 2 && bottomTeam.pts < 2) {
-      comments.push(`Dah! Hawa **${bottomTeam.team}** vipi? Mbona wanagawa pointi kama njugu? Kocha amka usingizini, ligi inaisha hiyo! 😴`);
-    }
-
-    // Banter kwa Clean Sheets
-    const defensiveMaster = [...standings].sort((a, b) => b.cleanSheets - a.cleanSheets)[0];
-    if (defensiveMaster && defensiveMaster.cleanSheets > 1) {
-      comments.push(`Ukuta wa Yeriko! **${defensiveMaster.team}** wamegoma kufungwa, wana 'Clean Sheets' ${defensiveMaster.cleanSheets}. Makipa wengine waige hapa.`);
-    }
-
-    // Banter kwa Magoli
+    
+    // Hesabu za haraka haraka
     const totalMatches = matches.filter(m => m.score && (m.score.includes('-') || m.score.includes(':'))).length;
     let totalGoals = 0;
     standings.forEach(t => totalGoals += t.gf);
-    const avgGoals = (totalGoals / Math.max(totalMatches, 1)).toFixed(1);
+    const avgGoals = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : 0;
+    
+    const comments = [];
 
-    if (avgGoals > 2.5) {
-      comments.push(`Wavu unacheka tu! Wastani wa magoli **${avgGoals}** kwa mechi. Hii sio soka, hii ni vita ya magoli! 🔥`);
-    } else {
-       comments.push(`Leo niko sawa, nasubiri mechi ijayo nione nani atapigwa nyingi.`);
+    // --- A: MWANZO WA LIGI (Mechi Chache - Dar Scenario Fix) ---
+    if (totalMatches > 0 && totalMatches <= 3) {
+        comments.push(`Ligi ndio kwanza inaanza, **usinene ukamara**! Bado mapema sana kusema nani bingwa.`);
+        
+        if (avgGoals < 1.5) {
+            comments.push(`Huku sioni magoli, naona **Mpira Chiguruni** tu! Mabeki wamekaza au washambuliaji wameula wa chuya? 😂`);
+        }
+    }
+
+    // --- B: TIMU BORA (Top of the Table) ---
+    if (topTeam && topTeam.pts > 0) {
+      if (topTeam.formGuide && topTeam.formGuide.includes('WW')) {
+         comments.push(`Eeh bana wee! Hawa **${topTeam.team}** wanapiga **Pira Biriani**! Wapo kileleni na pointi ${topTeam.pts}. Wengine wanajifunza soka.`);
+      } else {
+         comments.push(`Kwa sasa **${topTeam.team}** ndio wameweka kwapani, wanaongoza ligi. Lakini wasijisahau, **Mpira Chiguruni** huu!`);
+      }
+    }
+
+    // --- C: TIMU BOVU (Bottom of the Table) ---
+    if (bottomTeam && bottomTeam.l > 0) {
+      if (bottomTeam.gd < -3) {
+         comments.push(`Hawa **${bottomTeam.team}** ni **Wafungashwa** rasmi! Wanakula **Kipigo cha Mbwa Kachoka** kila wakikanyaga uwanjani. Kocha amka! 😴`);
+      } else {
+         comments.push(`Pole sana kwa **${bottomTeam.team}**, mambo bado magumu. Soka lenu limepoa kama chai ya jana.`);
+      }
+    }
+
+    // --- D: UKUTA MGUMU (Clean Sheets) ---
+    const defensiveMaster = [...standings].sort((a, b) => b.cleanSheets - a.cleanSheets)[0];
+    if (defensiveMaster && defensiveMaster.cleanSheets > 1) {
+      comments.push(`Ukuta wa Yeriko! **${defensiveMaster.team}** wamegoma kufungwa, wana 'Clean Sheets' ${defensiveMaster.cleanSheets}. Hapa hakupiti hata panya!`);
+    }
+
+    // --- E: MAGOLI MENGI VS MACHACHE ---
+    if (avgGoals > 3.0) {
+      comments.push(`Wiki hii kumenuka! Timu zinagawa **Kipigo cha Sigara Bwege**. Wastani wa magoli **${avgGoals}** kwa mechi. Makipa wananaawa uso tu! 🔥`);
+    } else if (avgGoals > 0 && avgGoals < 1.0 && totalMatches > 3) {
+      comments.push(`Dah! Washambuliaji wamegoma kufunga? Wastani wa goli **${avgGoals}**? Huu mpira au mieleka?`);
+    }
+
+    // --- F: KAMA LIGI IMEMALIZA ---
+    if (matches.every(m => m.status === 'FINAL') && matches.length > 10) {
+        comments.push(`Ligi imeiva! **Usinene ukamara**, bingwa anakaribia kupatikana.`);
     }
 
     // Hakikisha haturudishi array tupu
-    return comments.length > 0 ? comments : ["Nasubiri data zaidi ili nianze kuwachana!"];
+    if (comments.length === 0) {
+        return ["Natafakari takwimu... **Usinene ukamara**, data zinakuja!"];
+    }
+
+    return comments;
   }
 };
