@@ -40,7 +40,7 @@ const LOCATIONS_LIST = [
   }
 ];
 
-// --- DATA ZA KUAZIMIA (FALLBACK) ---
+// --- DATA ZA KUAZIMIA (FALLBACK - ZITATUMIKA KAMA API IMEFELI TU) ---
 const FALLBACK_DATA = {
   hero: [
     {
@@ -70,6 +70,60 @@ const FALLBACK_DATA = {
 };
 
 // --- COMPONENTS ---
+
+// 1. Loading Screen Component (Professional Preloader)
+const LoadingScreen = () => (
+  <div style={{
+    position: 'fixed',
+    inset: 0,
+    backgroundColor: '#0f172a',
+    zIndex: 9999,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '20px'
+  }}>
+    <style>{`
+      @keyframes pulse-logo {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+    `}</style>
+    <img 
+      src={LOGO_PATH} 
+      alt="Loading..." 
+      style={{ 
+        height: '80px', 
+        width: 'auto',
+        animation: 'pulse-logo 1.5s infinite ease-in-out'
+      }} 
+    />
+    <div style={{ 
+      width: '40px', 
+      height: '4px', 
+      background: 'rgba(255,255,255,0.1)', 
+      borderRadius: '2px', 
+      overflow: 'hidden' 
+    }}>
+      <div style={{ 
+        width: '50%', 
+        height: '100%', 
+        background: '#a3e635', 
+        animation: 'loading-bar 1s infinite linear',
+        transform: 'translateX(-100%)'
+      }}></div>
+    </div>
+    <style>{`
+      @keyframes loading-bar {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+      }
+    `}</style>
+  </div>
+);
+
 const PandeLogo = ({ size = 'normal', isMobile }) => {
   // Mobile optimization for Logo Height
   const mobileHeight = '40px';
@@ -161,8 +215,8 @@ export const HomePage = () => {
   const [selectedNews, setSelectedNews] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   
-  // NOTE: visibleNewsCount removed because we now use scroll
-  const [cmsData, setCmsData] = useState(FALLBACK_DATA);
+  // Start with LOADING DATA, not Fallback Data directly to avoid FOUC
+  const [cmsData, setCmsData] = useState(null); 
   const [isLoading, setIsLoading] = useState(true);
 
   // --- HANDLERS ---
@@ -263,6 +317,9 @@ export const HomePage = () => {
 
   useEffect(() => {
     const fetchContentfulData = async () => {
+      // Small delay to ensure loader is seen (removes flicker)
+      const minLoaderTime = new Promise(resolve => setTimeout(resolve, 800));
+      
       try {
         const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&locale=en-US`;
         const getAssetUrl = (id, includes ) => {
@@ -347,19 +404,32 @@ export const HomePage = () => {
             websiteUrl: item.fields.websiteUrl || item.fields.link || '#'
         })) : [];
 
-        setCmsData(prev => ({
-            ...prev,
-            hero: fetchedHero,
+        // Wait for min time then set data
+        await minLoaderTime;
+
+        setCmsData({
+            hero: fetchedHero.length > 0 ? fetchedHero : FALLBACK_DATA.hero,
             matches: fetchedMatches,
             news: fetchedNews,
             standings: fetchedStandings, 
             videos: fetchedVideos,
-            sponsors: fetchedSponsors.length > 0 ? fetchedSponsors : prev.sponsors
-        }));
-      } catch (error) { console.error("CMS Error:", error); } finally { setIsLoading(false); }
+            sponsors: fetchedSponsors.length > 0 ? fetchedSponsors : FALLBACK_DATA.sponsors
+        });
+
+      } catch (error) { 
+        console.error("CMS Error:", error); 
+        setCmsData(FALLBACK_DATA); // On Error, use Fallback
+      } finally { 
+        setIsLoading(false); 
+      }
     };
     fetchContentfulData();
   }, []);
+
+  // Show Loading Screen until data is ready
+  if (isLoading || !cmsData) {
+      return <LoadingScreen />;
+  }
 
   const getCurrentHero = () => {
     const heroList = cmsData.hero && cmsData.hero.length > 0 ? cmsData.hero : FALLBACK_DATA.hero;
@@ -940,8 +1010,8 @@ export const HomePage = () => {
                               <td style={{ ...styles.td, paddingLeft: '16px', fontWeight: 'bold', color: idx === 0 ? '#a3e635' : (idx === 1 ? '#4ade80' : 'white') }}>{idx + 1}</td>
                               <td style={{ ...styles.td, fontWeight: 'bold', fontSize: '14px' }}>{team.team}</td>
                               <td style={{ ...styles.td, textAlign: 'center', color: '#94a3b8' }}>{team.p}</td>
-                              <td style={{ ...styles.td, textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : (team.gd.startsWith('-') ? '#f87171' : 'white') }}>{team.gd}</td>
-                              <td style={{ ...styles.td, textAlign: 'center', fontWeight: '900', color: 'white', fontSize: '15px', paddingRight: '16px' }}>{team.pts}</td>
+                              <td style={{ ...styles.td, textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : (team.gd.startsWith('-') ? '#f87171' : 'white'), fontWeight: 'bold' }}>{team.gd}</td>
+                              <td style={{ ...styles.td, textAlign: 'center', fontWeight: '900', color: 'white', fontSize: '18px' }}>{team.pts}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -957,7 +1027,7 @@ export const HomePage = () => {
 </>
       )}
 
-      {/* 7. PROFESSIONAL FOOTER - STRICT ALIGNMENT */}
+      {/* 7. PROFESSIONAL FOOTER - STRICT LEFT ALIGNMENT */}
       <footer id="about" style={{ backgroundColor: '#020617', borderTop: '1px solid rgba(163, 230, 53, 0.1)', position: 'relative', overflow: 'hidden' }}>
         
         {/* Decorative Glow */}
@@ -966,7 +1036,7 @@ export const HomePage = () => {
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '50px 24px 30px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px' }}>
             
-            {/* COL 1: BRAND & NARRATIVE */}
+            {/* COL 1: BRAND & NARRATIVE - LEFT ALIGNED */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
               <div style={{ marginBottom: '16px' }}><PandeLogo size="large" isMobile={isMobile} /></div>
               <div style={{ maxWidth: '300px' }}>
@@ -985,7 +1055,7 @@ export const HomePage = () => {
               </div>
             </div>
 
-            {/* COL 2: QUICK LINKS */}
+            {/* COL 2: QUICK LINKS - STRICTLY LEFT ALIGNED */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
               <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase', textAlign: 'left' }}>Viungo vya Haraka</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
@@ -996,7 +1066,7 @@ export const HomePage = () => {
               </div>
             </div>
 
-            {/* COL 3: CONTACTS */}
+            {/* COL 3: CONTACTS - STRICTLY LEFT ALIGNED */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
               <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase', textAlign: 'left' }}>Mawasiliano</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
