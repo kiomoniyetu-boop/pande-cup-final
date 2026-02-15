@@ -2,6 +2,7 @@ import SeasonSwitcher from '../components/SeasonSwitcher';
 import GorillaBot from '../components/GorillaBot'; 
 import React, { useState, useEffect } from 'react';
 import { Helmet } from "react-helmet"; 
+import { Link } from 'react-router-dom'; // 🔥 MPA ROUTING
 import { 
   Menu, X, Clock, Instagram, Facebook, Youtube,
   Newspaper, Phone, Mail, Grid, Shield, Maximize2, 
@@ -25,22 +26,10 @@ const SOCIAL_LINKS = {
 
 // --- ORODHA YA MITAA ---
 const LOCATIONS_LIST = [
-  { 
-    group: 'KIOMONI (Nyumbani - The Root)', 
-    areas: ['Kiomoni', 'Mpirani', 'Mabayani', 'Ndumi', 'Magubeni', 'Kivuleni', 'Cross Z', 'Mbogo', 'Kilimanjaro', 'Mowe', 'Masaini', 'Muheza', 'Kikuluni', 'Chote', 'Lwande', 'Marembwe', 'Mavumbi', 'Mijohoroni', 'Mjesani', 'Mnyenzani'] 
-  },
-  { 
-    group: 'TANGA MJINI (Kata & Mitaa)', 
-    areas: ['Ngamiani', 'Majengo', 'Mabawa', 'Central', 'Makorora', 'Mzingani', 'Tanga Sisi', 'Mnyanjani', 'Usagara', 'Nguvumali', 'Pongwe', 'Magaoni', 'Duga', 'Maweni', 'Chongoleani', 'Raskazone', 'Donge', 'Gofu'] 
-  },
-  { 
-    group: 'DAR ES SALAAM', 
-    areas: ['Goba', 'Madale', 'Makongo', 'Mbezi Mwisho', 'Kimara', 'Sinza', 'Ubungo', 'Mabibo', 'Tegeta', 'Bunju', 'Kinondoni', 'Ilala'] 
-  },
-  { 
-    group: 'ENGINE', 
-    areas: ['Nje ya Tanga/Dar'] 
-  }
+  { group: 'KIOMONI (Nyumbani - The Root)', areas: ['Kiomoni', 'Mpirani', 'Mabayani', 'Ndumi', 'Magubeni', 'Kivuleni', 'Cross Z', 'Mbogo', 'Kilimanjaro', 'Mowe', 'Masaini', 'Muheza', 'Kikuluni', 'Chote', 'Lwande', 'Marembwe', 'Mavumbi', 'Mijohoroni', 'Mjesani', 'Mnyenzani'] },
+  { group: 'TANGA MJINI (Kata & Mitaa)', areas: ['Ngamiani', 'Majengo', 'Mabawa', 'Central', 'Makorora', 'Mzingani', 'Tanga Sisi', 'Mnyanjani', 'Usagara', 'Nguvumali', 'Pongwe', 'Magaoni', 'Duga', 'Maweni', 'Chongoleani', 'Raskazone', 'Donge', 'Gofu'] },
+  { group: 'DAR ES SALAAM', areas: ['Goba', 'Madale', 'Makongo', 'Mbezi Mwisho', 'Kimara', 'Sinza', 'Ubungo', 'Mabibo', 'Tegeta', 'Bunju', 'Kinondoni', 'Ilala'] },
+  { group: 'ENGINE', areas: ['Nje ya Tanga/Dar'] }
 ];
 
 // --- DATA ZA KUAZIMIA (FALLBACK) ---
@@ -82,14 +71,7 @@ const PandeLogo = ({ size = 'normal', isMobile }) => {
           <img 
             src={LOGO_PATH} 
             alt="Pande Cup Logo" 
-            style={{ 
-              height: height, 
-              width: 'auto',
-              maxWidth: '100%',
-              objectFit: 'contain', 
-              filter: 'drop-shadow(0 0 8px rgba(163, 230, 53, 0.3))',
-              transition: 'all 0.3s ease'
-            }} 
+            style={{ height: height, width: 'auto', maxWidth: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(163, 230, 53, 0.3))', transition: 'all 0.3s ease' }} 
             onError={() => setImgError(true)} 
           />
       </div>
@@ -134,7 +116,7 @@ const renderWithLinks = (text) => {
   });
 };
 
-export const HomePage = () => {
+const HomePage = () => {
   const [activeLocation, setActiveLocation] = useState('kiomoni');
   const [activeSeason, setActiveSeason] = useState('2026'); 
    
@@ -145,20 +127,9 @@ export const HomePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); 
   const [submitError, setSubmitError] = useState(''); 
-  const [teamData, setTeamData] = useState({ 
-    name: '', 
-    location: '', 
-    coachName: '', 
-    nidaNumber: '',
-    phone: '', 
-    jerseyColor: ''
-  });
-
+  const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', nidaNumber: '', phone: '', jerseyColor: '' });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [selectedNews, setSelectedNews] = useState(null);
-  const [selectedGroup, setSelectedGroup] = useState(null);
    
-  const [visibleNewsCount, setVisibleNewsCount] = useState(3);
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -200,18 +171,12 @@ export const HomePage = () => {
     }
   };
 
-  const openNews = (newsItem) => { setSelectedNews(newsItem); document.body.style.overflow = 'hidden'; };
-  const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
-  const openGroupModal = (groupName, teams) => { setSelectedGroup({ name: groupName, teams: teams }); document.body.style.overflow = 'hidden'; };
-  const closeGroupModal = () => { setSelectedGroup(null); document.body.style.overflow = 'auto'; };
-   
   const handleNewsShare = async (newsItem) => {
     const shareText = `${newsItem.title} - Pande Cup`;
-    const shareUrl = window.location.href;
+    const shareUrl = `${window.location.origin}/news/${newsItem.id}`;
     if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Pande Cup', text: shareText, url: shareUrl });
-      } catch (err) { console.error('Web Share error:', err); }
+      try { await navigator.share({ title: 'Pande Cup', text: shareText, url: shareUrl }); } 
+      catch (err) { console.error('Web Share error:', err); }
     } else {
       navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => alert('Link copied!')).catch(err => console.error('Copy failed:', err));
     }
@@ -239,8 +204,6 @@ export const HomePage = () => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  useEffect(() => { setVisibleNewsCount(3); }, [activeLocation, activeSeason]);
 
   // --- FETCHING DATA FROM CONTENTFUL ---
   useEffect(() => {
@@ -270,6 +233,7 @@ export const HomePage = () => {
         })) : [];
 
         const fetchedMatches = matchesData.items ? matchesData.items.map(item => ({
+            id: item.sys.id, 
             home: String(item.fields.homeTeam || "Home"),
             away: String(item.fields.awayTeam || "Away"),
             score: String(item.fields.score || "VS"),
@@ -287,6 +251,7 @@ export const HomePage = () => {
                 return asset && asset.fields.file ? `https:${asset.fields.file.url}` : null;
              };
              return {
+                id: item.sys.id, 
                 date: String(item.fields.date || ""), 
                 title: String(item.fields.title || "Habari Mpya"),
                 excerpt: String(item.fields.excerpt || "Soma zaidi..."),
@@ -342,10 +307,6 @@ export const HomePage = () => {
     .filter(m => m.score.toUpperCase() === 'VS' || m.score.includes(':'))
     .sort((a, b) => new Date(a.matchDate || '9999-12-31') - new Date(b.matchDate || '9999-12-31'));
 
-  const pastMatches = filteredMatches
-    .filter(m => m.score.toUpperCase() !== 'VS' && !m.score.includes(':'))
-    .sort((a, b) => new Date(b.matchDate || '1970-01-01') - new Date(a.matchDate || '1970-01-01'));
-
   const filteredNews = getFilteredData(cmsData.news).sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
@@ -354,21 +315,7 @@ export const HomePage = () => {
   });
 
   const filteredStandings = getFilteredData(cmsData.standings);
-  const sortedTeams = [...filteredStandings].sort((a, b) => {
-      if (b.pts !== a.pts) return b.pts - a.pts; 
-      const gdA = parseInt(a.gd) || 0;
-      const gdB = parseInt(b.gd) || 0;
-      return gdB - gdA; 
-  });
-
-  const groupedStandings = sortedTeams.reduce((groups, team) => {
-      const groupName = team.group ? `GROUP ${team.group}` : 'LIGI KUU'; 
-      if (!groups[groupName]) groups[groupName] = [];
-      groups[groupName].push(team);
-      return groups;
-  }, {});
   
-  const sortedGroupKeys = Object.keys(groupedStandings).sort();
   const isGoba2025 = activeLocation === 'goba' && activeSeason === '2025';
 
   const displayTitle = currentHero.title;
@@ -409,7 +356,6 @@ export const HomePage = () => {
       position: 'relative',
       display: 'inline-block',
     },
-    // 🔥 HERO FIX: Flexbox Alignment for Desktop Center
     heroWrapper: { 
         position: 'relative', 
         overflow: 'hidden', 
@@ -420,7 +366,7 @@ export const HomePage = () => {
         justifyContent: 'center', 
         borderBottom: '1px solid rgba(163, 230, 53, 0.1)', 
         width: '100%',
-        paddingTop: isMobile ? '60px' : '0' // Mobile padding to avoid overlap
+        paddingTop: isMobile ? '60px' : '0'
     },
     heroMedia: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, objectFit: 'cover' },
     heroOverlay: { position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.9))' },
@@ -445,11 +391,7 @@ export const HomePage = () => {
     sectionTitle: { fontSize: '24px', fontWeight: '900', textTransform: 'uppercase', fontStyle: 'italic', margin: 0 },
     newsCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', height: '100%' },
     mobileMenu: { position: 'fixed', top: '0', right: '0', width: '85%', maxWidth: '320px', height: '100vh', backgroundColor: '#0f172a', zIndex: 200, padding: '32px 24px', boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', borderLeft: '1px solid rgba(255,255,255,0.1)' },
-    matchCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '24px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' },
-    table: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' },
-    th: { textAlign: 'left', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#64748b', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px' },
-    td: { padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' },
-    groupCard: { backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }
+    matchCard: { backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '24px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }
   };
 
   return (
@@ -491,7 +433,6 @@ export const HomePage = () => {
             min-width: 140px;
             cursor: pointer;
           }
-          /* 🔥 SPONSOR HOVER EFFECT FIX 🔥 */
           .sponsor-logo-img {
             height: 50px;
             object-fit: contain;
@@ -504,6 +445,33 @@ export const HomePage = () => {
             opacity: 1;
             transform: scale(1.15);
           }
+
+          /* 🔥 UNYAMA WA GLASS KWA SOCIAL ICONS 🔥 */
+          .social-glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            padding: 12px 28px;
+            display: inline-flex;
+            gap: 24px;
+            align-items: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            margin: 24px auto 0;
+          }
+          .social-icon-top {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .social-icon-top:hover {
+            color: #a3e635;
+            transform: translateY(-6px) scale(1.15);
+            filter: drop-shadow(0 8px 16px rgba(163, 230, 53, 0.5));
+          }
            
           /* MOBILE ADJUSTMENTS */
           @media (max-width: 768px) {
@@ -515,19 +483,20 @@ export const HomePage = () => {
             #ratiba { padding: 40px 16px !important; }
             .hero-content-mobile { width: 100% !important; padding: 0 16px !important; }
             .sponsor-logo-img { height: 40px; }
+            .social-glass { padding: 10px 20px; gap: 16px; margin-top: 16px; }
           }
         `}
       </style>
 
       {/* --- SEO HELMET --- */}
       <Helmet>
-        <title>{selectedNews ? selectedNews.title : seoTitle}</title>
-        <meta name="description" content={selectedNews ? selectedNews.excerpt : seoDescription} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://pandecup.co.tz/" />
-        <meta property="og:title" content={selectedNews ? selectedNews.title : "Pande Cup - Hii Game Ni Yetu"} />
-        <meta property="og:description" content={selectedNews ? selectedNews.excerpt : seoDescription} />
-        <meta property="og:image" content={selectedNews ? selectedNews.image : LOGO_PATH} />
+        <meta property="og:title" content="Pande Cup - Hii Game Ni Yetu" />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content={LOGO_PATH} />
       </Helmet>
 
       <div style={styles.container}>
@@ -538,7 +507,7 @@ export const HomePage = () => {
         </div>
       </div>
 
-      {/* 2. MAIN NAVIGATION - CENTERED DESKTOP */}
+      {/* 2. MAIN NAVIGATION - MPA LINKS INSTEAD OF ANCHORS */}
       <nav style={styles.nav} className="nav-glass nav-mobile pande-nav-glass">
               <style>{`
                 .pande-nav-glass {
@@ -572,31 +541,18 @@ export const HomePage = () => {
                   left: 15%;
                 }
               `}</style>
-              <script>
-                {`
-                  window.addEventListener('scroll', function() {
-                    const nav = document.querySelector('.pande-nav-glass');
-                    if (!nav) return;
-                    if (window.scrollY > 8) {
-                      nav.classList.add('sticky-shadow');
-                    } else {
-                      nav.classList.remove('sticky-shadow');
-                    }
-                  });
-                `}
-              </script>
         <div style={styles.navContent}>
           <a href="#hero" style={{ textDecoration: 'none', cursor: 'pointer', zIndex: 10 }}>
             <PandeLogo isMobile={isMobile} />
           </a>
            
-          {/* 🔥 NAV FIX: CENTERING LINKS 🔥 */}
+          {/* 🔥 NAV FIX: CENTERING MPA LINKS 🔥 */}
           <div className="desktop-only" style={{ display: 'flex', gap: '24px', alignItems: 'center', flex: 1, justifySelf: 'center', justifyContent: 'center' }}>
-            <a onClick={() => window.location.href='#news'} style={styles.navLink}>Habari</a>
-            <a onClick={() => window.location.href='#ratiba'} style={styles.navLink}>Ratiba</a>
-            <a href="/pctv" style={styles.navLink}>PC TV</a>
-            <a href="/sponsors" style={{...styles.navLink, color: '#cbd5e1'}}>Wadhamini</a>
-            <a href="/about" style={{...styles.navLink, color: '#cbd5e1'}}>Kutuhusu</a>
+            <Link to="/news" style={styles.navLink}>Habari</Link>
+            <Link to="/fixtures" style={styles.navLink}>Ratiba</Link>
+            <Link to="/pctv" style={styles.navLink}>PC TV</Link>
+            <Link to="/sponsors" style={{...styles.navLink, color: '#cbd5e1'}}>Wadhamini</Link>
+            <Link to="/about" style={{...styles.navLink, color: '#cbd5e1'}}>Kutuhusu</Link>
             <button
               onClick={openModal}
               style={{
@@ -621,7 +577,6 @@ export const HomePage = () => {
             >
               SAJILI TIMU
             </button>
-            {process.env.NODE_ENV === 'development' && <a href="/admin" style={{...styles.navLink, color: '#a3e635', fontWeight: '800'}}>ADMIN</a>}
           </div>
 
           <div style={{ display: 'block', zIndex: 10 }}>
@@ -634,12 +589,11 @@ export const HomePage = () => {
       <div style={styles.mobileMenu}>
         <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <a href="#hero" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Nyumbani</a>
-            <a href="#news" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Habari & Updates</a>
-            <a href="#ratiba" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Ratiba & Matokeo</a>
-            <a href="/sponsors" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Wadhamini</a>
-            <a href="/pctv" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>PC TV</a>
-            <a href="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Kutuhusu</a>
-            {process.env.NODE_ENV === 'development' && <a href="/admin" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>ADMIN</a>}
+            <Link to="/news" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Habari & Updates</Link>
+            <Link to="/fixtures" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Ratiba & Matokeo</Link>
+            <Link to="/sponsors" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Wadhamini</Link>
+            <Link to="/pctv" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>PC TV</Link>
+            <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#a3e635', fontSize: '20px', fontWeight: 'bold', textDecoration: 'none' }}>Kutuhusu</Link>
             <button onClick={openModal} style={{ ...styles.buttonPrimary, marginTop: '20px', width: '100%', justifyContent: 'center', background: '#a3e635', color: 'black', borderRadius: '8px', fontWeight: 'bold', border: 'none', fontSize: '18px', padding: '16px 0' }}>SAJILI TIMU</button>
         </div>
       </div>
@@ -655,14 +609,7 @@ export const HomePage = () => {
                alt="Background" 
              />
         ) : currentHero.videoUrl ? (
-             <video
-               autoPlay
-               loop
-               muted
-               playsInline
-               style={styles.heroMedia}
-               poster={currentHero.bgImage}
-             >
+             <video autoPlay loop muted playsInline style={styles.heroMedia} poster={currentHero.bgImage}>
                <source src={currentHero.videoUrl} type="video/mp4" />
                <img src={currentHero.bgImage} style={styles.heroMedia} alt="Background" />
              </video>
@@ -680,21 +627,11 @@ export const HomePage = () => {
         <section style={styles.heroContent} className="hero-content-mobile">
            <div 
              style={{
-               display: 'flex',
-               justifyContent: 'center',
-               gap: '16px',
-               marginBottom: '40px',
-               flexWrap: 'wrap',
-               padding: '8px 16px',
-               borderRadius: '50px',
-               background: 'rgba(255,255,255,0.05)',
-               backdropFilter: 'blur(10px)',
-               WebkitBackdropFilter: 'blur(10px)',
-               boxShadow: '0 4px 32px 0 rgba(0,0,0,0.18)',
-               border: '1px solid rgba(255,255,255,0.1)',
-               alignItems: 'center',
-               minWidth: 0,
-               transition: 'background 0.3s, box-shadow 0.3s',
+               display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '40px', flexWrap: 'wrap',
+               padding: '8px 16px', borderRadius: '50px', background: 'rgba(255,255,255,0.05)',
+               backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+               boxShadow: '0 4px 32px 0 rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.1)',
+               alignItems: 'center', minWidth: 0, transition: 'background 0.3s, box-shadow 0.3s',
              }}
            >
              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -733,45 +670,36 @@ export const HomePage = () => {
                 <h1 style={styles.mainTitle}>{displayTitle}</h1>
                 <p style={{ color: '#cbd5e1', fontSize: '1rem', maxWidth: '480px', margin: '0 auto 12px', lineHeight: '1.4', textAlign: 'center' }}>{displaySubtitle}</p>
                 <div style={{ width: '100%', overflow: 'hidden', margin: '16px 0 0', height: 32 }}>
-                  <div style={{
-                    display: 'inline-block',
-                    whiteSpace: 'nowrap',
-                    animation: 'slogan-scroll 18s linear infinite',
-                    fontSize: '1rem',
-                    color: '#a3e635',
-                    fontWeight: 700,
-                    letterSpacing: '1px',
-                    textShadow: '0 2px 8px #000',
-                  }}>
+                  <div style={{ display: 'inline-block', whiteSpace: 'nowrap', animation: 'slogan-scroll 18s linear infinite', fontSize: '1rem', color: '#a3e635', fontWeight: 700, letterSpacing: '1px', textShadow: '0 2px 8px #000' }}>
                     Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; #1 Grassroots Football League in Tanzania &nbsp;|&nbsp; Ligi Moja. Upendo Mmoja. Vumbi Moja. &nbsp;|&nbsp; #1 Grassroots Football League in Tanzania
                   </div>
-                  <style>{`
-                    @keyframes slogan-scroll {
-                      0% { transform: translateX(0); }
-                      100% { transform: translateX(-50%); }
-                    }
-                  `}</style>
+                  <style>{`@keyframes slogan-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
                 </div>
-                <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', margin: '18px 0 0' }}>
-                  <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" title="Instagram" style={{ color: '#fff' }}><Instagram size={28} /></a>
-                  <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" title="Facebook" style={{ color: '#fff' }}><Facebook size={28} /></a>
-                  <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" title="YouTube" style={{ color: '#fff' }}><Youtube size={28} /></a>
-                  <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noopener noreferrer" title="TikTok" style={{ color: '#fff' }}><TikTokIcon size={28} /></a>
+                
+                {/* 🔥 HAPA NDIO UNYAMA WA GLASS UMEKAA 🔥 */}
+                <div className="social-glass">
+                  <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" className="social-icon-top" title="Instagram">
+                    <Instagram size={26} />
+                  </a>
+                  <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" className="social-icon-top" title="Facebook">
+                    <Facebook size={26} />
+                  </a>
+                  <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noopener noreferrer" className="social-icon-top" title="TikTok">
+                    <TikTokIcon size={26} />
+                  </a>
+                  <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" className="social-icon-top" title="YouTube">
+                    <Youtube size={26} />
+                  </a>
                 </div>
+
               </>
             )}
         </section>
       </div>
       
-      {/* SPONSOR LOGOS - UPDATED WITH CLASS FOR ANIMATION */}
+      {/* SPONSOR LOGOS */}
       <section id="wadhamini" style={{ padding: '60px 24px', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-        <style>{`
-          .sponsor-marquee-container {
-            display: flex;
-            overflow: hidden;
-            width: 100%;
-          }
-        `}</style>
+        <style>{`.sponsor-marquee-container { display: flex; overflow: hidden; width: 100%; }`}</style>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <p style={{ fontSize: '10px', letterSpacing: '2px', fontWeight: '800', textTransform: 'uppercase', color: '#a3e635', marginBottom: '32px', textAlign: 'center' }}>WANAOTUPA NGUVU MSIMU HUU</p>
           <div>
@@ -780,11 +708,7 @@ export const HomePage = () => {
                 {[...cmsData.sponsors, ...cmsData.sponsors].map((sponsor, idx) => (
                   <div key={idx} className="sponsor-marquee-item">
                     <a href={sponsor.websiteUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none' }}>
-                      <img 
-                        src={sponsor.logo} 
-                        alt={sponsor.name} 
-                        className="sponsor-logo-img" /* 🔥 NEW CLASS HERE 🔥 */
-                      />
+                      <img src={sponsor.logo} alt={sponsor.name} className="sponsor-logo-img" />
                       <span style={{ fontSize: '10px', color: '#a3e635', fontWeight: 'bold', marginTop: '8px' }}>{sponsor.name}</span>
                     </a>
                   </div>
@@ -797,13 +721,13 @@ export const HomePage = () => {
 
       {!isGoba2025 && (
       <>
-        {/* 4. NEWS */}
+        {/* 4. NEWS - TEASER (.SLICE 3) NA MPA LINK */}
         <section id="news" style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={styles.sectionHeader}><Newspaper style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Habari <span style={styles.limeText}>{activeSeason}</span></h2></div>
           {filteredNews.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
-                    {filteredNews.slice(0, visibleNewsCount).map((item, idx) => (
+                    {filteredNews.slice(0, 3).map((item, idx) => (
                         <div key={idx} className="hover-card" style={styles.newsCard}>
                             <div style={{ height: '200px', overflow: 'hidden' }}>
                             <img 
@@ -818,7 +742,11 @@ export const HomePage = () => {
                                 <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 12px', lineHeight: '1.4' }}>{item.title}</h3>
                                 <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: '1.6', margin: '0 0 20px', flex: 1 }}>{item.excerpt}</p>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                                  <button onClick={() => openNews(item)} style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>SOMA ZAIDI <ChevronRight size={14} color="#a3e635" /></button>
+                                  
+                                  <Link to={`/news/${item.id}`} style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    SOMA ZAIDI <ChevronRight size={14} color="#a3e635" />
+                                  </Link>
+                                  
                                   <button onClick={() => handleNewsShare(item)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#a3e635'} onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}>
                                     <Share2 size={16} />
                                   </button>
@@ -828,144 +756,46 @@ export const HomePage = () => {
                     ))}
                 </div>
                 {filteredNews.length > 3 && (
-                    <div style={{ textAlign: 'center' }}>
-                        <button 
-                            onClick={() => setVisibleNewsCount(prev => prev === 3 ? filteredNews.length : 3)} 
-                            style={{ 
-                              padding: '12px 32px', 
-                              backgroundColor: 'white', 
-                              color: 'black', 
-                              borderRadius: '50px', 
-                              border: 'none', 
-                              fontWeight: 'bold', 
-                              cursor: 'pointer',
-                              fontSize: '13px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              boxShadow: '0 4px 15px rgba(255,255,255,0.1)'
-                            }}
-                          >
-                            {visibleNewsCount === 3 ? (
-                              <React.Fragment>ONYESHA HABARI ZAIDI <ChevronDown size={16} /></React.Fragment>
-                            ) : (
-                              <React.Fragment>PUNGUZA HABARI <ChevronUp size={16} /></React.Fragment>
-                            )}
-                          </button>
+                    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                        <Link to="/news" style={{ padding: '12px 32px', backgroundColor: 'white', color: 'black', borderRadius: '50px', textDecoration: 'none', fontWeight: 'bold', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 15px rgba(255,255,255,0.1)' }}>
+                            SOMA HABARI ZOTE <ChevronRight size={16} />
+                        </Link>
                     </div>
                 )}
             </div>
           ) : ( <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}><p>Hakuna habari zilizopakiwa kwa msimu huu bado.</p></div> )}
         </section>
 
-        {/* 5. MATCH CENTER & GROUPS */}
-        <section id="ratiba" style={{ padding: '100px 24px', maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '60px' }}>
-            {/* COLUMN 1: RATIBA & MATOKEO */}
-            <div>
-              {upcomingMatches.length > 0 && (
-                  <div style={{ marginBottom: '48px' }}>
-                      <div style={styles.sectionHeader}><Clock style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Ratiba <span style={styles.limeText}>Ijayo</span></h2></div>
-                      <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto', paddingRight: '10px' }}>
-                          {upcomingMatches.map((m, idx) => {
-                            const { date, time } = formatMatchTime(m.matchDate);
-                            return (
-                            <div key={idx} className="hover-card" style={styles.matchCard}>
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#64748b', fontWeight: 'bold', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px', width: '100%' }}>
-                                    {date && <span>{date}</span>}
-                                    {time && <span style={{ color: '#a3e635' }}>• {time}</span>}
-                                    {m.stadium && <span>• {m.stadium}</span>}
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                    <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ color: 'white', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
-                                        <div style={{ fontSize: '10px', color: '#a3e635', fontWeight: 'bold', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{m.status}</div>
-                                    </div>
-                                    <div style={{ fontWeight: '900', fontSize: '15px', textAlign: 'right', width: '35%' }}>{m.away}</div>
-                                </div>
-                            </div>
-                          )})}
-                      </div>
-                  </div>
-              )}
-              {pastMatches.length > 0 && (
-                  <div>
-                      <div style={styles.sectionHeader}><Trophy style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Matokeo <span style={styles.limeText}>Yaliyopita</span></h2></div>
-                      <div className="custom-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto', paddingRight: '10px' }}>
-                          {pastMatches.map((m, idx) => {
-                            const { date } = formatMatchTime(m.matchDate);
-                            return (
-                            <div key={idx} className="hover-card" style={styles.matchCard}>
-                                <div style={{ display: 'flex', justifyContent: 'center', fontSize: '10px', color: '#64748b', marginBottom: '4px' }}>{date} • {m.stadium}</div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                    <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ color: 'white', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
-                                        <div style={{ fontSize: '11px', color: '#a3e635', fontWeight: 'bold', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{m.status}</div>
-                                    </div>
-                                    <div style={{ fontWeight: '900', fontSize: '15px', textAlign: 'right', width: '35%' }}>{m.away}</div>
-                                </div>
-                            </div>
-                          )})}
-                      </div>
-                  </div>
-              )}
-              {upcomingMatches.length === 0 && pastMatches.length === 0 && (
-                  <p style={{ color: '#64748b', fontStyle: 'italic' }}>Hakuna mechi zilizorekodiwa kwa msimu huu.</p>
-              )}
-            </div>
-
-            {/* COLUMN 2: MAKUNDI */}
-            <div>
-              <div style={styles.sectionHeader}><Grid style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Msimamo wa <span style={styles.limeText}>Makundi</span></h2></div>
-              {filteredStandings.length > 0 ? (
-                <div className="custom-scroll" style={{ maxHeight: '500px', overflowY: 'auto', paddingRight: '10px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                  {sortedGroupKeys.map((groupName, gIdx) => (
-                    <div key={gIdx} className="hover-card" style={styles.groupCard}>
-                      <div style={{ backgroundColor: 'rgba(163, 230, 53, 0.1)', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Shield size={18} color="#a3e635" />
-                            <span style={{ color: 'white', fontWeight: '900', textTransform: 'uppercase', fontSize: '16px', letterSpacing: '1px' }}>
-                              {groupName}
-                            </span>
-                        </div>
-                        <button onClick={() => openGroupModal(groupName, groupedStandings[groupName])} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a3e635', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }}>Open</span>
-                            <Maximize2 size={16} />
-                        </button>
-                      </div>
-                       
-                      <table style={styles.table}>
-                        <thead>
-                          <tr style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
-                            <th style={{...styles.th, width: '40px', paddingLeft: '16px'}}>#</th>
-                            <th style={styles.th}>Timu</th>
-                            <th style={{...styles.th, textAlign: 'center'}}>P</th>
-                            <th style={{...styles.th, textAlign: 'center'}}>GD</th>
-                            <th style={{...styles.th, textAlign: 'center', paddingRight: '16px'}}>PTS</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {groupedStandings[groupName].slice(0, 5).map((team, idx) => (
-                            <tr key={idx} style={{ 
-                                borderBottom: idx !== Math.min(groupedStandings[groupName].length, 5) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                                backgroundColor: idx < 2 ? 'rgba(34, 197, 94, 0.05)' : 'transparent' 
-                            }}>
-                              <td style={{ ...styles.td, paddingLeft: '16px', fontWeight: 'bold', color: idx === 0 ? '#a3e635' : (idx === 1 ? '#4ade80' : 'white') }}>{idx + 1}</td>
-                              <td style={{ ...styles.td, fontWeight: 'bold', fontSize: '14px' }}>{team.team}</td>
-                              <td style={{ ...styles.td, textAlign: 'center', color: '#94a3b8' }}>{team.p}</td>
-                              <td style={{ ...styles.td, textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : (team.gd.startsWith('-') ? '#f87171' : 'white') }}>{team.gd}</td>
-                              <td style={{ ...styles.td, textAlign: 'center', fontWeight: '900', color: 'white', fontSize: '15px', paddingRight: '16px' }}>{team.pts}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+        {/* 5. MATCH CENTER (TEASER) */}
+        <section id="ratiba" style={{ padding: '80px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={styles.sectionHeader}><Clock style={styles.limeText} size={24} /><h2 style={styles.sectionTitle}>Ratiba <span style={styles.limeText}>Zijazo</span></h2></div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+              {upcomingMatches.slice(0, 3).map((m, idx) => {
+                const { date, time } = formatMatchTime(m.matchDate);
+                return (
+                <div key={idx} className="hover-card" style={styles.matchCard}>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#64748b', fontWeight: 'bold', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px', width: '100%' }}>
+                        {date && <span>{date}</span>}
+                        {time && <span style={{ color: '#a3e635' }}>• {time}</span>}
+                        {m.stadium && <span>• {m.stadium}</span>}
                     </div>
-                  ))}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <div style={{ fontWeight: '900', fontSize: '15px', width: '35%' }}>{m.home}</div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ color: 'white', fontWeight: '900', fontSize: '20px' }}>{m.score}</div>
+                            <div style={{ fontSize: '10px', color: '#a3e635', fontWeight: 'bold', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{m.status}</div>
+                        </div>
+                        <div style={{ fontWeight: '900', fontSize: '15px', textAlign: 'right', width: '35%' }}>{m.away}</div>
+                    </div>
                 </div>
-              ) : (<p style={{ color: '#64748b', fontStyle: 'italic' }}>Msimamo haujatoka bado kwa msimu huu.</p>)}
-            </div>
+              )})}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+              <Link to="/fixtures" style={{ padding: '12px 32px', backgroundColor: '#1e293b', color: 'white', border: '1px solid #a3e635', borderRadius: '50px', textDecoration: 'none', fontWeight: 'bold', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  NENDA MATCH CENTER <ChevronRight size={16} color="#a3e635" />
+              </Link>
           </div>
         </section>
 
@@ -1007,10 +837,10 @@ export const HomePage = () => {
             <div>
               <h4 style={{ color: 'white', fontSize: '13px', fontWeight: '800', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>Viungo vya Haraka</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <a href="#hero" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Nyumbani</a>
-                <a href="#news" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Habari & Matukio</a>
-                <a href="#ratiba" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Ratiba & Matokeo</a>
-                <a href="/sponsors" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color='#a3e635'} onMouseLeave={e => e.target.style.color='#cbd5e1'}><ChevronRight size={14} color="#a3e635" /> Wadhamini Wetu</a>
+                <a href="#hero" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }}><ChevronRight size={14} color="#a3e635" /> Nyumbani</a>
+                <Link to="/news" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }}><ChevronRight size={14} color="#a3e635" /> Habari & Matukio</Link>
+                <Link to="/fixtures" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }}><ChevronRight size={14} color="#a3e635" /> Ratiba & Matokeo</Link>
+                <Link to="/sponsors" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s' }}><ChevronRight size={14} color="#a3e635" /> Wadhamini Wetu</Link>
               </div>
             </div>
 
@@ -1053,59 +883,16 @@ export const HomePage = () => {
         </div>
       </footer>
 
-      {/* MODAL COMPONENTS */}
+      {/* MODAL YA KUSAJILI TIMU PEKEE */}
       {isModalOpen && (
         <>
           <style>{`
-            .pande-modal-overlay {
-              position: fixed;
-              inset: 0;
-              z-index: 100;
-              background: rgba(0,0,0,0.7);
-              backdrop-filter: blur(8px);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              padding: 16px;
-              animation: fadeInModal 0.3s cubic-bezier(.4,0,.2,1);
-            }
-            .pande-modal-glass {
-              background: rgba(30,41,59,0.7);
-              border-radius: 24px;
-              border: 1.5px solid rgba(163,230,53,0.13);
-              box-shadow: 0 8px 32px 0 rgba(163,230,53,0.13), 0 1.5px 0 0 #a3e63533;
-              max-width: 420px;
-              width: 100%;
-              position: relative;
-              max-height: 95vh;
-              overflow-y: auto;
-              display: flex;
-              flex-direction: column;
-              animation: scaleInModal 0.3s cubic-bezier(.4,0,.2,1);
-            }
-            @keyframes fadeInModal {
-              from { opacity: 0; }
-              to { opacity: 1; }
-            }
-            @keyframes scaleInModal {
-              from { transform: scale(0.95); }
-              to { transform: scale(1); }
-            }
-            .pande-modal-glass input, .pande-modal-glass select {
-              background: rgba(30,41,59,0.6);
-              border: 1.5px solid #333;
-              color: #fff;
-              border-radius: 8px;
-              padding: 12px;
-              font-size: 16px;
-              margin-bottom: 0;
-              outline: none;
-              transition: border-color 0.2s, box-shadow 0.2s;
-            }
-            .pande-modal-glass input:focus, .pande-modal-glass select:focus {
-              border-color: #a3e635;
-              box-shadow: 0 0 0 2px #a3e63533;
-            }
+            .pande-modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeInModal 0.3s cubic-bezier(.4,0,.2,1); }
+            .pande-modal-glass { background: rgba(30,41,59,0.7); border-radius: 24px; border: 1.5px solid rgba(163,230,53,0.13); box-shadow: 0 8px 32px 0 rgba(163,230,53,0.13), 0 1.5px 0 0 #a3e63533; max-width: 420px; width: 100%; position: relative; max-height: 95vh; overflow-y: auto; display: flex; flex-direction: column; animation: scaleInModal 0.3s cubic-bezier(.4,0,.2,1); }
+            @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes scaleInModal { from { transform: scale(0.95); } to { transform: scale(1); } }
+            .pande-modal-glass input, .pande-modal-glass select { background: rgba(30,41,59,0.6); border: 1.5px solid #333; color: #fff; border-radius: 8px; padding: 12px; font-size: 16px; margin-bottom: 0; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+            .pande-modal-glass input:focus, .pande-modal-glass select:focus { border-color: #a3e635; box-shadow: 0 0 0 2px #a3e63533; }
           `}</style>
           <div className="pande-modal-overlay">
             <div className="pande-modal-glass">
@@ -1119,34 +906,14 @@ export const HomePage = () => {
                     <option value="">Chagua Eneo...</option>
                     {LOCATIONS_LIST.map((group, idx) => (
                       <optgroup key={group.group} label={group.group}>
-                        {group.areas.map(area => (
-                          <option key={area} value={area}>{area}</option>
-                        ))}
+                        {group.areas.map(area => ( <option key={area} value={area}>{area}</option> ))}
                       </optgroup>
                     ))}
                   </select>
                   <input type="text" placeholder="Namba ya Simu ya Kocha (WhatsApp)" value={teamData.phone} onChange={e => setTeamData({ ...teamData, phone: e.target.value })} required />
                   <input type="text" placeholder="Rangi ya Jezi (hiari)" value={teamData.jerseyColor} onChange={e => setTeamData({ ...teamData, jerseyColor: e.target.value })} />
                   {submitError && <div style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '14px', marginTop: '4px', textAlign: 'center' }}>{submitError}</div>}
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="pulse-glow-btn"
-                    style={{
-                      width: '100%',
-                      padding: '14px',
-                      background: '#a3e635',
-                      color: '#181a1b',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      fontSize: '18px',
-                      cursor: 'pointer',
-                      marginTop: '8px',
-                      opacity: isSubmitting ? 0.7 : 1,
-                      transition: 'box-shadow 0.2s',
-                    }}
-                  >
+                  <button type="submit" disabled={isSubmitting} style={{ width: '100%', padding: '14px', background: '#a3e635', color: '#181a1b', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer', marginTop: '8px', opacity: isSubmitting ? 0.7 : 1 }}>
                     {isSubmitting ? 'Inatuma...' : 'TUMA MAOMBI'}
                   </button>
                 </form>
@@ -1162,76 +929,6 @@ export const HomePage = () => {
             </div>
           </div>
         </>
-      )}
-
-      {selectedNews && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 110, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(5px)' }}>
-          <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px', borderRadius: '24px', padding: '0', position: 'relative', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-            <button onClick={closeNews} style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '50%', padding: '8px' }}><X size={24} /></button>
-            <div style={{ height: '250px', width: '100%', flexShrink: 0 }}>
-                <img src={selectedNews.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={selectedNews.title} />
-            </div>
-            <div style={{ padding: '32px' }}>
-                <span style={{ fontSize: '12px', color: '#a3e635', fontWeight: 'bold', textTransform: 'uppercase' }}>{formatDate(selectedNews.date)} • {selectedNews.season}</span>
-                <h2 style={{ fontSize: '24px', fontWeight: '900', marginTop: '12px', marginBottom: '24px', lineHeight: '1.3' }}>{selectedNews.title}</h2>
-                <div style={{ color: '#cbd5e1', lineHeight: '1.8', fontSize: '16px', whiteSpace: 'pre-wrap' }}>
-                    {renderWithLinks(selectedNews.body || selectedNews.excerpt)}
-                </div>
-                <button onClick={closeNews} style={{ marginTop: '32px', width: '100%', padding: '16px', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>FUNGA</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {selectedGroup && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 120, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', backdropFilter: 'blur(8px)' }}>
-          <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '600px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(163, 230, 53, 0.05)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <Shield size={28} color="#a3e635" />
-                    <div>
-                        <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '900', textTransform: 'uppercase', color: 'white' }}>{selectedGroup.name}</h2>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#a3e635', fontWeight: 'bold', letterSpacing: '1px' }}>MSIMAMO WA KUNDI</p>
-                    </div>
-                </div>
-                <button onClick={closeGroupModal} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '50%', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <X size={24} />
-                </button>
-            </div>
-             
-            <div className="custom-scroll" style={{ padding: '0', overflowY: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-                    <thead style={{ position: 'sticky', top: 0, backgroundColor: '#0f172a', zIndex: 10 }}>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                            <th style={{...styles.th, width: '50px', padding: '16px'}}>#</th>
-                            <th style={{...styles.th, padding: '16px'}}>Timu</th>
-                            <th style={{...styles.th, textAlign: 'center', padding: '16px'}}>P</th>
-                            <th style={{...styles.th, textAlign: 'center', padding: '16px'}}>GD</th>
-                            <th style={{...styles.th, textAlign: 'center', padding: '16px'}}>PTS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {selectedGroup.teams.map((team, idx) => (
-                        <tr key={idx} style={{ 
-                            borderBottom: '1px solid rgba(255,255,255,0.05)',
-                            backgroundColor: idx < 2 ? 'rgba(34, 197, 94, 0.05)' : 'transparent' 
-                        }}>
-                            <td style={{ ...styles.td, padding: '16px', fontWeight: 'bold', color: idx === 0 ? '#a3e635' : (idx === 1 ? '#4ade80' : 'white'), fontSize: '16px' }}>{idx + 1}</td>
-                            <td style={{ ...styles.td, padding: '16px', fontWeight: 'bold', fontSize: '16px' }}>{team.team}</td>
-                            <td style={{ ...styles.td, padding: '16px', textAlign: 'center', color: '#94a3b8' }}>{team.p}</td>
-                            <td style={{ ...styles.td, padding: '16px', textAlign: 'center', color: team.gd.startsWith('+') ? '#a3e635' : (team.gd.startsWith('-') ? '#f87171' : 'white'), fontWeight: 'bold' }}>{team.gd}</td>
-                            <td style={{ ...styles.td, padding: '16px', textAlign: 'center', fontWeight: '900', color: 'white', fontSize: '18px' }}>{team.pts}</td>
-                        </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-             
-            <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', fontSize: '11px', color: '#64748b' }}>
-                <p style={{ margin: 0 }}>*Nafasi mbili za juu zinafuzu hatua inayofuata.</p>
-            </div>
-          </div>
-        </div>
       )}
 
       </div>

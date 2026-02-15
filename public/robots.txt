@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 
-Sitemap: https://pandecup.co.tz/sitemap.xml
+# Tunaielekeza Google kwenye ramani yenye www
+Sitemap: https://www.pandecup.co.tz/sitemap.xml

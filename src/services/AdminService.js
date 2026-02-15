@@ -1,4 +1,5 @@
-// 🎮 ADMIN DATA SERVICE - Team & Match Management
+// 🎮 PANDE CUP ADMIN DATA SERVICE (v3.0) - Team & Match Management
+// Inatumia LocalStorage kwa sasa (Testing Phase)
 
 // Simple unique ID generator for testing
 function uuidv4() {
@@ -7,6 +8,7 @@ function uuidv4() {
 
 const STORAGE_KEY = 'pande_cup_admin_data';
 
+// Muundo wa Data zetu (Schema)
 const defaultData = {
   teams: [],
   players: [],
@@ -16,32 +18,46 @@ const defaultData = {
 };
 
 export const AdminService = {
-  // Initialize local storage
+  // 1. INITIALIZE: Washa mtambo wa Database
   initialize: () => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+    try {
+      if (!localStorage.getItem(STORAGE_KEY)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+      }
+    } catch (e) {
+      console.warn("Storage access denied or full:", e);
     }
   },
 
+  // 2. GET DATA: Vuta mzigo wote
   getData: () => {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
-    } catch {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : defaultData;
+    } catch (e) {
+      console.error("Error parsing admin data:", e);
       return defaultData;
     }
   },
 
+  // 3. SAVE DATA: Hifadhi mzigo
   saveData: (data) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error("Error saving admin data. Storage might be full:", e);
+    }
   },
 
-  // TEAMS
+  // ==========================================
+  // 🛡️ TIMU (TEAMS) MANAGEMENT
+  // ==========================================
   addTeam: (teamData) => {
     const data = AdminService.getData();
     const newTeam = {
       id: uuidv4(),
       ...teamData,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(), // Tumia ISO string kwa usalama wa tarehe
       players: []
     };
     data.teams.push(newTeam);
@@ -53,7 +69,7 @@ export const AdminService = {
     const data = AdminService.getData();
     const teamIndex = data.teams.findIndex(t => t.id === teamId);
     if (teamIndex !== -1) {
-      data.teams[teamIndex] = { ...data.teams[teamIndex], ...updates };
+      data.teams[teamIndex] = { ...data.teams[teamIndex], ...updates, updatedAt: new Date().toISOString() };
       AdminService.saveData(data);
       return data.teams[teamIndex];
     }
@@ -62,12 +78,15 @@ export const AdminService = {
 
   deleteTeam: (teamId) => {
     const data = AdminService.getData();
+    // Futa timu na wachezaji wake wote (Cascade Delete)
     data.teams = data.teams.filter(t => t.id !== teamId);
     data.players = data.players.filter(p => p.teamId !== teamId);
     AdminService.saveData(data);
   },
 
-  // PLAYERS
+  // ==========================================
+  // 🏃‍♂️ WACHEZAJI (PLAYERS) MANAGEMENT
+  // ==========================================
   addPlayer: (teamId, playerData) => {
     const data = AdminService.getData();
     const newPlayer = {
@@ -76,14 +95,19 @@ export const AdminService = {
       ...playerData,
       goals: 0,
       assists: 0,
-      matches: 0
+      matches: 0,
+      registeredAt: new Date().toISOString()
     };
+    
     data.players.push(newPlayer);
-    const team = data.teams.find(t => t.id === teamId);
-    if (team) {
-      team.players = team.players || [];
-      team.players.push(newPlayer.id);
+    
+    // Update team roster
+    const teamIndex = data.teams.findIndex(t => t.id === teamId);
+    if (teamIndex !== -1) {
+      data.teams[teamIndex].players = data.teams[teamIndex].players || [];
+      data.teams[teamIndex].players.push(newPlayer.id);
     }
+    
     AdminService.saveData(data);
     return newPlayer;
   },
@@ -102,6 +126,7 @@ export const AdminService = {
   deletePlayer: (playerId) => {
     const data = AdminService.getData();
     data.players = data.players.filter(p => p.id !== playerId);
+    // Hapa tunaweza pia kuondoa ID ya mchezaji kwenye array ya timu kama tunataka usafi wa 100%
     AdminService.saveData(data);
   },
 
@@ -110,14 +135,17 @@ export const AdminService = {
     return data.players.filter(p => p.teamId === teamId);
   },
 
-  // MATCHES
+  // ==========================================
+  // ⚽ MECHI (MATCHES) & MATUKIO
+  // ==========================================
   createMatch: (matchData) => {
     const data = AdminService.getData();
     const newMatch = {
       id: uuidv4(),
       ...matchData,
-      status: 'SCHEDULED',
-      createdAt: new Date(),
+      status: 'SCHEDULED', // SCHEDULED, LIVE, FINAL
+      score: 'VS',
+      createdAt: new Date().toISOString(),
       goals: [],
       cards: []
     };
@@ -131,15 +159,19 @@ export const AdminService = {
     const goal = {
       id: uuidv4(),
       matchId,
-      ...goalData,
-      timestamp: new Date()
+      ...goalData, // inategemewa iwe na { playerId, teamId, minute }
+      timestamp: new Date().toISOString()
     };
+    
     data.goals.push(goal);
-    const match = data.matches.find(m => m.id === matchId);
-    if (match) {
-      match.goals = match.goals || [];
-      match.goals.push(goal);
+    
+    // Weka goli kwenye mechi husika
+    const matchIndex = data.matches.findIndex(m => m.id === matchId);
+    if (matchIndex !== -1) {
+      data.matches[matchIndex].goals = data.matches[matchIndex].goals || [];
+      data.matches[matchIndex].goals.push(goal);
     }
+    
     AdminService.saveData(data);
     return goal;
   },
@@ -149,37 +181,41 @@ export const AdminService = {
     const card = {
       id: uuidv4(),
       matchId,
-      ...cardData,
-      timestamp: new Date()
+      ...cardData, // { playerId, type: 'YELLOW'/'RED', minute }
+      timestamp: new Date().toISOString()
     };
     data.cards.push(card);
-    const match = data.matches.find(m => m.id === matchId);
-    if (match) {
-      match.cards = match.cards || [];
-      match.cards.push(card);
+    
+    const matchIndex = data.matches.findIndex(m => m.id === matchId);
+    if (matchIndex !== -1) {
+      data.matches[matchIndex].cards = data.matches[matchIndex].cards || [];
+      data.matches[matchIndex].cards.push(card);
     }
+    
     AdminService.saveData(data);
     return card;
   },
 
   updateMatchScore: (matchId, homeScore, awayScore, status = 'FINAL') => {
     const data = AdminService.getData();
-    const match = data.matches.find(m => m.id === matchId);
-    if (match) {
-      match.score = `${homeScore}-${awayScore}`;
-      match.status = status;
+    const matchIndex = data.matches.findIndex(m => m.id === matchId);
+    if (matchIndex !== -1) {
+      data.matches[matchIndex].score = `${homeScore}-${awayScore}`;
+      data.matches[matchIndex].status = status;
       AdminService.saveData(data);
-      return match;
+      return data.matches[matchIndex];
     }
     return null;
   },
 
-  // REPORTS
+  // ==========================================
+  // 📈 RIPOTI (REPORTS GENERATION)
+  // ==========================================
   generateReport: (type = 'full') => {
     const data = AdminService.getData();
     
     const report = {
-      generatedAt: new Date(),
+      generatedAt: new Date().toISOString(),
       type,
       summary: {
         totalTeams: data.teams.length,
@@ -196,8 +232,8 @@ export const AdminService = {
     if (type === 'full' || type === 'standings') {
       report.standings = data.teams.map(t => ({
         team: t.name,
-        players: data.players.filter(p => p.teamId === t.id).length,
-        matches: data.matches.filter(m => m.homeTeam === t.name || m.awayTeam === t.name).length
+        playersCount: data.players.filter(p => p.teamId === t.id).length,
+        matchesPlayed: data.matches.filter(m => (m.homeTeam === t.name || m.awayTeam === t.name) && m.status === 'FINAL').length
       }));
     }
 
@@ -205,13 +241,18 @@ export const AdminService = {
   }
 };
 
+// Internal function kuvuta payment logs kama zipo kwenye LocalStorage
 const getPaymentReport = () => {
   const payments = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('payment_')) {
-      payments.push(JSON.parse(localStorage.getItem(key)));
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('payment_')) {
+        payments.push(JSON.parse(localStorage.getItem(key)));
+      }
     }
+  } catch (e) {
+    console.error("Error reading payments:", e);
   }
   return payments;
 };
