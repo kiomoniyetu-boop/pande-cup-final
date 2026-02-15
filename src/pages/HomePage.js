@@ -6,7 +6,7 @@ import {
   Menu, X, Clock, Instagram, Facebook, Youtube,
   Newspaper, Phone, Mail, Grid, Shield, Maximize2, 
   ChevronDown, ChevronUp, CheckCircle, Share2, ChevronRight, 
-  Info, Trophy, MapPin // <-- MapPin imeongezwa hapa
+  Info, Trophy, MapPin 
 } from 'lucide-react';
 
 // --- USANIDI WA CMS ---
@@ -50,13 +50,15 @@ const FALLBACK_DATA = {
       location: 'kiomoni',
       title: "HII GAME NI YETU.",
       subtitle: "Soka la mtaani lenye hadhi ya kitaifa. Tunakuza vipaji, tunajenga undugu, na kutetea heshima ya kwetu.",
-      bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600" 
+      bgImage: "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600",
+      videoUrl: null 
     },
     {
       location: 'goba',
       title: "HII GAME NI YETU.",
       subtitle: "Pande Cup Imetua Jijini! Kutoka vumbi la Kiomoni hadi Goba.",
-      bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600"
+      bgImage: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600",
+      videoUrl: null
     }
   ],
   matches: [],
@@ -77,7 +79,7 @@ const PandeLogo = ({ size = 'normal', isMobile }) => {
   const mobileHeight = '40px';
   const desktopHeight = size === 'large' ? '120px' : '50px';
   const height = isMobile ? mobileHeight : desktopHeight;
-  
+   
   const [imgError, setImgError] = useState(false);
 
   if (USE_IMAGE_LOGO && !imgError) {
@@ -141,7 +143,7 @@ const renderWithLinks = (text) => {
 export const HomePage = () => {
   const [activeLocation, setActiveLocation] = useState('kiomoni');
   const [activeSeason, setActiveSeason] = useState('2026'); 
-  
+   
   const [isMobile, setIsMobile] = useState(false);
 
   // Registration State
@@ -161,7 +163,7 @@ export const HomePage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedNews, setSelectedNews] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  
+   
   const [visibleNewsCount, setVisibleNewsCount] = useState(3);
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
@@ -179,7 +181,7 @@ export const HomePage = () => {
     document.body.style.overflow = 'auto';
   };
   const toggleMobileMenu = () => { setIsMobileMenuOpen(!isMobileMenuOpen); };
-  
+   
   const handleRegistrationSubmit = async () => {
     setSubmitError('');
     if (!teamData.name || !teamData.coachName || !teamData.phone || !teamData.location) {
@@ -208,7 +210,7 @@ export const HomePage = () => {
   const closeNews = () => { setSelectedNews(null); document.body.style.overflow = 'auto'; };
   const openGroupModal = (groupName, teams) => { setSelectedGroup({ name: groupName, teams: teams }); document.body.style.overflow = 'hidden'; };
   const closeGroupModal = () => { setSelectedGroup(null); document.body.style.overflow = 'auto'; };
-  
+   
   const handleNewsShare = async (newsItem) => {
     const shareText = `${newsItem.title} - Pande Cup`;
     const shareUrl = window.location.href;
@@ -246,6 +248,7 @@ export const HomePage = () => {
 
   useEffect(() => { setVisibleNewsCount(3); }, [activeLocation, activeSeason]);
 
+  // --- FETCHING DATA FROM CONTENTFUL (UPDATED FOR VIDEO) ---
   useEffect(() => {
     const fetchContentfulData = async () => {
       try {
@@ -268,7 +271,9 @@ export const HomePage = () => {
             title: item.fields.title || "HII GAME NI YETU.",
             subtitle: item.fields.subtitle || "",
             location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
-            bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes)
+            bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes),
+            // 🔥 HAPA: TUMEONGEZA LOGIC YA KUVUTA VIDEO URL
+            videoUrl: getAssetUrl(item.fields.backgroundVideo?.sys?.id, heroData.includes)
         })) : [];
 
         const fetchedMatches = matchesData.items ? matchesData.items.map(item => ({
@@ -459,7 +464,7 @@ export const HomePage = () => {
           .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(163, 230, 53, 0.6); }
           .animate-fade-in { animation: fadeIn 0.5s ease-out; }
           @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-          
+           
           /* SPONSOR MARQUEE ANIMATION */
           @keyframes scroll {
             0% { transform: translateX(0); }
@@ -501,7 +506,7 @@ export const HomePage = () => {
           .sponsor-marquee-item a:active {
             transform: scale(0.95);
           }
-          
+           
           /* MOBILE ADJUSTMENTS */
           @media (max-width: 768px) {
             .desktop-only { display: none !important; }
@@ -585,7 +590,7 @@ export const HomePage = () => {
           <a href="#hero" style={{ textDecoration: 'none', cursor: 'pointer', zIndex: 10 }}>
             <PandeLogo isMobile={isMobile} />
           </a>
-          
+           
           <div className="desktop-only" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
             <a onClick={() => window.location.href='#news'} style={styles.navLink}>Habari</a>
             <a onClick={() => window.location.href='#ratiba'} style={styles.navLink}>Ratiba</a>
@@ -640,14 +645,38 @@ export const HomePage = () => {
       </div>
       {isMobileMenuOpen && <div onClick={() => setIsMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 55, backdropFilter: 'blur(4px)' }}></div>}
 
-      {/* 3. HERO SECTION */}
+      {/* 3. HERO SECTION - VIDEO IMEONGEZWA HAPA */}
       <div id="hero" style={styles.heroWrapper} className="hero-mobile-height">
-        <img 
-            src={isGoba2025 ? "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600" : (currentHero.bgImage || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600")}
-            style={{...styles.heroMedia, filter: isGoba2025 ? 'grayscale(100%) brightness(0.4)' : 'none'}}
-            alt="Background" 
-            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600"; }}
-        />
+        
+        {/* LOGIC YA MEDIA: Goba 2025 (Grayscale), Video (Kama ipo), au Picha */}
+        {isGoba2025 ? (
+             <img 
+               src="https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600"
+               style={{...styles.heroMedia, filter: 'grayscale(100%) brightness(0.4)'}}
+               alt="Background" 
+             />
+        ) : currentHero.videoUrl ? (
+             // 🔥 HII NDIO SEHEMU MPYA YA VIDEO 🔥
+             <video
+               autoPlay
+               loop
+               muted
+               playsInline
+               style={styles.heroMedia}
+               poster={currentHero.bgImage}
+             >
+               <source src={currentHero.videoUrl} type="video/mp4" />
+               <img src={currentHero.bgImage} style={styles.heroMedia} alt="Background" />
+             </video>
+        ) : (
+             <img 
+               src={currentHero.bgImage || "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600"}
+               style={styles.heroMedia}
+               alt="Background" 
+               onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600"; }}
+             />
+        )}
+
         <div style={styles.heroOverlay}></div>
         
         <section style={styles.heroContent} className="hero-content-mobile">
@@ -694,7 +723,7 @@ export const HomePage = () => {
                >DAR</button>
              </div>
            </div>
-            
+           
            {isGoba2025 ? (
               <div className="animate-fade-in text-center p-8 bg-black/40 rounded-2xl backdrop-blur-sm border border-white/10" style={{textAlign: 'center'}}>
                 <Info size={48} className="text-[#a3e635] mx-auto mb-4" style={{display: 'inline-block'}} />
@@ -910,7 +939,7 @@ export const HomePage = () => {
                             <Maximize2 size={16} />
                         </button>
                       </div>
-                      
+                       
                       <table style={styles.table}>
                         <thead>
                           <tr style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
@@ -958,7 +987,7 @@ export const HomePage = () => {
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '50px 24px 30px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '32px' }}>
-            
+             
             {/* COL 1: BRAND */}
             <div>
               <div style={{ marginBottom: '16px' }}><PandeLogo size="large" isMobile={isMobile} /></div>
@@ -1173,7 +1202,7 @@ export const HomePage = () => {
                     <X size={24} />
                 </button>
             </div>
-            
+             
             <div className="custom-scroll" style={{ padding: '0', overflowY: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
                     <thead style={{ position: 'sticky', top: 0, backgroundColor: '#0f172a', zIndex: 10 }}>
@@ -1201,7 +1230,7 @@ export const HomePage = () => {
                     </tbody>
                 </table>
             </div>
-            
+             
             <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', fontSize: '11px', color: '#64748b' }}>
                 <p style={{ margin: 0 }}>*Nafasi mbili za juu zinafuzu hatua inayofuata.</p>
             </div>
