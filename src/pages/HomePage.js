@@ -65,13 +65,7 @@ const FALLBACK_DATA = {
   standings: [],
   news: [],
   videos: [],
-  sponsors: [
-    { name: "VODACOM", logo: "/images/vodacom.png", websiteUrl: "https://www.vodacom.co.tz" }, 
-    { name: "CRDB BANK", logo: "/images/crdb.png", websiteUrl: "https://www.crdbbank.co.tz" },
-    { name: "YAS", logo: "/images/yas.png", websiteUrl: "https://yastz.com" },
-    { name: "POLISI TANZANIA", logo: "/images/polisi.png", websiteUrl: "https://www.polisi.go.tz" },
-    { name: "AZAM TV", logo: "/images/azam.png", websiteUrl: "https://www.azam.co.tz" }
-  ]
+  sponsors: []
 };
 
 // --- COMPONENTS ---
@@ -248,7 +242,7 @@ export const HomePage = () => {
 
   useEffect(() => { setVisibleNewsCount(3); }, [activeLocation, activeSeason]);
 
-  // --- FETCHING DATA FROM CONTENTFUL (UPDATED FOR VIDEO) ---
+  // --- FETCHING DATA FROM CONTENTFUL ---
   useEffect(() => {
     const fetchContentfulData = async () => {
       try {
@@ -272,7 +266,6 @@ export const HomePage = () => {
             subtitle: item.fields.subtitle || "",
             location: item.fields.location ? String(item.fields.location).toLowerCase() : 'kiomoni',
             bgImage: getAssetUrl(item.fields.backgroundImage?.sys?.id || item.fields.image?.sys?.id, heroData.includes),
-            // 🔥 HAPA: TUMEONGEZA LOGIC YA KUVUTA VIDEO URL
             videoUrl: getAssetUrl(item.fields.backgroundVideo?.sys?.id, heroData.includes)
         })) : [];
 
@@ -416,7 +409,19 @@ export const HomePage = () => {
       position: 'relative',
       display: 'inline-block',
     },
-    heroWrapper: { position: 'relative', overflow: 'hidden', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(163, 230, 53, 0.1)', width: '100%' },
+    // 🔥 HERO FIX: Flexbox Alignment for Desktop Center
+    heroWrapper: { 
+        position: 'relative', 
+        overflow: 'hidden', 
+        minHeight: '65vh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        borderBottom: '1px solid rgba(163, 230, 53, 0.1)', 
+        width: '100%',
+        paddingTop: isMobile ? '60px' : '0' // Mobile padding to avoid overlap
+    },
     heroMedia: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, objectFit: 'cover' },
     heroOverlay: { position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.9))' },
     heroContent: { 
@@ -465,7 +470,7 @@ export const HomePage = () => {
           .animate-fade-in { animation: fadeIn 0.5s ease-out; }
           @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
            
-          /* SPONSOR MARQUEE ANIMATION */
+          /* SPONSOR MARQUEE ANIMATION & STYLES */
           @keyframes scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
@@ -486,25 +491,18 @@ export const HomePage = () => {
             min-width: 140px;
             cursor: pointer;
           }
-          .sponsor-marquee-item a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            width: 100%;
-            text-decoration: none;
+          /* 🔥 SPONSOR HOVER EFFECT FIX 🔥 */
+          .sponsor-logo-img {
+            height: 50px;
+            object-fit: contain;
             filter: grayscale(100%);
-            opacity: 0.6;
-            transition: all 0.4s ease;
-            flex-direction: column;
+            opacity: 0.7;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           }
-          .sponsor-marquee-item a:hover {
-            filter: grayscale(0%) brightness(1.2);
+          .sponsor-marquee-item:hover .sponsor-logo-img {
+            filter: grayscale(0%);
             opacity: 1;
             transform: scale(1.15);
-          }
-          .sponsor-marquee-item a:active {
-            transform: scale(0.95);
           }
            
           /* MOBILE ADJUSTMENTS */
@@ -516,6 +514,7 @@ export const HomePage = () => {
             #news { padding: 40px 16px !important; }
             #ratiba { padding: 40px 16px !important; }
             .hero-content-mobile { width: 100% !important; padding: 0 16px !important; }
+            .sponsor-logo-img { height: 40px; }
           }
         `}
       </style>
@@ -539,7 +538,7 @@ export const HomePage = () => {
         </div>
       </div>
 
-      {/* 2. MAIN NAVIGATION */}
+      {/* 2. MAIN NAVIGATION - CENTERED DESKTOP */}
       <nav style={styles.nav} className="nav-glass nav-mobile pande-nav-glass">
               <style>{`
                 .pande-nav-glass {
@@ -591,7 +590,8 @@ export const HomePage = () => {
             <PandeLogo isMobile={isMobile} />
           </a>
            
-          <div className="desktop-only" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          {/* 🔥 NAV FIX: CENTERING LINKS 🔥 */}
+          <div className="desktop-only" style={{ display: 'flex', gap: '24px', alignItems: 'center', flex: 1, justifySelf: 'center', justifyContent: 'center' }}>
             <a onClick={() => window.location.href='#news'} style={styles.navLink}>Habari</a>
             <a onClick={() => window.location.href='#ratiba'} style={styles.navLink}>Ratiba</a>
             <a href="/pctv" style={styles.navLink}>PC TV</a>
@@ -610,7 +610,7 @@ export const HomePage = () => {
                 padding: '6px 18px',
                 height: 'auto',
                 boxShadow: 'none',
-                marginLeft: 0,
+                marginLeft: 10,
                 marginRight: 0,
                 display: 'flex',
                 alignItems: 'center',
@@ -645,10 +645,9 @@ export const HomePage = () => {
       </div>
       {isMobileMenuOpen && <div onClick={() => setIsMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 55, backdropFilter: 'blur(4px)' }}></div>}
 
-      {/* 3. HERO SECTION - VIDEO IMEONGEZWA HAPA */}
+      {/* 3. HERO SECTION - VIDEO ENABLED + MOBILE PADDING FIX */}
       <div id="hero" style={styles.heroWrapper} className="hero-mobile-height">
         
-        {/* LOGIC YA MEDIA: Goba 2025 (Grayscale), Video (Kama ipo), au Picha */}
         {isGoba2025 ? (
              <img 
                src="https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600"
@@ -656,7 +655,6 @@ export const HomePage = () => {
                alt="Background" 
              />
         ) : currentHero.videoUrl ? (
-             // 🔥 HII NDIO SEHEMU MPYA YA VIDEO 🔥
              <video
                autoPlay
                loop
@@ -765,7 +763,7 @@ export const HomePage = () => {
         </section>
       </div>
       
-      {/* SPONSOR LOGOS */}
+      {/* SPONSOR LOGOS - UPDATED WITH CLASS FOR ANIMATION */}
       <section id="wadhamini" style={{ padding: '60px 24px', background: 'rgba(255, 255, 255, 0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
         <style>{`
           .sponsor-marquee-container {
@@ -785,9 +783,7 @@ export const HomePage = () => {
                       <img 
                         src={sponsor.logo} 
                         alt={sponsor.name} 
-                        style={{ height: isMobile ? '40px' : '50px', objectFit: 'contain', filter: 'grayscale(100%)', opacity: 0.7, transition: '0.3s' }} 
-                        onMouseOver={e => { e.currentTarget.style.filter = 'grayscale(0%)'; e.currentTarget.style.opacity = 1; }}
-                        onMouseOut={e => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = 0.7; }}
+                        className="sponsor-logo-img" /* 🔥 NEW CLASS HERE 🔥 */
                       />
                       <span style={{ fontSize: '10px', color: '#a3e635', fontWeight: 'bold', marginTop: '8px' }}>{sponsor.name}</span>
                     </a>
