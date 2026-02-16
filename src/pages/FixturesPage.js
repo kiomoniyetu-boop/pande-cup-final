@@ -10,8 +10,8 @@ const ACCESS_TOKEN = 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
 const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 
 const HERO_BACKGROUNDS = {
-  kiomoni: "https://images.ctfassets.net/ax6wvfd84net/1vdIuoy6E7R5lqNqv9Z9ML/c004e70367f236b553af19e124c89752/__Pande_Cup_Finals_.jpghttps://images.unsplash.com/photo-1518605336396-6a727c5c0d66?auto=format&fit=crop&q=80&w=1600",
-  goba: "https://images.ctfassets.net/ax6wvfd84net/1vdIuoy6E7R5lqNqv9Z9ML/c004e70367f236b553af19e124c89752/__Pande_Cup_Finals_.jpghttps://images.unsplash.com/photo-1543326727-cf6c39e8f84c?auto=format&fit=crop&q=80&w=1600"
+  kiomoni: "https://images.ctfassets.net/ax6wvfd84net/1vdIuoy6E7R5lqNqv9Z9ML/c004e70367f236b553af19e124c89752/__Pande_Cup_Finals_.jpg",
+  goba: "https://images.ctfassets.net/ax6wvfd84net/5OU770QPTByiemzIycqDOU/1eebda85780038f027c36edce5c77c7d/cheche.jpg"
 };
 
 const formatDate = (ds) => {
