@@ -2,7 +2,7 @@ import SeasonSwitcher from '../components/SeasonSwitcher';
 import GorillaBot from '../components/GorillaBot'; 
 import React, { useState, useEffect } from 'react';
 import { Helmet } from "react-helmet"; 
-import { Link } from 'react-router-dom'; // 🔥 MPA ROUTING
+import { Link } from 'react-router-dom';
 import { 
   Menu, X, Clock, Instagram, Facebook, Youtube,
   Newspaper, Phone, Mail, Grid, Shield, Maximize2, 
@@ -122,55 +122,19 @@ const HomePage = () => {
    
   const [isMobile, setIsMobile] = useState(false);
 
-  // Registration State
-  const [modalStep, setModalStep] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); 
-  const [submitError, setSubmitError] = useState(''); 
-  const [teamData, setTeamData] = useState({ name: '', location: '', coachName: '', nidaNumber: '', phone: '', jerseyColor: '' });
+  // 🔥 SAJILI REDIRECT - ONLY CHANGE HERE 🔥
+  const openModal = () => {
+    window.location.href = '/register';
+  };
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
    
   const [cmsData, setCmsData] = useState(FALLBACK_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
   // --- HANDLERS ---
-  const openModal = () => {
-    setIsModalOpen(true);
-    setModalStep(1);
-    setIsMobileMenuOpen(false);
-    document.body.style.overflow = 'hidden';
-    setSubmitError('');
-  };
-  const closeModal = () => {
-    setIsModalOpen(false);
-    document.body.style.overflow = 'auto';
-  };
   const toggleMobileMenu = () => { setIsMobileMenuOpen(!isMobileMenuOpen); };
    
-  const handleRegistrationSubmit = async () => {
-    setSubmitError('');
-    if (!teamData.name || !teamData.coachName || !teamData.phone || !teamData.location) {
-        setSubmitError('Tafadhali jaza taarifa zote muhimu.');
-        return;
-    }
-    const phoneRegex = /^(06|07)\d{8}$/;
-    if (!phoneRegex.test(teamData.phone)) {
-        setSubmitError('Weka namba sahihi ya simu (mfano: 0712345678).');
-        return;
-    }
-    setIsSubmitting(true);
-    try {
-        setTimeout(() => {
-            setIsSubmitting(false);
-            setModalStep(2);
-        }, 1500);
-    } catch (error) {
-        console.error("Submission Error:", error);
-        setSubmitError(`SYSTEM ERROR: ${error.message}`);
-        setIsSubmitting(false);
-    }
-  };
-
   const handleNewsShare = async (newsItem) => {
     const shareText = `${newsItem.title} - Pande Cup`;
     const shareUrl = `${window.location.origin}/news/${newsItem.id}`;
@@ -882,54 +846,6 @@ const HomePage = () => {
           </p>
         </div>
       </footer>
-
-      {/* MODAL YA KUSAJILI TIMU PEKEE */}
-      {isModalOpen && (
-        <>
-          <style>{`
-            .pande-modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeInModal 0.3s cubic-bezier(.4,0,.2,1); }
-            .pande-modal-glass { background: rgba(30,41,59,0.7); border-radius: 24px; border: 1.5px solid rgba(163,230,53,0.13); box-shadow: 0 8px 32px 0 rgba(163,230,53,0.13), 0 1.5px 0 0 #a3e63533; max-width: 420px; width: 100%; position: relative; max-height: 95vh; overflow-y: auto; display: flex; flex-direction: column; animation: scaleInModal 0.3s cubic-bezier(.4,0,.2,1); }
-            @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes scaleInModal { from { transform: scale(0.95); } to { transform: scale(1); } }
-            .pande-modal-glass input, .pande-modal-glass select { background: rgba(30,41,59,0.6); border: 1.5px solid #333; color: #fff; border-radius: 8px; padding: 12px; font-size: 16px; margin-bottom: 0; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-            .pande-modal-glass input:focus, .pande-modal-glass select:focus { border-color: #a3e635; box-shadow: 0 0 0 2px #a3e63533; }
-          `}</style>
-          <div className="pande-modal-overlay">
-            <div className="pande-modal-glass">
-              <button onClick={closeModal} style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '50%', padding: '8px' }}><X size={24} /></button>
-              {modalStep === 1 && (
-                <form onSubmit={e => { e.preventDefault(); handleRegistrationSubmit(); }} style={{ padding: '36px 28px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  <h2 style={{ color: '#a3e635', fontWeight: '900', fontSize: '22px', marginBottom: '8px', textAlign: 'center' }}>Sajili Timu</h2>
-                  <input type="text" placeholder="Jina la Timu" value={teamData.name} onChange={e => setTeamData({ ...teamData, name: e.target.value })} required />
-                  <input type="text" placeholder="Jina la Kocha" value={teamData.coachName} onChange={e => setTeamData({ ...teamData, coachName: e.target.value })} required />
-                  <select value={teamData.location} onChange={e => setTeamData({ ...teamData, location: e.target.value })} required>
-                    <option value="">Chagua Eneo...</option>
-                    {LOCATIONS_LIST.map((group, idx) => (
-                      <optgroup key={group.group} label={group.group}>
-                        {group.areas.map(area => ( <option key={area} value={area}>{area}</option> ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                  <input type="text" placeholder="Namba ya Simu ya Kocha (WhatsApp)" value={teamData.phone} onChange={e => setTeamData({ ...teamData, phone: e.target.value })} required />
-                  <input type="text" placeholder="Rangi ya Jezi (hiari)" value={teamData.jerseyColor} onChange={e => setTeamData({ ...teamData, jerseyColor: e.target.value })} />
-                  {submitError && <div style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '14px', marginTop: '4px', textAlign: 'center' }}>{submitError}</div>}
-                  <button type="submit" disabled={isSubmitting} style={{ width: '100%', padding: '14px', background: '#a3e635', color: '#181a1b', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer', marginTop: '8px', opacity: isSubmitting ? 0.7 : 1 }}>
-                    {isSubmitting ? 'Inatuma...' : 'TUMA MAOMBI'}
-                  </button>
-                </form>
-              )}
-              {modalStep === 2 && (
-                <div style={{ padding: '40px 28px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '18px' }}>
-                  <CheckCircle size={48} color="#a3e635" />
-                  <h2 style={{ color: '#a3e635', fontWeight: '900', fontSize: '22px', margin: 0 }}>Ombi Limeshawasilishwa!</h2>
-                  <p style={{ color: '#cbd5e1', fontSize: '16px', margin: 0 }}>Tutawasiliana nawe kupitia WhatsApp kwa maelezo zaidi ya usajili na malipo. Asante kwa kujiunga na Pande Cup!</p>
-                  <button onClick={closeModal} style={{ marginTop: '18px', width: '100%', padding: '14px', background: '#23272f', color: '#a3e635', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}>Funga</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      )}
 
       </div>
     </>

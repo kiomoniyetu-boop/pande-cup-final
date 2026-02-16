@@ -8,6 +8,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import SponsorsPage from './pages/SponsorsPage';
 import AboutPage from './pages/AboutPage';
 import PcTvPage from './pages/PcTvPage';
+import RegisterTeam from './pages/RegisterTeam'; // 🔥 NEW PAGE
 
 function App() {
   return (
@@ -15,15 +16,22 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         
-        {/* 🔥 ADD THESE MISSING ROUTES 🔥 */}
+        {/* News Routes */}
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:id" element={<NewsDetail />} />
+        
+        {/* Fixtures & Results */}
         <Route path="/fixtures" element={<FixturesPage />} />
         
-        {/* Existing routes */}
+        {/* 🔥 REGISTRATION PAGE - POWER HOUSE 🔥 */}
+        <Route path="/register" element={<RegisterTeam />} />
+        
+        {/* Other Pages */}
         <Route path="/sponsors" element={<SponsorsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/pctv" element={<PcTvPage />} />
+        
+        {/* Admin Dashboard */}
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
