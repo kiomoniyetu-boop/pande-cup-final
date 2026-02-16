@@ -5,6 +5,10 @@ import {
   CheckCircle, Trash2, AlertCircle, Copy, Home, Upload
 } from 'lucide-react';
 
+// --- CONFIGURATION ---
+const SPACE_ID = 'ax6wvfd84net';
+// MUHIMU: Hii lazima iwe Management Token (CFPAT) ili kuruhusu kuandika data
+const MANAGEMENT_TOKEN = 'CFPAT-BrmzMuZOK46nqs1DRSLGP1Fsbbqze2Lj0BStohdF6As'; 
 const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 
 const LOCATIONS = [
@@ -87,41 +91,99 @@ export default function RegisterTeam() {
   const submit = async () => {
     setLoading(true);
     setError('');
+    
     try {
+      // 1. Prepare Data for Contentful
       const loc = DAR_AREAS.includes(team.location) ? 'goba' : 'kiomoni';
-      const data = {
-        id: `reg_${Date.now()}`,
-        teamName: team.name,
-        coach: team.coach,
-        phone: team.phone,
-        email: team.email,
-        location: loc,
-        rawLocation: team.location,
-        jerseyColor: team.jersey,
-        season: team.season,
-        status: 'Inasubiri',
-        date: new Date().toISOString(),
-        players: players.filter(p => p.name.trim()).map(p => ({
-          fullName: p.name,
-          aka: p.aka || '',
+      
+      // Clean players data to remove heavy binary/preview data before JSON stringify
+      // We keep basic info. Images would need a separate upload process to be robust.
+      const playersPayload = players
+        .filter(p => p.name.trim())
+        .map(p => ({
+          name: p.name,
+          aka: p.aka,
           position: p.pos,
-          jerseyNumber: p.no,
-          hasPhoto: !!p.photo
-        })),
-        totalPlayers: players.filter(p => p.name.trim()).length
+          number: p.no,
+          // Note: We are NOT sending the Base64 photo string to 'Players Data' field
+          // because it will exceed Contentful's character limit for text fields.
+          // In a future update, we can upload these as Assets.
+          hasPhoto: !!p.photo 
+        }));
+
+      const contentfulData = {
+        fields: {
+          teamName: { 'en-US': team.name },
+          coachName: { 'en-US': team.coach },
+          phoneNumber: { 'en-US': team.phone },
+          Location: { 'en-US': loc },
+          rawLocation: { 'en-US': team.location }, // New Field
+          jerseyColor: { 'en-US': team.jersey || '' },
+          Season: { 'en-US': team.season }, // New Field
+          paymentStatus: { 'en-US': false }, // Boolean Field
+          Status: { 'en-US': 'Inasubiri' }, // New Field
+          'Registration Date': { 'en-US': new Date().toISOString() }, // Date Field
+          'Total Players': { 'en-US': playersPayload.length }, // Integer Field
+          'Players Data': { 'en-US': JSON.stringify(playersPayload) } // Long Text Field (JSON Blob)
+        }
       };
 
+      // 2. Send to Contentful Management API
+      const response = await fetch(
+        `https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${MANAGEMENT_TOKEN}`,
+            'Content-Type': 'application/vnd.contentful.management.v1+json',
+            'X-Contentful-Content-Type': 'registration'
+          },
+          body: JSON.stringify(contentfulData)
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Contentful Error:', errorData);
+        throw new Error('Failed to submit to Contentful');
+      }
+
+      // 3. Publish the Entry (Optional - if you want it live immediately)
+      // The entry is currently in "Draft" state.
+      const entry = await response.json();
+      
+      // Attempt to publish (Requires version number from the created entry)
+      await fetch(
+        `https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${entry.sys.id}/published`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${MANAGEMENT_TOKEN}`,
+            'X-Contentful-Version': entry.sys.version
+          }
+        }
+      );
+
+      // 4. Local Backup (Just in case)
+      const localData = {
+        id: entry.sys.id,
+        ...team,
+        players: playersPayload,
+        submittedAt: new Date().toISOString()
+      };
       const existing = JSON.parse(localStorage.getItem('pande_pending_regs')) || [];
-      existing.push(data);
+      existing.push(localData);
       localStorage.setItem('pande_pending_regs', JSON.stringify(existing));
 
+      // 5. Success State
       setTimeout(() => {
         setLoading(false);
         setSuccess(true);
-      }, 1500);
+      }, 1000);
+
     } catch (err) {
       console.error(err);
-      setError('Imeshindikana. Jaribu tena.');
+      setError('Imeshindikana kusajili. Tafadhali jaribu tena au wasiliana nasi.');
       setLoading(false);
     }
   };
@@ -144,7 +206,6 @@ export default function RegisterTeam() {
         .btn { background: #a3e635; color: black; font-weight: 700; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; text-transform: uppercase; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
         .btn:hover:not(:disabled) { background: #bef264; transform: translateY(-2px); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-sec { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); }
         .btn-sec:hover { background: rgba(255,255,255,0.1); }
         .card { background: rgba(30,41,59,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; position: relative; }
         .photo { width: 60px; height: 60px; border-radius: 8px; border: 2px dashed rgba(163,230,53,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(15,23,42,0.8); overflow: hidden; }
