@@ -2,13 +2,15 @@ import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   X, ChevronRight, ChevronLeft, Users, Camera, 
-  CheckCircle, Trash2, AlertCircle, Copy, Home, Upload
+  CheckCircle, Trash2, AlertCircle, Copy, Home, Loader
 } from 'lucide-react';
 
-// --- CONFIGURATION ---
-const SPACE_ID = 'ax6wvfd84net';
-// MUHIMU: Hii lazima iwe Management Token (CFPAT) ili kuruhusu kuandika data
-const MANAGEMENT_TOKEN = 'CFPAT-BrmzMuZOK46nqs1DRSLGP1Fsbbqze2Lj0BStohdF6As'; 
+// --- CONFIGURATION (FROM .ENV) ---
+const SPACE_ID = process.env.REACT_APP_SPACE_ID;
+const MANAGEMENT_TOKEN = process.env.REACT_APP_ACCESS_TOKEN; 
+const CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = process.env.REACT_APP_CLOUDINARY_PRESET;
+
 const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 
 const LOCATIONS = [
@@ -21,7 +23,6 @@ const LOCATIONS = [
 const DAR_AREAS = ['Goba', 'Madale', 'Makongo', 'Mbezi Mwisho', 'Mbezi Beach', 'Kimara', 'Sinza', 'Ubungo', 'Mabibo', 'Tegeta', 'Bunju', 'Kinondoni', 'Ilala', 'Chamazi', 'Kijamboni', 'Mbagala', 'Boko', 'Kawe', 'Msumi', 'Kwa Robert', 'Mkuranga', 'Kibaha', 'Pwani Mjini', 'Gongo La Mboto', 'Chanika'];
 
 const MIXX_LIPA_NAMBA = '43852599';
-const RECEIVER_NAME = 'FESTO HENRY MSANGAWALE';
 const REGISTRATION_FEE = 70000;
 
 export default function RegisterTeam() {
@@ -34,8 +35,9 @@ export default function RegisterTeam() {
     name: '', coach: '', phone: '', email: '', location: '', jersey: '', season: '2026'
   });
 
+  // Added 'photoUrl' and 'uploading' state
   const [players, setPlayers] = useState([
-    { id: 1, name: '', aka: '', pos: '', no: '', photo: null, preview: null }
+    { id: 1, name: '', aka: '', pos: '', no: '', photo: null, preview: null, photoUrl: '', uploading: false }
   ]);
 
   const fileRefs = useRef({});
@@ -64,12 +66,16 @@ export default function RegisterTeam() {
     if (step === 2) {
       const valid = players.filter(p => p.name.trim());
       if (valid.length < 11) return setError('Unahitaji wachezaji 11+ ili kuendelea'), false;
+      
+      // Check if any upload is still pending
+      const pendingUploads = players.some(p => p.uploading);
+      if (pendingUploads) return setError('Subiri picha zimalize kupanda hewani...'), false;
     }
     return true;
   };
 
   const addPlayer = () => {
-    if (players.length < 25) setPlayers([...players, { id: Date.now(), name: '', aka: '', pos: '', no: '', photo: null, preview: null }]);
+    if (players.length < 25) setPlayers([...players, { id: Date.now(), name: '', aka: '', pos: '', no: '', photo: null, preview: null, photoUrl: '', uploading: false }]);
   };
 
   const delPlayer = (id) => {
@@ -80,24 +86,54 @@ export default function RegisterTeam() {
     setPlayers(players.map(p => p.id === id ? { ...p, [field]: val } : p));
   };
 
-  const uploadPhoto = (id, file) => {
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPlayers(players.map(p => p.id === id ? { ...p, photo: file, preview: reader.result } : p));
-      reader.readAsDataURL(file);
+  // --- ENGINE MPYA YA PICHA (CLOUDINARY) ---
+  const uploadPhoto = async (id, file) => {
+    if (!file || !file.type.startsWith('image/')) return;
+
+    // 1. Show Preview Immediately (UI Preservation) & Set Uploading TRUE
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        setPlayers(prev => prev.map(p => p.id === id ? { ...p, preview: reader.result, uploading: true } : p));
+    };
+    reader.readAsDataURL(file);
+
+    // 2. Upload to Cloudinary in Background
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+    formData.append("cloud_name", CLOUD_NAME);
+
+    try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+            method: "POST",
+            body: formData
+        });
+        
+        const data = await res.json();
+        
+        if (data.secure_url) {
+            // Success: Save the URL
+            setPlayers(prev => prev.map(p => p.id === id ? { ...p, photoUrl: data.secure_url, uploading: false } : p));
+            console.log("Picha imepanda:", data.secure_url);
+        } else {
+            throw new Error("No URL returned");
+        }
+
+    } catch (err) {
+        console.error("Upload Error:", err);
+        // Error: Stop spinner, maybe clear preview or keep it but warn user
+        alert("Picha haikupanda. Tafadhali jaribu tena au angalia internet.");
+        setPlayers(prev => prev.map(p => p.id === id ? { ...p, uploading: false } : p));
     }
   };
 
   const submit = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
-      // 1. Prepare Data for Contentful
       const loc = DAR_AREAS.includes(team.location) ? 'goba' : 'kiomoni';
       
-      // Clean players data to remove heavy binary/preview data before JSON stringify
-      // We keep basic info. Images would need a separate upload process to be robust.
       const playersPayload = players
         .filter(p => p.name.trim())
         .map(p => ({
@@ -105,10 +141,7 @@ export default function RegisterTeam() {
           aka: p.aka,
           position: p.pos,
           number: p.no,
-          // Note: We are NOT sending the Base64 photo string to 'Players Data' field
-          // because it will exceed Contentful's character limit for text fields.
-          // In a future update, we can upload these as Assets.
-          hasPhoto: !!p.photo 
+          photo: p.photoUrl || "" // 🔥 Tuma URL ya Cloudinary!
         }));
 
       const contentfulData = {
@@ -116,19 +149,22 @@ export default function RegisterTeam() {
           teamName: { 'en-US': team.name },
           coachName: { 'en-US': team.coach },
           phoneNumber: { 'en-US': team.phone },
-          Location: { 'en-US': loc },
-          rawLocation: { 'en-US': team.location }, // New Field
+          location: { 'en-US': loc },
+          rawLocation: { 'en-US': team.location },
           jerseyColor: { 'en-US': team.jersey || '' },
-          Season: { 'en-US': team.season }, // New Field
-          paymentStatus: { 'en-US': false }, // Boolean Field
-          Status: { 'en-US': 'Inasubiri' }, // New Field
-          'Registration Date': { 'en-US': new Date().toISOString() }, // Date Field
-          'Total Players': { 'en-US': playersPayload.length }, // Integer Field
-          'Players Data': { 'en-US': JSON.stringify(playersPayload) } // Long Text Field (JSON Blob)
+          status: { 'en-US': 'Inasubiri' },
+          season: { 'en-US': team.season },
+          paymentStatus: { 'en-US': false },
+          registrationDate: { 'en-US': new Date().toISOString() },
+          totalPlayers: { 'en-US': playersPayload.length },
+          players: { 'en-US': JSON.stringify(playersPayload) },
+          adminNotes: { 'en-US': 'New Registration via Web' }
         }
       };
 
-      // 2. Send to Contentful Management API
+      console.log("🚀 Sending Payload:", contentfulData);
+
+      // Step 1: Create Entry
       const response = await fetch(
         `https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries`,
         {
@@ -144,15 +180,21 @@ export default function RegisterTeam() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Contentful Error:', errorData);
-        throw new Error('Failed to submit to Contentful');
+        console.error('❌ Contentful Error:', errorData);
+
+        if (errorData.sys && errorData.sys.id === 'ValidationFailed') {
+             const fieldError = errorData.details.errors[0];
+             throw new Error(`Kosa la Contentful: Field "${fieldError.name}" (ID: ${fieldError.path}) haipo au ina makosa.`);
+        }
+        else if (errorData.message) {
+             throw new Error(errorData.message);
+        }
+        throw new Error('Hitilafu ya kimtandao wakati wa kutuma data.');
       }
 
-      // 3. Publish the Entry (Optional - if you want it live immediately)
-      // The entry is currently in "Draft" state.
       const entry = await response.json();
       
-      // Attempt to publish (Requires version number from the created entry)
+      // Step 2: Publish Entry
       await fetch(
         `https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${entry.sys.id}/published`,
         {
@@ -164,18 +206,7 @@ export default function RegisterTeam() {
         }
       );
 
-      // 4. Local Backup (Just in case)
-      const localData = {
-        id: entry.sys.id,
-        ...team,
-        players: playersPayload,
-        submittedAt: new Date().toISOString()
-      };
-      const existing = JSON.parse(localStorage.getItem('pande_pending_regs')) || [];
-      existing.push(localData);
-      localStorage.setItem('pande_pending_regs', JSON.stringify(existing));
-
-      // 5. Success State
+      // Success!
       setTimeout(() => {
         setLoading(false);
         setSuccess(true);
@@ -183,7 +214,7 @@ export default function RegisterTeam() {
 
     } catch (err) {
       console.error(err);
-      setError('Imeshindikana kusajili. Tafadhali jaribu tena au wasiliana nasi.');
+      setError(`Imeshindikana: ${err.message}`);
       setLoading(false);
     }
   };
@@ -208,9 +239,12 @@ export default function RegisterTeam() {
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-sec:hover { background: rgba(255,255,255,0.1); }
         .card { background: rgba(30,41,59,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; position: relative; }
-        .photo { width: 60px; height: 60px; border-radius: 8px; border: 2px dashed rgba(163,230,53,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(15,23,42,0.8); overflow: hidden; }
+        .photo { width: 60px; height: 60px; border-radius: 8px; border: 2px dashed rgba(163,230,53,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(15,23,42,0.8); overflow: hidden; position: relative; }
         .photo:hover { border-color: #a3e635; background: rgba(163,230,53,0.05); }
         .photo img { width: 100%; height: 100%; object-fit: cover; }
+        /* Animation ya Spinner */
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr !important; } .btn { width: 100%; justify-content: center; } }
       `}</style>
 
@@ -256,86 +290,56 @@ export default function RegisterTeam() {
             </div>
           )}
 
-          {/* STEP 1: TEAM INFO */}
+          {/* STEPS */}
           {step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600', textTransform: 'uppercase' }}>Jina la Timu *</label>
-                <input className="input" type="text" placeholder="Mfano: Mpirani FC" value={team.name} onChange={e => setTeam({...team, name: e.target.value})} />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600', textTransform: 'uppercase' }}>Kocha / Manager *</label>
-                <input className="input" type="text" placeholder="Jina Kamili" value={team.coach} onChange={e => setTeam({...team, coach: e.target.value})} />
-              </div>
+              <div><label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600' }}>JINA LA TIMU *</label><input className="input" type="text" placeholder="Mfano: Mpirani FC" value={team.name} onChange={e => setTeam({...team, name: e.target.value})} /></div>
+              <div><label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600' }}>KOCHA / MANAGER *</label><input className="input" type="text" placeholder="Jina Kamili" value={team.coach} onChange={e => setTeam({...team, coach: e.target.value})} /></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="grid">
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600', textTransform: 'uppercase' }}>Simu *</label>
-                  <input className="input" type="tel" placeholder="07XXXXXXXX" value={team.phone} onChange={e => setTeam({...team, phone: e.target.value})} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600', textTransform: 'uppercase' }}>Email</label>
-                  <input className="input" type="email" placeholder="email@example.com" value={team.email} onChange={e => setTeam({...team, email: e.target.value})} />
-                </div>
+                <div><label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600' }}>SIMU *</label><input className="input" type="tel" placeholder="07XXXXXXXX" value={team.phone} onChange={e => setTeam({...team, phone: e.target.value})} /></div>
+                <div><label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600' }}>EMAIL</label><input className="input" type="email" placeholder="email@example.com" value={team.email} onChange={e => setTeam({...team, email: e.target.value})} /></div>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600', textTransform: 'uppercase' }}>Eneo *</label>
-                <select className="input" value={team.location} onChange={e => setTeam({...team, location: e.target.value})} style={{ cursor: 'pointer' }}>
-                  <option value="">Chagua...</option>
-                  {LOCATIONS.map(g => (
-                    <optgroup key={g.group} label={g.group} style={{ background: '#0f172a', color: '#a3e635' }}>
-                      {g.areas.map(a => <option key={a} value={a} style={{ color: 'white' }}>{a}</option>)}
-                    </optgroup>
-                  ))}
-                </select>
+                <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600' }}>ENEO *</label>
+                <select className="input" value={team.location} onChange={e => setTeam({...team, location: e.target.value})} style={{ cursor: 'pointer' }}><option value="">Chagua...</option>{LOCATIONS.map(g => (<optgroup key={g.group} label={g.group} style={{ background: '#0f172a', color: '#a3e635' }}>{g.areas.map(a => <option key={a} value={a} style={{ color: 'white' }}>{a}</option>)}</optgroup>))}</select>
               </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600', textTransform: 'uppercase' }}>Rangi za Jezi</label>
-                <input className="input" type="text" placeholder="Njano (Home), Nyeusi (Away)" value={team.jersey} onChange={e => setTeam({...team, jersey: e.target.value})} />
-              </div>
+              <div><label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '6px', fontWeight: '600' }}>RANGI ZA JEZI</label><input className="input" type="text" placeholder="Njano (Home), Nyeusi (Away)" value={team.jersey} onChange={e => setTeam({...team, jersey: e.target.value})} /></div>
             </div>
           )}
 
-          {/* STEP 2: PLAYERS */}
           {step === 2 && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 'bold' }}>Orodha ya Wachezaji</h3>
-                  <p style={{ color: '#64748b', fontSize: '12px', marginTop: '4px' }}>{players.filter(p => p.name.trim()).length}/25 (Min: 11)</p>
-                </div>
-                <button className="btn" onClick={addPlayer} disabled={players.length >= 25} style={{ padding: '8px 16px', fontSize: '12px' }}>
-                  <Users size={14} /> ONGEZA
-                </button>
+                <div><h3 style={{ fontSize: '16px', fontWeight: 'bold' }}>Orodha ya Wachezaji</h3><p style={{ color: '#64748b', fontSize: '12px', marginTop: '4px' }}>{players.filter(p => p.name.trim()).length}/25 (Min: 11)</p></div>
+                <button className="btn" onClick={addPlayer} disabled={players.length >= 25} style={{ padding: '8px 16px', fontSize: '12px' }}><Users size={14} /> ONGEZA</button>
               </div>
               <div style={{ maxHeight: '450px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '8px' }}>
                 {players.map((p, i) => (
                   <div key={p.id} className="card">
                     <div style={{ position: 'absolute', top: '12px', left: '12px', background: '#a3e635', color: 'black', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '12px' }}>{i + 1}</div>
-                    {players.length > 1 && (
-                      <button onClick={() => delPlayer(p.id)} style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}>
-                        <Trash2 size={14} />
-                      </button>
-                    )}
+                    {players.length > 1 && (<button onClick={() => delPlayer(p.id)} style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}><Trash2 size={14} /></button>)}
                     <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr', gap: '12px', marginTop: '32px' }}>
+                      
+                      {/* --- HAPA NDIPO UCHAWI WA UI ULIPO (PHOTO PREVIEW + LOADER) --- */}
                       <div>
                         <input type="file" accept="image/*" ref={el => fileRefs.current[p.id] = el} style={{ display: 'none' }} onChange={e => uploadPhoto(p.id, e.target.files[0])} />
                         <div className="photo" onClick={() => fileRefs.current[p.id]?.click()}>
-                          {p.preview ? <img src={p.preview} alt="Player" /> : <Camera size={20} color="#64748b" />}
+                           {p.uploading ? (
+                             <Loader className="spin" size={24} color="#a3e635" /> 
+                           ) : p.preview ? (
+                             <img src={p.preview} alt="Player" /> 
+                           ) : (
+                             <Camera size={20} color="#64748b" />
+                           )}
                         </div>
-                        <p style={{ fontSize: '8px', color: '#64748b', marginTop: '4px', textAlign: 'center' }}>PHOTO</p>
                       </div>
+                      
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <input className="input" type="text" placeholder="Jina Kamili *" value={p.name} onChange={e => updatePlayer(p.id, 'name', e.target.value)} style={{ padding: '8px 10px', fontSize: '13px' }} />
-                        <input className="input" type="text" placeholder="AKA (Optional)" value={p.aka} onChange={e => updatePlayer(p.id, 'aka', e.target.value)} style={{ padding: '8px 10px', fontSize: '13px' }} />
+                        <input className="input" type="text" placeholder="AKA" value={p.aka} onChange={e => updatePlayer(p.id, 'aka', e.target.value)} style={{ padding: '8px 10px', fontSize: '13px' }} />
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '8px' }}>
-                          <select className="input" value={p.pos} onChange={e => updatePlayer(p.id, 'pos', e.target.value)} style={{ padding: '8px 10px', fontSize: '13px', cursor: 'pointer' }}>
-                            <option value="">Nafasi...</option>
-                            <option value="GK">GK</option>
-                            <option value="DEF">DEF</option>
-                            <option value="MID">MID</option>
-                            <option value="FWD">FWD</option>
-                          </select>
-                          <input className="input" type="number" placeholder="No." value={p.no} onChange={e => updatePlayer(p.id, 'no', e.target.value)} style={{ padding: '8px 10px', fontSize: '13px' }} min="1" max="99" />
+                          <select className="input" value={p.pos} onChange={e => updatePlayer(p.id, 'pos', e.target.value)} style={{ padding: '8px 10px', fontSize: '13px', cursor: 'pointer' }}><option value="">Nafasi...</option><option value="GK">GK</option><option value="DEF">DEF</option><option value="MID">MID</option><option value="FWD">FWD</option></select>
+                          <input className="input" type="number" placeholder="#" value={p.no} onChange={e => updatePlayer(p.id, 'no', e.target.value)} style={{ padding: '8px 10px', fontSize: '13px' }} min="1" max="99" />
                         </div>
                       </div>
                     </div>
@@ -345,7 +349,6 @@ export default function RegisterTeam() {
             </div>
           )}
 
-          {/* STEP 3: REVIEW */}
           {step === 3 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{ background: 'rgba(163,230,53,0.05)', border: '1px solid rgba(163,230,53,0.2)', borderRadius: '12px', padding: '20px' }}>
@@ -358,89 +361,32 @@ export default function RegisterTeam() {
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#94a3b8' }}>Wachezaji:</span><span style={{ color: '#a3e635', fontWeight: 'bold' }}>{players.filter(p => p.name.trim()).length}</span></div>
                 </div>
               </div>
-              <div>
-                <h4 style={{ fontSize: '14px', marginBottom: '12px', fontWeight: 'bold' }}>WACHEZAJI</h4>
-                <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {players.filter(p => p.name.trim()).map((p, i) => (
-                    <div key={p.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '10px 12px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ color: '#64748b', fontWeight: '900' }}>{i + 1}.</span>
-                        <span style={{ fontWeight: '600' }}>{p.name}{p.aka && <span style={{ color: '#94a3b8', marginLeft: '6px' }}>"{p.aka}"</span>}</span>
-                      </div>
-                      <div style={{ display: 'flex', gap: '10px', fontSize: '12px' }}>
-                        <span style={{ color: '#64748b' }}>{p.pos || '-'}</span>
-                        <span style={{ color: '#a3e635', fontWeight: 'bold' }}>#{p.no || '-'}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
-          {/* STEP 4: PAYMENT */}
           {step === 4 && (
-            <div>
-              <div style={{ background: 'rgba(163,230,53,0.05)', border: '2px dashed #a3e635', borderRadius: '16px', padding: '24px', textAlign: 'center' }}>
+             <div style={{ background: 'rgba(163,230,53,0.05)', border: '2px dashed #a3e635', borderRadius: '16px', padding: '24px', textAlign: 'center' }}>
                 <h3 style={{ color: '#a3e635', fontSize: '18px', marginBottom: '16px', fontWeight: '900' }}>ADA YA USAJILI</h3>
                 <div style={{ fontSize: '40px', fontWeight: '900', color: 'white', marginBottom: '6px' }}>TSH {REGISTRATION_FEE.toLocaleString()}/=</div>
                 <p style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '24px' }}>Ada ya usajili kwa timu moja</p>
-                <div style={{ background: '#0f172a', borderRadius: '12px', padding: '20px', textAlign: 'left' }}>
-                  <h4 style={{ color: 'white', fontSize: '14px', fontWeight: 'bold', marginBottom: '16px', textAlign: 'center' }}>JINSI YA KULIPA (Mixx By Yas)</h4>
-                  <div style={{ background: 'rgba(163,230,53,0.05)', border: '1px solid rgba(163,230,53,0.2)', borderRadius: '10px', padding: '12px', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div>
-                        <p style={{ fontSize: '10px', color: '#94a3b8', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Lipa Namba</p>
-                        <div style={{ fontSize: '28px', fontWeight: '900', color: '#a3e635', fontFamily: 'monospace', letterSpacing: '2px' }}>{MIXX_LIPA_NAMBA}</div>
-                      </div>
-                      <button onClick={copy} style={{ background: 'rgba(163,230,53,0.1)', border: '1px solid rgba(163,230,53,0.3)', color: '#a3e635', padding: '10px', borderRadius: '8px', cursor: 'pointer' }}>
-                        <Copy size={18} />
-                      </button>
-                    </div>
-                    <div style={{ borderTop: '1px solid rgba(163,230,53,0.2)', marginTop: '12px', paddingTop: '12px' }}>
-                      <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>Jina la Mpokeaji:</p>
-                      <p style={{ fontSize: '14px', color: 'white', fontWeight: 'bold' }}>{RECEIVER_NAME}</p>
-                    </div>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '10px', padding: '16px', fontSize: '12px', color: '#cbd5e1' }}>
-                    <p style={{ fontWeight: '800', color: 'white', marginBottom: '12px', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '1px' }}>Hatua za Kulipa:</p>
-                    <ol style={{ paddingLeft: '20px', margin: 0, lineHeight: '1.8', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <li>Piga <strong>*150*01#</strong></li>
-                      <li>Chagua: <strong>5. Lipa Kwa Simu</strong></li>
-                      <li>Chagua: <strong>1. Kwenda Mixx By Yas</strong></li>
-                      <li>Ingiza Lipa Namba: <strong style={{ color: '#a3e635' }}>{MIXX_LIPA_NAMBA}</strong></li>
-                      <li>Ingiza Kiasi: <strong style={{ color: '#a3e635' }}>{REGISTRATION_FEE.toLocaleString()}</strong></li>
-                      <li>Thibitisha: <strong>{RECEIVER_NAME}</strong></li>
-                      <li>Weka PIN yako</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-            </div>
+                <button onClick={copy} style={{ background: '#0f172a', border: '1px solid #a3e635', color: '#a3e635', padding: '12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}>
+                   <Copy size={16}/> {MIXX_LIPA_NAMBA}
+                </button>
+             </div>
           )}
 
-          {/* STEP 5: FINAL */}
           {step === 5 && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '30px 0' }}>
               <CheckCircle size={56} color="#a3e635" />
               <h3 style={{ fontSize: '22px', fontWeight: '900' }}>Tayari Kusubmit?</h3>
-              <p style={{ color: '#94a3b8', textAlign: 'center', maxWidth: '450px', lineHeight: '1.6', fontSize: '14px' }}>
-                Kwa kubonyeza "SUBMIT", unakubali kuwa umelipa ada ya usajili na taarifa zote ni sahihi.
-              </p>
+              <p style={{ color: '#94a3b8', textAlign: 'center', maxWidth: '450px', lineHeight: '1.6', fontSize: '14px' }}>Kwa kubonyeza "SUBMIT", unakubali kuwa umelipa ada na taarifa ni sahihi.</p>
             </div>
           )}
 
-          {/* NAV BUTTONS */}
+          {/* NAV */}
           <div style={{ display: 'flex', gap: '12px', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             {step > 1 && <button className="btn btn-sec" onClick={prev} style={{ flex: 1 }}><ChevronLeft size={16} /> NYUMA</button>}
-            {step < 5 ? (
-              <button className="btn" onClick={next} style={{ flex: 1 }}>ENDELEA <ChevronRight size={16} /></button>
-            ) : (
-              <button className="btn" onClick={submit} disabled={loading} style={{ flex: 1 }}>
-                {loading ? 'INATUMA...' : 'SUBMIT REGISTRATION'}
-                {!loading && <CheckCircle size={16} />}
-              </button>
-            )}
+            {step < 5 ? (<button className="btn" onClick={next} style={{ flex: 1 }}>ENDELEA <ChevronRight size={16} /></button>) : (<button className="btn" onClick={submit} disabled={loading} style={{ flex: 1 }}>{loading ? 'INATUMA...' : 'SUBMIT REGISTRATION'} {!loading && <CheckCircle size={16} />}</button>)}
           </div>
         </div>
 
@@ -448,16 +394,10 @@ export default function RegisterTeam() {
         {success && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
             <div style={{ background: 'rgba(30,41,59,0.7)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.05)', maxWidth: '400px', width: '100%', padding: '32px', borderRadius: '20px', textAlign: 'center' }}>
-              <div style={{ width: '70px', height: '70px', background: 'rgba(163,230,53,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', border: '3px solid #a3e635' }}>
-                <CheckCircle size={36} color="#a3e635" />
-              </div>
+              <CheckCircle size={36} color="#a3e635" style={{ margin: '0 auto 20px' }} />
               <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#a3e635', marginBottom: '12px' }}>HONGERA! 🎉</h2>
-              <p style={{ color: '#cbd5e1', fontSize: '14px', lineHeight: '1.6', marginBottom: '28px' }}>
-                Usajili wa <strong style={{ color: 'white' }}>{team.name}</strong> umefanikiwa! Tutawasiliana nawe kupitia WhatsApp.
-              </p>
-              <Link to="/" style={{ textDecoration: 'none' }}>
-                <button className="btn" style={{ width: '100%' }}><Home size={16} /> RUDI NYUMBANI</button>
-              </Link>
+              <p style={{ color: '#cbd5e1', fontSize: '14px', marginBottom: '28px' }}>Usajili wa <strong style={{ color: 'white' }}>{team.name}</strong> umefanikiwa!</p>
+              <Link to="/"><button className="btn" style={{ width: '100%' }}><Home size={16} /> RUDI NYUMBANI</button></Link>
             </div>
           </div>
         )}
