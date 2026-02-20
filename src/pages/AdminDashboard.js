@@ -34,7 +34,7 @@ const GorillaCard = ({ player, type = "MOTM" }) => {
       </div>
 
       <div style={{ height: '150px', width: '100%', position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden', background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%)' }}>
-        {player?.photo ? (
+        {player?.photo && player.photo.startsWith('http') ? (
           <img src={player.photo} alt={player.name} style={{ height: '100%', width: '100%', objectFit: 'cover', objectPosition: 'center 20%' }} />
         ) : (
           <div style={{ fontSize: '60px', opacity: 0.2 }}>👤</div>
@@ -67,15 +67,15 @@ const GorillaCard = ({ player, type = "MOTM" }) => {
           </div>
         </div>
       </div>
-
-      <div style={{ position: 'absolute', bottom: -8, left: '50%', transform: 'translateX(-50%)', width: '70%', height: '16px', background: config.color, filter: 'blur(16px)', opacity: 0.3, zIndex: 1, pointerEvents: 'none' }} />
     </div>
   );
 };
 
+// 🔥 CONFIG YETU HAPA (ONGEZA PREVIEW TOKEN KAMA CLAUDE ALIVYOSHAURI)
 const SPACE_ID = process.env.REACT_APP_SPACE_ID || 'ax6wvfd84net';
-const ACCESS_TOKEN = process.env.REACT_APP_CDA_TOKEN || 'uPIoItEzujeqD7V1AZpAeYoDTRs_MTgV78nV6Kcu7w8';
+const PREVIEW_TOKEN = process.env.REACT_APP_PREVIEW_TOKEN || 'OmUmdEXkdk9xv49fwsz2hm9eSKO2dT1UK1ZSVQpWteo'; // 👈 Weka Content Preview Token hapa
 const MANAGEMENT_TOKEN = process.env.REACT_APP_ACCESS_TOKEN; 
+
 const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 const COBRA_KAI_LOGIN_BG = "https://private-us-east-1.manuscdn.com/sessionFile/JmLymlOQ4Xh34kMZAEJn2l/sandbox/eV01jTBgRrK1IEQILJ5kGA-img-1_1771071749000_na1fn_Y29icmEta2FpLWxvZ2luLWJn.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80";
 const ADMIN_PASSWORD_HASH = 'pandecupwakawaka@2022';
@@ -86,13 +86,11 @@ const fontStyles = `
   body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; margin: 0; height: 100vh; overflow: hidden; }
   .oswald { font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; }
   .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); }
-  .glass-transparent { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(251,191,36,0.2); }
   .dashboard-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; transition: all 0.3s ease; }
-  .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-color: rgba(163,230,53,0.3); }
-  .btn-lime { background: #a3e635; color: #020617; font-weight: 800; transition: all 0.3s ease; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; justify-content: center; text-transform: uppercase; letter-spacing: 0.5px; }
+  .btn-lime { background: #a3e635; color: #020617; font-weight: 800; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; justify-content: center; text-transform: uppercase; transition: 0.3s; }
   .btn-lime:hover:not(:disabled) { background: #bef264; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(163, 230, 53, 0.3); }
   .btn-lime:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 800; transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 8px; justify-content: center; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px; border-radius: 10px; }
+  .btn-red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; justify-content: center; text-transform: uppercase; padding: 12px; border-radius: 10px; transition: 0.3s; }
   .btn-red:hover:not(:disabled) { background: #ef4444; color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3); }
   .btn-cobra { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; font-family: 'Oswald', sans-serif; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.2s; }
   .btn-cobra:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
@@ -101,19 +99,13 @@ const fontStyles = `
   .nav-active { background: linear-gradient(90deg, rgba(163, 230, 53, 0.15) 0%, rgba(163, 230, 53, 0.05) 100%) !important; color: #a3e635 !important; border-left: 3px solid #a3e635; border-radius: 0 12px 12px 0; }
   select, input { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 16px; border-radius: 10px; outline: none; font-size: 13px; font-weight: 600; width: 100%; }
   select:focus, input:focus { border-color: #a3e635; box-shadow: 0 0 0 2px rgba(163, 230, 53, 0.2); }
-  .cobra-loader { position: absolute; inset: -15px; border: 2px solid #fbbf24; border-radius: 50%; border-top-color: transparent; border-bottom-color: transparent; animation: spin 3s linear infinite; }
-  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  .logo-float { animation: float 3s ease-in-out infinite; }
-  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
   .custom-scroll::-webkit-scrollbar { width: 6px; }
   .custom-scroll::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
   .custom-scroll::-webkit-scrollbar-thumb { background: rgba(163, 230, 53, 0.3); border-radius: 10px; }
-  .inbox-player-card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden; transition: all 0.3s; }
-  .inbox-player-card:hover { border-color: rgba(163, 230, 53, 0.5); transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-  .inbox-player-number { position: absolute; top: 12px; right: 16px; font-family: 'Oswald', sans-serif; font-size: 28px; color: rgba(255,255,255,0.15); font-weight: 900; }
-  .inbox-player-avatar { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #a3e635; background: #334155; margin-bottom: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  .inbox-player-card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .inbox-player-avatar { width: 100px; height: 110px; border-radius: 12px; border: 2px solid #a3e635; background: #334155; margin-bottom: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
   .inbox-player-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .modal-overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.85); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  
   .bottom-nav { display: none; }
   @media (max-width: 768px) {
     .sidebar-hide { display: none !important; }
@@ -156,7 +148,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [activeLocation, setActiveLocation] = useState('kiomoni'); 
   const [activeSeason, setActiveSeason] = useState('2026');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState({ text: '', type: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false); 
   const [rawMatches, setRawMatches] = useState([]);
@@ -173,181 +165,299 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const baseUrl = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&limit=1000`;
+      // 🔥 SENSEI FIX: HAPA NDIPO TUNAPOTUMIA PREVIEW API (Kama Claude Alivyoshauri)
+      // Imebadilishwa kutoka cdn.contentful.com kwenda preview.contentful.com
+      const baseUrl = `https://preview.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${PREVIEW_TOKEN}&limit=1000`;
+      
+      // Lazimisha browser isitunze cache yake yenyewe
+      const fetchOptions = { cache: 'no-store' };
+
       const [tRes, mRes, pRes, rRes] = await Promise.all([
-        fetch(`${baseUrl}&content_type=standing`), 
-        fetch(`${baseUrl}&content_type=match`), 
-        fetch(`${baseUrl}&content_type=player`), 
-        fetch(`${baseUrl}&content_type=registration&order=-sys.createdAt`)
+        fetch(`${baseUrl}&content_type=standing`, fetchOptions), 
+        fetch(`${baseUrl}&content_type=match`, fetchOptions), 
+        fetch(`${baseUrl}&content_type=players`, fetchOptions), 
+        fetch(`${baseUrl}&content_type=registration&order=-sys.createdAt`, fetchOptions)
       ]);
-      const [tData, mData, pData, rData] = await Promise.all([
-        tRes.json(), 
-        mRes.json(), 
-        pRes.json(), 
-        rRes.json()
-      ]);
+      const [tData, mData, pData, rData] = await Promise.all([ tRes.json(), mRes.json(), pRes.json(), rRes.json() ]);
       
-      const parsedMatches = mData.items.map(i => ({ 
+      if (tData.sys?.type === "Error") throw new Error("API Key ina shida. Angalia Preview Token yako.");
+
+      const tDataItems = tData.items ? tData.items.map(i => ({ 
         id: i.sys.id, 
-        homeTeam: i.fields.homeTeam || 'Home', 
-        awayTeam: i.fields.awayTeam || 'Away', 
-        score: i.fields.score || '0-0', 
-        date: i.fields.matchDate, 
-        status: i.fields.status || 'Scheduled', 
-        location: i.fields.location ? String(i.fields.location).toLowerCase() : 'kiomoni', 
-        season: i.fields.season ? String(i.fields.season) : '2026', 
-        stadium: i.fields.stadium || '' 
-      }));
-      
-      const parsedStandings = tData.items.map(i => ({ 
-        id: i.sys.id, 
-        teamName: i.fields.teamName || 'Unknown', 
+        teamName: (i.fields.teamName || 'Unknown').trim(), 
         group: i.fields.group || 'LIGI KUU', 
-        location: i.fields.location ? String(i.fields.location).toLowerCase() : 'kiomoni', 
-        season: i.fields.season ? String(i.fields.season) : '2026', 
-      }));
+        location: i.fields.location ? String(i.fields.location).toLowerCase().trim() : 'kiomoni', 
+        season: i.fields.season ? String(i.fields.season).trim() : '2026' 
+      })) : [];
+      setRawStandings(tDataItems);
+
+      setRawMatches(mData.items ? mData.items.map(i => ({ 
+        id: i.sys.id, 
+        homeTeam: String(i.fields.homeTeam || 'Home').trim(), 
+        awayTeam: String(i.fields.awayTeam || 'Away').trim(), 
+        score: i.fields.score || '0-0', date: i.fields.matchDate, status: i.fields.status || 'Scheduled', 
+        location: i.fields.location ? String(i.fields.location).toLowerCase().trim() : 'kiomoni', 
+        season: i.fields.season ? String(i.fields.season).trim() : '2026', stadium: i.fields.stadium || '' 
+      })) : []);
       
-      const parsedRegistrations = rData.items.map(item => { 
+      setRawPlayers(pData.items ? pData.items.map(i => {
+         let tName = String(i.fields.team || i.fields.Team || 'Free Agent').trim();
+         
+         return { 
+           id: i.sys.id, 
+           playerName: String(i.fields.playerName || i.fields['Player Name'] || 'Unknown').trim(), 
+           team: tName, 
+           goals: parseInt(i.fields.goals || i.fields.Goals || 0), 
+           location: String(i.fields.location || i.fields.Location || 'kiomoni').toLowerCase().trim(), 
+           season: String(i.fields.season || i.fields.Season || '2026').trim(), 
+           position: String(i.fields.position || i.fields.Position || 'N/A').trim(), 
+           jerseyNumber: i.fields.jerseyNumber || i.fields['Jersey Number'] || '-', 
+           photo: i.fields.photo || i.fields.Photo || '' 
+         };
+      }) : []);
+      
+      setRawRegistrations(rData.items ? rData.items.map(item => { 
         let players = []; 
-        try { 
-          if (item.fields.players) players = JSON.parse(item.fields.players); 
-        } catch (e) {}
+        try { if (item.fields.playersData) players = JSON.parse(item.fields.playersData); } catch (e) {} 
+        if (players.length === 0) { try { if (item.fields.players) players = JSON.parse(item.fields.players); } catch (e) {} } 
+        
         return { 
           id: item.sys.id, 
-          teamName: item.fields.teamName || 'Timu Mpya', 
+          teamName: String(item.fields.teamName || 'Timu Mpya').trim(), 
           coach: item.fields.coachName || 'N/A', 
           phone: item.fields.phoneNumber || 'N/A', 
-          location: item.fields.Location ? String(item.fields.Location).toLowerCase() : 'kiomoni',
-          season: item.fields.season ? String(item.fields.season) : '2026', 
-          date: item.fields.registrationDate || '', 
-          totalPlayers: item.fields.totalPlayers || 0, 
-          status: item.fields.status || 'Pending', 
+          location: String(item.fields.Location || item.fields.location || item.fields.rawLocation || 'kiomoni').toLowerCase().trim(), 
+          season: String(item.fields.Season || item.fields.season || '2026').trim(), 
+          date: item.fields.registrationDate || item.fields['Registration Date'] || '', 
+          totalPlayers: item.fields.totalPlayers || item.fields['Total Players'] || 0, 
+          status: item.fields.status || item.fields.Status || 'Pending', 
           playersList: players 
         }; 
-      });
+      }) : []);
       
-      const parsedPlayers = pData.items ? pData.items.map(i => ({ 
-        id: i.sys.id, 
-        playerName: i.fields.playerName || 'Unknown', 
-        team: i.fields.team || 'Free Agent', 
-        goals: parseInt(i.fields.goals || 0), 
-        location: i.fields.location ? String(i.fields.location).toLowerCase() : 'kiomoni', 
-        season: i.fields.season ? String(i.fields.season) : '2026', 
-        position: i.fields.position || 'N/A', 
-        jerseyNumber: i.fields.jerseyNumber || '-', 
-        photo: i.fields.photo || '' 
-      })) : [];
-      
-      setRawMatches(parsedMatches); 
-      setRawStandings(parsedStandings); 
-      setRawRegistrations(parsedRegistrations);
-      setRawPlayers(parsedPlayers);
-      
-      console.log("🔍 Registrations loaded:", parsedRegistrations.length);
-      
-      showMsg("⚡ System Synced.");
+      showMsg("⚡ System Synced (Live Preview Engine).", "success");
     } catch (err) { 
-      showMsg("⚠️ Sync Error."); 
+      showMsg(`⚠️ Sync Error: ${err.message}`, "error"); 
       console.error(err); 
-    } finally { 
-      setIsLoading(false); 
-    }
+    } finally { setIsLoading(false); }
   };
 
   useEffect(() => { if (authenticated) fetchData(); }, [authenticated]);
   
-  const showMsg = (txt) => { setMessage(txt); setTimeout(() => setMessage(''), 5000); };
+  const showMsg = (txt, type) => { setMessage({text: txt, type}); setTimeout(() => setMessage({text: '', type: ''}), 8000); };
   
   const filteredMatches = rawMatches.filter(m => String(m.location || '').includes(activeLocation) && String(m.season || '').includes(activeSeason));
   const filteredRegistrations = rawRegistrations.filter(r => String(r.location || '').includes(activeLocation) && String(r.season || '').includes(activeSeason));
   const filteredPlayers = rawPlayers.filter(p => String(p.location || '').includes(activeLocation) && String(p.season || '').includes(activeSeason));
   const standingTeamsBase = rawStandings.filter(t => String(t.location || '').includes(activeLocation) && String(t.season || '').includes(activeSeason));
   const pendingInbox = filteredRegistrations.filter(r => { const currentStatus = r.status?.toLowerCase() || 'pending'; return currentStatus === 'pending' || currentStatus === 'inasubiri'; });
-  const activeMatchPlayers = liveMatch ? filteredPlayers.filter(p => p.team === liveMatch.homeTeam || p.team === liveMatch.awayTeam) : [];
+  
+  const activeMatchPlayers = liveMatch ? filteredPlayers.filter(p => {
+    const pTeam = (p.team || '').toLowerCase();
+    const hTeam = (liveMatch.homeTeam || '').toLowerCase();
+    const aTeam = (liveMatch.awayTeam || '').toLowerCase();
+    return pTeam === hTeam || pTeam === aTeam;
+  }) : [];
 
   useEffect(() => {
     const computed = calculateLiveStandings(filteredMatches, standingTeamsBase);
     setCalculatedStandings(computed.sort((a,b) => { if (b.points !== a.points) return b.points - a.points; if (b.gd !== a.gd) return b.gd - a.gd; return b.gf - a.gf; }));
   }, [filteredMatches, standingTeamsBase, activeLocation, activeSeason]);
 
+  const handleApproveRegistration = async (reg) => {
+    if (!MANAGEMENT_TOKEN) return showMsg('❌ Management Token missing kwenye .env!', 'error');
+    setIsLoading(true);
+    let successCount = 0;
+    let failedCount = 0;
+    const safeTeamName = reg.teamName.trim();
+    const universalLocation = reg.location;
+
+    try {
+      const getRegRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}`, { headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}` }});
+      if(!getRegRes.ok) throw new Error("Haikuweza kuvuta data za usajili Contentful.");
+      
+      const regEntry = await getRegRes.json(); 
+      if (regEntry.fields.Status) delete regEntry.fields.Status;
+      regEntry.fields.status = { 'en-US': 'Approved' };
+      
+      const putRegRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}`, { 
+        method: 'PUT', 
+        headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Version': regEntry.sys.version }, 
+        body: JSON.stringify(regEntry) 
+      });
+      
+      if(!putRegRes.ok) throw new Error("Contentful imegoma kubadili Status ya Usajili.");
+      const updatedRegEntry = await putRegRes.json();
+      await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': updatedRegEntry.sys.version } });
+      
+      setRawRegistrations(prev => prev.map(r => r.id === reg.id ? {...r, status: 'Approved'} : r));
+      
+      // 1. CREATE STANDING
+      try {
+        const standingData = { 
+          fields: { 
+            teamName: { 'en-US': safeTeamName }, group: { 'en-US': 'LIGI KUU' }, location: { 'en-US': universalLocation }, 
+            season: { 'en-US': reg.season }, points: { 'en-US': 0 }, played: { 'en-US': 0 }, won: { 'en-US': 0 }, drawn: { 'en-US': 0 }, lost: { 'en-US': 0 }, goalsFor: { 'en-US': 0 }, goalsAgainst: { 'en-US': 0 }, goalDifference: { 'en-US': 0 } 
+          } 
+        };
+        const res = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries`, { method: 'POST', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Content-Type': 'standing' }, body: JSON.stringify(standingData) });
+        if (res.ok) {
+          const entry = await res.json();
+          await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${entry.sys.id}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': entry.sys.version } });
+          setRawStandings(prev => [...prev, { id: entry.sys.id, teamName: safeTeamName, group: 'LIGI KUU', location: reg.location, season: reg.season }]);
+        }
+      } catch (e) { console.error("Error creating standing", e); }
+
+      let newPlayers = [];
+      
+      // 2. CREATE PLAYERS
+      if (reg.playersList && reg.playersList.length > 0) {
+          for (const p of reg.playersList) {
+             if (!p.name || !p.name.trim()) continue;
+             
+             const safeNum = parseInt(p.number);
+             const finalJersey = (isNaN(safeNum) || safeNum < 1 || safeNum > 99) ? 99 : safeNum;
+             const finalPosition = (p.position && p.position.trim() !== '') ? p.position : 'MID';
+
+             const playerData = { 
+               fields: { 
+                 playerName: { 'en-US': p.name }, jerseyNumber: { 'en-US': finalJersey }, position: { 'en-US': finalPosition }, goals: { 'en-US': 0 }, season: { 'en-US': reg.season }, location: { 'en-US': universalLocation }, team: { 'en-US': safeTeamName } 
+               } 
+             };
+
+             if (p.photo && typeof p.photo === 'string') playerData.fields.photo = { 'en-US': p.photo };
+             
+             try {
+                 let pRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries`, { 
+                    method: 'POST', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Content-Type': 'players' }, body: JSON.stringify(playerData) 
+                 });
+
+                 if(pRes.ok) {
+                    const pEntry = await pRes.json(); 
+                    await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${pEntry.sys.id}/published`, { 
+                       method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': pEntry.sys.version } 
+                    }); 
+                    newPlayers.push({ id: pEntry.sys.id, playerName: p.name, team: safeTeamName, goals: 0, location: reg.location, season: reg.season, position: finalPosition, jerseyNumber: finalJersey, photo: p.photo }); 
+                    successCount++;
+                 } else {
+                    failedCount++;
+                 }
+             } catch(e) { failedCount++; }
+
+             // 🔥 PUMZI NDEFU ILI KUZUIA KUKATAA (Sekunde 0.8)
+             await new Promise(resolve => setTimeout(resolve, 800));
+          }
+      }
+
+      // 3. CREATE COACH (Tengeneza Kocha)
+      if (reg.coach && reg.coach !== 'N/A') {
+          try {
+              const coachData = { 
+                 fields: { 
+                   playerName: { 'en-US': reg.coach }, jerseyNumber: { 'en-US': 99 }, team: { 'en-US': safeTeamName }, position: { 'en-US': 'Coach' }, goals: { 'en-US': 0 }, season: { 'en-US': reg.season }, location: { 'en-US': universalLocation } 
+                 } 
+              };
+
+              if (reg.coachPhotoUrl) {
+                  coachData.fields.photo = { 'en-US': reg.coachPhotoUrl };
+              }
+
+              let cRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries`, { 
+                 method: 'POST', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Content-Type': 'players' }, body: JSON.stringify(coachData) 
+              });
+
+              if(cRes.ok) {
+                 const cEntry = await cRes.json(); 
+                 await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${cEntry.sys.id}/published`, { 
+                    method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': cEntry.sys.version } 
+                 });
+                 newPlayers.push({ id: cEntry.sys.id, playerName: reg.coach, team: safeTeamName, goals: 0, location: reg.location, season: reg.season, position: 'Coach', jerseyNumber: 99, photo: reg.coachPhotoUrl || null });
+              }
+          } catch(e) { console.error("Coach save error", e); }
+      }
+
+      // 🔥 SENSEI FIX: OPTIMISTIC UI KAMA CLAUDE ALIVYOSHAURI
+      // Tunaweka data mpya kwenye state hapo hapo kabla hata hatujarefresh
+      setRawPlayers(prev => [...prev, ...newPlayers]);
+      
+      if (failedCount > 0) {
+         showMsg(`⚠️ Wachezaji ${successCount} Wameingia, ${failedCount} waligoma kwa mtandao. Nenda kwenye tab ya wachezaji kuangalia.`, 'error');
+      } else {
+         showMsg(`✅ ${safeTeamName} Imekubaliwa! Wachezaji na Kocha wamesajiliwa kikamilifu! Sasa hivi ukirefresh hawatapotea.`, 'success');
+      }
+      
+    } catch (err) { 
+      showMsg(`❌ Kosa: ${err.message}`, 'error'); 
+      console.error(err); 
+    } finally { 
+      setIsLoading(false); 
+    }
+  };
+
+  const handleRejectRegistration = async (reg) => {
+    if (!window.confirm(`Una uhakika unataka kukataa timu ya ${reg.teamName}?`)) return;
+    setIsLoading(true);
+    try {
+      const getRegRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}`, { headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}` }});
+      if(!getRegRes.ok) throw new Error("Haikuweza kupata entry Contentful.");
+      
+      const regEntry = await getRegRes.json(); 
+      if (regEntry.fields.Status) delete regEntry.fields.Status;
+      regEntry.fields.status = { 'en-US': 'Rejected' };
+      
+      const putRegRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}`, { 
+        method: 'PUT', 
+        headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Version': regEntry.sys.version }, 
+        body: JSON.stringify(regEntry) 
+      });
+      if(!putRegRes.ok) throw new Error("Haikuweza kuhifadhi mabadiliko.");
+      
+      const updatedRegEntry = await putRegRes.json();
+      await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': updatedRegEntry.sys.version } });
+      
+      setRawRegistrations(prev => prev.map(r => r.id === reg.id ? {...r, status: 'Rejected'} : r));
+      showMsg(`⛔ ${reg.teamName} Imekataliwa.`, 'success');
+    } catch (err) { 
+      showMsg(`❌ Kosa: ${err.message}`, 'error'); 
+    } finally { 
+      setIsLoading(false); 
+    }
+  };
+
   const handleScheduleMatch = async (e) => {
     e.preventDefault();
-    if (!newMatch.homeTeam || !newMatch.awayTeam || !newMatch.matchDate) return showMsg("⚠️ Jaza timu zote mbili na tarehe.");
-    if (newMatch.homeTeam === newMatch.awayTeam) return showMsg("⚠️ Timu haiwezi kucheza yenyewe!");
+    if (!newMatch.homeTeam || !newMatch.awayTeam || !newMatch.matchDate) return showMsg("⚠️ Jaza timu zote mbili na tarehe.", "error");
+    if (newMatch.homeTeam === newMatch.awayTeam) return showMsg("⚠️ Timu haiwezi kucheza yenyewe!", "error");
     setIsPublishing(true);
+
+    const universalLocation = activeLocation.toLowerCase();
+
     try {
-      const matchPayload = { fields: { homeTeam: { 'en-US': newMatch.homeTeam }, awayTeam: { 'en-US': newMatch.awayTeam }, score: { 'en-US': 'VS' }, matchDate: { 'en-US': `${newMatch.matchDate}T${newMatch.time || '16:00'}:00Z` }, status: { 'en-US': 'Scheduled' }, location: { 'en-US': activeLocation }, season: { 'en-US': activeSeason }, stadium: { 'en-US': newMatch.stadium || 'Uwanja Mkuu' } } };
+      const matchPayload = { 
+        fields: { 
+          homeTeam: { 'en-US': newMatch.homeTeam }, 
+          awayTeam: { 'en-US': newMatch.awayTeam }, 
+          score: { 'en-US': 'VS' }, 
+          matchDate: { 'en-US': `${newMatch.matchDate}T${newMatch.time || '16:00'}:00Z` }, 
+          status: { 'en-US': 'Scheduled' }, 
+          location: { 'en-US': universalLocation }, 
+          season: { 'en-US': activeSeason }, 
+          stadium: { 'en-US': newMatch.stadium || 'Uwanja Mkuu' } 
+        } 
+      };
       const res = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries`, { method: 'POST', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Content-Type': 'match' }, body: JSON.stringify(matchPayload) });
-      if (!res.ok) throw new Error('Failed to create match');
+      if (!res.ok) throw new Error('Kuna shida kwenye rules za Contentful!');
       const entry = await res.json();
       await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${entry.sys.id}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': entry.sys.version } });
       setRawMatches(prev => [...prev, { id: entry.sys.id, homeTeam: newMatch.homeTeam, awayTeam: newMatch.awayTeam, score: 'VS', date: `${newMatch.matchDate}T${newMatch.time || '16:00'}:00`, status: 'Scheduled', location: activeLocation, season: activeSeason, stadium: newMatch.stadium }]);
       setShowMatchModal(false); setNewMatch({ homeTeam: '', awayTeam: '', matchDate: '', time: '', stadium: '' });
-      showMsg("✅ Mechi imepangwa!");
-    } catch (err) { showMsg(`❌ Error: ${err.message}`); } finally { setIsPublishing(false); }
+      showMsg("✅ Mechi imepangwa!", "success");
+    } catch (err) { showMsg(`❌ Error: ${err.message}`, "error"); } finally { setIsPublishing(false); }
   };
 
-  const handleApproveRegistration = async (reg) => {
-    if (!MANAGEMENT_TOKEN) { showMsg('❌ Token missing!'); return; }
-    setIsLoading(true);
-    try {
-      // ✅ FIX: Update status in state instead of removing
-      setRawRegistrations(prev => prev.map(r => r.id === reg.id ? {...r, status: 'Approved'} : r));
-      
-      const standingData = { fields: { teamName: { 'en-US': reg.teamName }, group: { 'en-US': 'LIGI KUU' }, location: { 'en-US': reg.location }, season: { 'en-US': reg.season }, points: { 'en-US': 0 }, played: { 'en-US': 0 }, won: { 'en-US': 0 }, drawn: { 'en-US': 0 }, lost: { 'en-US': 0 }, goalsFor: { 'en-US': 0 }, goalsAgainst: { 'en-US': 0 }, goalDifference: { 'en-US': 0 } } };
-      const res = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries`, { method: 'POST', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Content-Type': 'standing' }, body: JSON.stringify(standingData) });
-      if (!res.ok) throw new Error('Failed to create standing');
-      const entry = await res.json();
-      await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${entry.sys.id}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': entry.sys.version } });
-      setRawStandings(prev => [...prev, { id: entry.sys.id, teamName: reg.teamName, group: 'LIGI KUU', location: reg.location, season: reg.season }]);
-      
-      let newPlayers = [];
-      if (reg.playersList && reg.playersList.length > 0) {
-          for (const p of reg.playersList) {
-             const playerData = { fields: { playerName: { 'en-US': p.name || 'Unknown' }, jerseyNumber: { 'en-US': parseInt(p.number) || 0 }, team: { 'en-US': reg.teamName }, position: { 'en-US': p.position || 'Unknown' }, goals: { 'en-US': 0 }, season: { 'en-US': reg.season }, location: { 'en-US': reg.location }, saa: { 'en-US': p.name || 'Player' } } };
-             if (p.photo) playerData.fields.photo = { 'en-US': p.photo };
-             try {
-                const pRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries`, { method: 'POST', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Content-Type': 'player' }, body: JSON.stringify(playerData) });
-                if(pRes.ok){ 
-                  const pEntry = await pRes.json(); 
-                  await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${pEntry.sys.id}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': pEntry.sys.version } }); 
-                  newPlayers.push({ id: pEntry.sys.id, playerName: p.name, team: reg.teamName, goals: 0, location: reg.location, season: reg.season, position: p.position, jerseyNumber: p.number, photo: p.photo }); 
-                }
-             } catch(e) { console.error("Error saving player", e); }
-          }
-      }
-      setRawPlayers(prev => [...prev, ...newPlayers]);
-      
-      const getRegRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}`, { headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}` }});
-      const regEntry = await getRegRes.json(); 
-      regEntry.fields.status = { 'en-US': 'Approved' };
-      const putRegRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Version': regEntry.sys.version }, body: JSON.stringify(regEntry) });
-      const updatedRegEntry = await putRegRes.json();
-      await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': updatedRegEntry.sys.version } });
-      showMsg(`✅ ${reg.teamName} IMEKUBALIWA! ${newPlayers.length} wachezaji!`);
-    } catch (err) { showMsg(`❌ Error: ${err.message}`); console.error(err); } finally { setIsLoading(false); }
-  };
-
-  const handleRejectRegistration = async (reg) => {
-    if (!window.confirm(`Una uhakika unataka kukataa ${reg.teamName}?`)) return;
-    setIsLoading(true);
-    try {
-      // ✅ FIX: Update status instead of removing
-      setRawRegistrations(prev => prev.map(r => r.id === reg.id ? {...r, status: 'Rejected'} : r));
-      
-      const getRegRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}`, { headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}` }});
-      const regEntry = await getRegRes.json(); 
-      regEntry.fields.status = { 'en-US': 'Rejected' };
-      const putRegRes = await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'Content-Type': 'application/vnd.contentful.management.v1+json', 'X-Contentful-Version': regEntry.sys.version }, body: JSON.stringify(regEntry) });
-      const updatedRegEntry = await putRegRes.json();
-      await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${reg.id}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': updatedRegEntry.sys.version } });
-      showMsg(`⛔ ${reg.teamName} imekataliwa.`);
-    } catch (err) { showMsg(`❌ Error: ${err.message}`); } finally { setIsLoading(false); }
-  };
-  
   const handleRecordGoal = async (teamSide) => {
     if (!liveMatch) return;
-    if (!selectedGoalScorer) { showMsg('⚠️ Chagua mchezaji kwanza!'); return; }
+    if (!selectedGoalScorer) { showMsg('⚠️ Chagua mchezaji kwanza!', 'error'); return; }
     setIsPublishing(true); 
     const currentScore = liveMatch.score || "0-0";
     const parts = currentScore.includes('-') ? currentScore.split('-') : currentScore.split(':');
@@ -378,12 +488,20 @@ const AdminDashboard = () => {
         await fetch(`https://api.contentful.com/spaces/${SPACE_ID}/environments/master/entries/${selectedGoalScorer}/published`, { method: 'PUT', headers: { 'Authorization': `Bearer ${MANAGEMENT_TOKEN}`, 'X-Contentful-Version': updatedPlayerEntry.sys.version } });
         
         const scorerName = rawPlayers.find(p => p.id === selectedGoalScorer)?.playerName || 'Mchezaji';
-        showMsg(`⚽ GOLI! ${scorerName}! ${newScore}`); 
+        showMsg(`⚽ GOLI! ${scorerName}! ${newScore}`, 'success'); 
         setSelectedGoalScorer(''); 
-      } catch (err) { showMsg(`⚠️ Goli limehesabiwa local.`); console.error(err); }
-    } else { showMsg(`⚽ GOLI! (Local)`); }
+      } catch (err) { showMsg(`⚠️ Goli limehesabiwa local.`, 'error'); console.error(err); }
+    } else { showMsg(`⚽ GOLI! (Local)`, 'success'); }
     setIsPublishing(false); 
   };
+
+  const playersGroupedByTeam = filteredPlayers.reduce((groups, player) => {
+    if (player.position === 'Coach') return groups;
+    const tName = (player.team && player.team !== 'Free Agent') ? player.team.toUpperCase().trim() : 'FREE AGENT';
+    if (!groups[tName]) groups[tName] = [];
+    groups[tName].push(player);
+    return groups;
+  }, {});
 
   const groupedStandings = calculatedStandings.reduce((groups, team) => { const groupName = team.group ? `KUNDI ${team.group}`.toUpperCase() : 'LIGI KUU'; if (!groups[groupName]) groups[groupName] = []; groups[groupName].push(team); return groups; }, {});
 
@@ -393,16 +511,13 @@ const AdminDashboard = () => {
         <style>{fontStyles}</style>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(20,10,0,0.9) 50%, rgba(0,0,0,0.8) 100%)', zIndex: 1 }} />
         <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '420px' }}>
-          <div className="glass-transparent" style={{ padding: '40px 32px', borderRadius: '24px', textAlign: 'center', boxShadow: '0 8px 32px rgba(251,191,36,0.15), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
-            <div style={{ position: 'relative', width: '90px', height: '90px', margin: '0 auto 24px' }}>
-              <div className="cobra-loader" style={{ borderColor: '#fbbf24' }}></div>
-              <img src={LOGO_PATH} className="logo-float" style={{ width: '100%', position: 'relative', zIndex: 2, filter: 'drop-shadow(0 0 15px rgba(251,191,36,0.5))' }} alt="Logo" />
-            </div>
-            <h1 className="oswald" style={{ fontSize: '24px', color: '#fbbf24', margin: '0 0 8px 0', textShadow: '0 0 15px rgba(251,191,36,0.4)', letterSpacing: '1px' }}>PANDE CUP COMMAND CENTRE</h1>
-            <p className="oswald" style={{ color: '#ef4444', fontSize: '14px', fontWeight: '900', margin: '0 0 30px 0', letterSpacing: '2px', textTransform: 'uppercase' }}>STRIKE FIRST. STRIKE HARD. NO MERCY.</p>
-            <form onSubmit={(e) => { e.preventDefault(); password === ADMIN_PASSWORD_HASH ? setAuthenticated(true) : showMsg('❌ Access Denied!'); }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <input type="password" placeholder="NENOSIRI LA SENSEI" value={password} onChange={(e) => setPassword(e.target.value)} style={{ textAlign: 'center', fontSize: '16px', letterSpacing: '3px', background: 'rgba(15,23,42,0.8)', borderColor: 'rgba(251,191,36,0.3)', color: '#fbbf24', padding: '16px', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.3)', outline: 'none' }} />
-              {message && <div style={{ color: '#ef4444', fontSize: '12px', fontWeight: 'bold' }}>{message}</div>}
+          <div className="glass" style={{ padding: '40px 32px', borderRadius: '24px', textAlign: 'center', boxShadow: '0 8px 32px rgba(251,191,36,0.15), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
+            <img src={LOGO_PATH} style={{ width: '90px', margin: '0 auto 24px', filter: 'drop-shadow(0 0 15px rgba(251,191,36,0.5))' }} alt="Logo" />
+            <h1 className="oswald" style={{ fontSize: '24px', color: '#fbbf24', margin: '0 0 8px 0', letterSpacing: '1px' }}>PANDE CUP COMMAND CENTRE</h1>
+            <p className="oswald" style={{ color: '#ef4444', fontSize: '14px', fontWeight: '900', margin: '0 0 30px 0', letterSpacing: '2px' }}>STRIKE FIRST. STRIKE HARD. NO MERCY.</p>
+            <form onSubmit={(e) => { e.preventDefault(); password === ADMIN_PASSWORD_HASH ? setAuthenticated(true) : showMsg('❌ Access Denied!', 'error'); }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <input type="password" placeholder="NENOSIRI LA SENSEI" value={password} onChange={(e) => setPassword(e.target.value)} style={{ textAlign: 'center', fontSize: '16px', letterSpacing: '3px', background: 'rgba(15,23,42,0.8)', borderColor: 'rgba(251,191,36,0.3)', color: '#fbbf24', padding: '16px', borderRadius: '10px' }} />
+              {message.text && <div style={{ color: message.type === 'error' ? '#ef4444' : '#a3e635', fontSize: '12px', fontWeight: 'bold' }}>{message.text}</div>}
               <button type="submit" className="btn-cobra" style={{ width: '100%', padding: '16px', borderRadius: '12px', fontSize: '16px' }}>STRIKE HARD 👊</button>
             </form>
           </div>
@@ -443,15 +558,10 @@ const AdminDashboard = () => {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
         <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(163,230,53,0.05) 0%, transparent 70%)', filter: 'blur(40px)', zIndex: 0 }} />
         
-        {/* 🔥 NEW HEADER WITH CUSTOM GREETING */}
         <header className="glass header-compact" style={{ padding: '24px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', zIndex: 10 }}>
           <div>
-            <h1 className="oswald" style={{ margin: 0, fontSize: '26px', color: 'white', letterSpacing: '0.5px' }}>
-              Welcome Sensei Msangawale! 🥋
-            </h1>
-            <p style={{ color: '#64748b', fontSize: '13px', marginTop: '6px', margin: '6px 0 0', fontStyle: 'italic' }}>
-              This here Dojo is ready for you.
-            </p>
+            <h1 className="oswald" style={{ margin: 0, fontSize: '26px', color: 'white', letterSpacing: '0.5px' }}>Welcome Sensei Msangawale! 🥋</h1>
+            <p style={{ color: '#64748b', fontSize: '13px', marginTop: '6px', margin: '6px 0 0', fontStyle: 'italic' }}>This here Dojo is ready for you.</p>
           </div>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             <select value={activeLocation} onChange={(e) => setActiveLocation(e.target.value)} style={{padding:'10px 16px'}}><option value="kiomoni">📍 TANGA</option><option value="goba">📍 DAR</option></select>
@@ -460,9 +570,15 @@ const AdminDashboard = () => {
           </div>
         </header>
         
-        {/* MAIN AREA */}
         <main className="custom-scroll main-content-area" style={{ flex: 1, overflowY: 'auto', padding: '40px', position: 'relative', zIndex: 10 }}>
-          {message && <div style={{ padding: '16px 24px', background: 'rgba(163, 230, 53, 0.1)', border: '1px solid rgba(163,230,53,0.3)', color: '#a3e635', borderRadius: '12px', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 'bold' }}><CheckCircle size={20} /> {message}</div>}
+          
+          {/* 🔥 ENHANCED NOTIFICATION SYSTEM */}
+          {message.text && (
+            <div style={{ padding: '16px 24px', background: message.type === 'error' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(163, 230, 53, 0.1)', border: `1px solid ${message.type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(163,230,53,0.3)'}`, color: message.type === 'error' ? '#ef4444' : '#a3e635', borderRadius: '12px', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 'bold' }}>
+              {message.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle size={20} />} 
+              {message.text}
+            </div>
+          )}
           
           {/* DASHBOARD TAB */}
           {activeTab === 'dashboard' && (
@@ -506,8 +622,9 @@ const AdminDashboard = () => {
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
                                    {reg.playersList.map((p, i) => (
                                       <div key={i} className="inbox-player-card">
-                                         <div className="inbox-player-number">{p.number || '-'}</div>
-                                         <div className="inbox-player-avatar">{p.photo ? (<img src={p.photo} alt={p.name} />) : ( <div style={{ fontSize: '32px' }}>👤</div> )}</div>
+                                         <div className="inbox-player-avatar">
+                                           {p.photo && p.photo.startsWith('http') ? (<img src={p.photo} alt={p.name} />) : ( <div style={{ fontSize: '32px' }}>👤</div> )}
+                                         </div>
                                          <div style={{ fontWeight: '800', fontSize: '14px', textAlign: 'center', marginBottom: '6px', color: 'white' }}>{p.name}</div>
                                          <div style={{ background: 'rgba(163,230,53,0.1)', border: '1px solid rgba(163,230,53,0.2)', color: '#a3e635', fontSize: '11px', padding: '4px 12px', borderRadius: '50px', fontWeight: '900' }}>{p.position || 'N/A'}</div>
                                       </div>
@@ -609,14 +726,28 @@ const AdminDashboard = () => {
           {/* TEAMS TAB */}
           {activeTab === 'teams' && (
              <div>
-                <h3 className="oswald" style={{ color: '#a3e635', marginBottom: '25px', fontSize: '24px', borderBottom: '2px solid rgba(163,230,53,0.2)', paddingBottom: '10px', display: 'inline-block' }}>WAFUNGAJI BORA ({activeSeason})</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', paddingBottom: '40px' }}>
-                  {filteredPlayers.length > 0 ? filteredPlayers.sort((a, b) => b.goals - a.goals).map((p, idx) => { 
-                    const gorillaPlayerObj = { name: p.playerName, team: p.team, pos: p.position, no: p.jerseyNumber, goals: p.goals, photo: p.photo }; 
-                    const isTopScorer = idx === 0 && p.goals > 0; 
-                    return ( <GorillaCard key={idx} player={gorillaPlayerObj} type={isTopScorer ? "TOP_SCORER" : "MOTM"} /> ); 
-                  }) : <div className="dashboard-card" style={{ padding: '40px', gridColumn: '1/-1', textAlign: 'center' }}><p style={{ color: '#64748b', fontSize: '16px' }}>Hakuna wachezaji.</p></div>}
-                </div>
+                <h3 className="oswald" style={{ color: '#a3e635', marginBottom: '25px', fontSize: '24px', borderBottom: '2px solid rgba(163,230,53,0.2)', paddingBottom: '10px', display: 'inline-block' }}>WACHEZAJI / WAFUNGAJI BORA ({activeSeason})</h3>
+                
+                {Object.keys(playersGroupedByTeam).length > 0 ? (
+                  Object.keys(playersGroupedByTeam).map((teamName, idx) => (
+                    <div key={idx} style={{ marginBottom: '40px' }}>
+                       <h4 style={{ color: 'white', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', marginBottom: '20px', fontSize: '18px', textTransform: 'uppercase' }}>
+                         🛡️ {teamName} <span style={{ color: '#64748b', fontSize: '14px' }}>({playersGroupedByTeam[teamName].length} Wachezaji/Kocha)</span>
+                       </h4>
+                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+                         {playersGroupedByTeam[teamName].sort((a, b) => b.goals - a.goals).map((p, pIdx) => { 
+                           const gorillaPlayerObj = { name: p.playerName, team: p.team, pos: p.position, no: p.jerseyNumber, goals: p.goals, photo: p.photo }; 
+                           const isTopScorer = pIdx === 0 && p.goals > 0; 
+                           return ( <GorillaCard key={pIdx} player={gorillaPlayerObj} type={isTopScorer ? "TOP_SCORER" : "MOTM"} /> ); 
+                         })}
+                       </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="dashboard-card" style={{ padding: '40px', textAlign: 'center' }}>
+                     <p style={{ color: '#64748b', fontSize: '16px' }}>Database mpya haina wachezaji. Tafadhali Approve timu mpya kisha subiri dakika 3.</p>
+                  </div>
+                )}
              </div>
           )}
         </main>
@@ -624,7 +755,7 @@ const AdminDashboard = () => {
       
       {/* MATCH MODAL */}
       {showMatchModal && (
-        <div className="modal-overlay">
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.85)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div className="glass" style={{ background: 'rgba(15,23,42,0.98)', width: '100%', maxWidth: '420px', borderRadius: '24px', padding: '32px', border: '1px solid rgba(163,230,53,0.3)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                <h3 className="oswald" style={{ color: '#a3e635', margin: 0, fontSize: '22px' }}>PANGA MECHI</h3>
@@ -638,7 +769,7 @@ const AdminDashboard = () => {
                   <div><label style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '8px', display: 'block', fontWeight: 'bold' }}>Muda</label><input className="input" type="time" required value={newMatch.time} onChange={e => setNewMatch({...newMatch, time: e.target.value})} style={{padding:'12px'}} /></div>
                 </div>
                 <div><label style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '8px', display: 'block', fontWeight: 'bold' }}>Stadium</label><input className="input" type="text" placeholder="Uwanja" required value={newMatch.stadium} onChange={e => setNewMatch({...newMatch, stadium: e.target.value})} style={{padding:'12px'}} /></div>
-                <button type="submit" className="btn-lime" style={{ padding: '16px', marginTop: '16px', fontSize: '16px', borderRadius: '12px' }} disabled={isPublishing}>{isPublishing ? 'INATUMA...' : 'TUMA ⚽'}</button>
+                <button type="submit" className="btn-lime" style={{ padding: '16px', marginTop: '16px', fontSize: '16px', borderRadius: '12px', width: '100%' }} disabled={isPublishing}>{isPublishing ? 'INATUMA...' : 'TUMA ⚽'}</button>
              </form>
           </div>
         </div>
