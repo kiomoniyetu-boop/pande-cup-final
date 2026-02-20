@@ -78,8 +78,7 @@ const MANAGEMENT_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
 
 const LOGO_PATH = "https://images.ctfassets.net/ax6wvfd84net/1T4feibK8k9Ft9Y6MdQul0/2807bebb7fbdf78ba3ea0d7e7bb5c71e/logo.png";
 const COBRA_KAI_LOGIN_BG = "https://private-us-east-1.manuscdn.com/sessionFile/JmLymlOQ4Xh34kMZAEJn2l/sandbox/eV01jTBgRrK1IEQILJ5kGA-img-1_1771071749000_na1fn_Y29icmEta2FpLWxvZ2luLWJn.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80";
-const ADMIN_PASSWORD_HASH = 'pandecupwakawaka@2022';
-
+const ADMIN_PASSWORD_HASH = process.env.REACT_APP_ADMIN_PASSWORD;
 const fontStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@700&display=swap');
   * { box-sizing: border-box; }
